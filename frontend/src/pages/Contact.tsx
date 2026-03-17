@@ -1,18 +1,42 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { api } from '../lib/api';
 
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    subject: 'Private Fitting Request',
+    message: ''
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Mock submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await api.submitContact({
+        name: `${form.firstName} ${form.lastName}`.trim(),
+        email: form.email,
+        subject: form.subject,
+        message: form.message
+      });
+      setForm({
+        firstName: '',
+        lastName: '',
+        email: '',
+        subject: 'Private Fitting Request',
+        message: ''
+      });
       alert('Message received. We will be in touch.');
-    }, 1500);
+    } catch (error) {
+      console.error(error);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const containerVariants = {
@@ -94,6 +118,8 @@ export default function Contact() {
                       type="text" 
                       id="firstName"
                       required 
+                      value={form.firstName}
+                      onChange={(e) => setForm((prev) => ({ ...prev, firstName: e.target.value }))}
                       className="w-full bg-transparent border-b border-slate-300 py-2 text-[#0a192f] focus:outline-none focus:border-[#0a192f] transition-colors peer placeholder-transparent"
                       placeholder="First Name"
                     />
@@ -106,6 +132,8 @@ export default function Contact() {
                       type="text" 
                       id="lastName"
                       required 
+                      value={form.lastName}
+                      onChange={(e) => setForm((prev) => ({ ...prev, lastName: e.target.value }))}
                       className="w-full bg-transparent border-b border-slate-300 py-2 text-[#0a192f] focus:outline-none focus:border-[#0a192f] transition-colors peer placeholder-transparent"
                       placeholder="Last Name"
                     />
@@ -120,6 +148,8 @@ export default function Contact() {
                     type="email" 
                     id="email"
                     required 
+                    value={form.email}
+                    onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
                     className="w-full bg-transparent border-b border-slate-300 py-2 text-[#0a192f] focus:outline-none focus:border-[#0a192f] transition-colors peer placeholder-transparent"
                     placeholder="Email Address"
                   />
@@ -131,6 +161,8 @@ export default function Contact() {
                 <div className="relative group pt-2">
                   <select 
                     id="subject" 
+                    value={form.subject}
+                    onChange={(e) => setForm((prev) => ({ ...prev, subject: e.target.value }))}
                     className="w-full bg-transparent border-b border-slate-300 py-2 text-[#0a192f] focus:outline-none focus:border-[#0a192f] transition-colors appearance-none cursor-pointer"
                   >
                     <option>Private Fitting Request</option>
@@ -148,6 +180,8 @@ export default function Contact() {
                     id="message" 
                     rows={4}
                     required 
+                    value={form.message}
+                    onChange={(e) => setForm((prev) => ({ ...prev, message: e.target.value }))}
                     className="w-full bg-transparent border-b border-slate-300 py-2 text-[#0a192f] focus:outline-none focus:border-[#0a192f] transition-colors peer placeholder-transparent resize-none"
                     placeholder="Message"
                   ></textarea>

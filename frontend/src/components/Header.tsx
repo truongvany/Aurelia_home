@@ -1,7 +1,25 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, User, Search, Menu } from 'lucide-react';
+import { api } from '../lib/api';
 
 export default function Header() {
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        const cart = await api.getCart();
+        const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+        setCartCount(totalItems);
+      } catch {
+        setCartCount(0);
+      }
+    };
+
+    loadCart();
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -31,7 +49,7 @@ export default function Header() {
             </Link>
             <Link to="/checkout" className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors relative">
               <ShoppingBag className="h-5 w-5" />
-              <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#1e3a8a] text-white text-[10px] font-bold flex items-center justify-center">0</span>
+              <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#1e3a8a] text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span>
             </Link>
           </div>
         </div>

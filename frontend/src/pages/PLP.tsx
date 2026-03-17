@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
 import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { api } from '../lib/api';
 
 export default function PLP() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Array<{ _id: string; name: string; slug: string }>>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   
@@ -20,28 +23,28 @@ export default function PLP() {
   };
 
   useEffect(() => {
-    // Mock fetch from backend
+    const fetchCategories = async () => {
+      try {
+        const categoryData = await api.getCategories();
+        setCategories(categoryData);
+      } catch (error) {
+        console.error('Failed to fetch categories', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // In a real app: const res = await fetch('http://localhost:5000/api/products');
-        // const data = await res.json();
-        
-        // Simulating network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        const mockData: Product[] = Array.from({ length: 9 }).map((_, i) => ({
-          _id: `prod-${i + 10}`,
-          name: `Luxury Item ${i + 1}`,
-          description: 'A fine piece of clothing.',
-          price: 250 + (i * 50),
-          category: i % 2 === 0 ? 'Outerwear' : 'Knitwear',
-          imageUrl: `https://picsum.photos/seed/menswear${i}/600/800`,
-          sizes: ['S', 'M', 'L'],
-          colors: ['Black', 'Navy', 'Charcoal'],
-          inStock: i !== 3
-        }));
-        
-        setProducts(mockData);
+        setLoading(true);
+        const params = new URLSearchParams();
+        if (selectedCategory !== 'all') {
+          params.set('category', selectedCategory);
+        }
+        const data = await api.getProducts(params);
+        setProducts(data);
       } catch (error) {
         console.error('Failed to fetch products', error);
       } finally {
@@ -50,7 +53,7 @@ export default function PLP() {
     };
 
     fetchProducts();
-  }, []);
+  }, [selectedCategory]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -83,10 +86,15 @@ export default function PLP() {
               </button>
               {openSections.category && (
                 <div className="mt-4 space-y-3">
-                  {['All', 'Outerwear', 'Knitwear', 'Trousers', 'Footwear', 'Accessories'].map(cat => (
-                    <label key={cat} className="flex items-center space-x-3 cursor-pointer group">
-                      <input type="checkbox" className="form-checkbox h-4 w-4 text-charcoal border-gray-300 rounded-sm focus:ring-charcoal" />
-                      <span className="text-gray-600 group-hover:text-charcoal transition-colors">{cat}</span>
+                  {[{ slug: 'all', name: 'All' }, ...categories].map(cat => (
+                    <label key={cat.slug} className="flex items-center space-x-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        className="form-checkbox h-4 w-4 text-charcoal border-gray-300 rounded-sm focus:ring-charcoal"
+                        checked={selectedCategory === cat.slug}
+                        onChange={() => setSelectedCategory(cat.slug)}
+                      />
+                      <span className="text-gray-600 group-hover:text-charcoal transition-colors">{cat.name}</span>
                     </label>
                   ))}
                 </div>

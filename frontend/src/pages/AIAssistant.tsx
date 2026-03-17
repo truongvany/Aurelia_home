@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, Cpu } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ChatMessage } from '../types';
+import { api } from '../lib/api';
 
 export default function AIAssistant() {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -13,6 +14,7 @@ export default function AIAssistant() {
     }
   ]);
   const [input, setInput] = useState('');
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -23,7 +25,7 @@ export default function AIAssistant() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = (e?: React.FormEvent) => {
+  const handleSend = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!input.trim()) return;
     
@@ -36,17 +38,25 @@ export default function AIAssistant() {
     
     setMessages(prev => [...prev, newUserMsg]);
     setInput('');
-    
-    // Mock AI response
-    setTimeout(() => {
-      const newAiMsg: ChatMessage = {
-        _id: `msg-${Date.now() + 1}`,
-        sender: 'ai',
-        text: 'An excellent choice. Based on your preference, I would highly recommend exploring our new Cashmere Collection. The texture and drape are unparalleled for that specific look. Shall I show you some curated pieces?',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, newAiMsg]);
-    }, 1500);
+
+    try {
+      const payload = await api.sendChatMessage({
+        message: newUserMsg.text,
+        conversationId
+      });
+      setConversationId(payload.conversationId);
+      setMessages(prev => [
+        ...prev,
+        {
+          _id: payload.aiMessage._id,
+          sender: 'ai',
+          text: payload.aiMessage.text,
+          timestamp: new Date(payload.aiMessage.createdAt)
+        }
+      ]);
+    } catch (error) {
+      console.error('Chat failed', error);
+    }
   };
 
   const suggestions = [

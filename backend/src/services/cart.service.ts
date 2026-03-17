@@ -26,8 +26,22 @@ export const getCart = async (userId: string) => {
     return { userId, items: [], total: 0 };
   }
 
+  const productIds = [...new Set(cart.items.map((item) => item.productId.toString()))];
+  const products = await ProductModel.find({ _id: { $in: productIds } }).lean();
+  const productMap = new Map(products.map((product) => [product._id.toString(), product]));
+
+  const items = cart.items.map((item) => {
+    const product = productMap.get(item.productId.toString());
+    return {
+      ...item.toObject(),
+      productName: product?.name ?? "Unknown product",
+      productImageUrl: product?.imageUrl ?? "",
+      lineTotal: item.unitPrice * item.quantity
+    };
+  });
+
   const total = cart.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
-  return { ...cart.toObject(), total };
+  return { ...cart.toObject(), items, total };
 };
 
 export const addCartItem = async (input: AddCartItemInput) => {

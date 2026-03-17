@@ -1,18 +1,49 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { api, setAuthSession } from '../lib/api';
 
 export default function AuthPage() {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+  const [registerForm, setRegisterForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: ''
+  });
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login logic
-    console.log('Logging in...');
+    try {
+      setError(null);
+      setIsSubmitting(true);
+      const payload = await api.login(loginForm);
+      setAuthSession(payload);
+      navigate('/profile');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to login');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock register logic
-    console.log('Registering...');
+    try {
+      setError(null);
+      setIsSubmitting(true);
+      const payload = await api.register(registerForm);
+      setAuthSession(payload);
+      navigate('/profile');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to register');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -60,6 +91,8 @@ export default function AuthPage() {
             </button>
           </div>
 
+          {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
+
           {isLogin ? (
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
@@ -69,6 +102,8 @@ export default function AuthPage() {
                   name="email" 
                   type="email" 
                   required 
+                  value={loginForm.email}
+                  onChange={(e) => setLoginForm((prev) => ({ ...prev, email: e.target.value }))}
                   className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-charcoal transition-colors bg-transparent"
                 />
               </div>
@@ -82,14 +117,17 @@ export default function AuthPage() {
                   name="password" 
                   type="password" 
                   required 
+                  value={loginForm.password}
+                  onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
                   className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-charcoal transition-colors bg-transparent"
                 />
               </div>
               <button 
                 type="submit" 
+                disabled={isSubmitting}
                 className="w-full bg-charcoal text-white py-4 font-medium uppercase tracking-widest hover:bg-gold transition-colors mt-8"
               >
-                Sign In
+                {isSubmitting ? 'Signing In...' : 'Sign In'}
               </button>
             </form>
           ) : (
@@ -102,6 +140,10 @@ export default function AuthPage() {
                     name="firstName" 
                     type="text" 
                     required 
+                    value={registerForm.firstName}
+                    onChange={(e) =>
+                      setRegisterForm((prev) => ({ ...prev, firstName: e.target.value }))
+                    }
                     className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-charcoal transition-colors bg-transparent"
                   />
                 </div>
@@ -112,6 +154,10 @@ export default function AuthPage() {
                     name="lastName" 
                     type="text" 
                     required 
+                    value={registerForm.lastName}
+                    onChange={(e) =>
+                      setRegisterForm((prev) => ({ ...prev, lastName: e.target.value }))
+                    }
                     className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-charcoal transition-colors bg-transparent"
                   />
                 </div>
@@ -123,6 +169,8 @@ export default function AuthPage() {
                   name="email" 
                   type="email" 
                   required 
+                  value={registerForm.email}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, email: e.target.value }))}
                   className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-charcoal transition-colors bg-transparent"
                 />
               </div>
@@ -133,14 +181,17 @@ export default function AuthPage() {
                   name="password" 
                   type="password" 
                   required 
+                  value={registerForm.password}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
                   className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-charcoal transition-colors bg-transparent"
                 />
               </div>
               <button 
                 type="submit" 
+                disabled={isSubmitting}
                 className="w-full bg-charcoal text-white py-4 font-medium uppercase tracking-widest hover:bg-gold transition-colors mt-8"
               >
-                Create Account
+                {isSubmitting ? 'Creating Account...' : 'Create Account'}
               </button>
             </form>
           )}

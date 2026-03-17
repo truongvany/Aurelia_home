@@ -2,32 +2,28 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Product } from '../types';
 import { ChevronRight, Heart, Share2, Truck, RefreshCw } from 'lucide-react';
+import { api } from '../lib/api';
+
+type ProductDetail = Product & {
+  variants: Array<{ _id: string; size: string; color: string; sku: string; stockQuantity: number }>;
+};
 
 export default function PDP() {
   const { id } = useParams<{ id: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<ProductDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   useEffect(() => {
-    // Mock fetch from backend
     const fetchProduct = async () => {
       try {
-        // In a real app: const res = await fetch(`http://localhost:5000/api/products/${id}`);
-        await new Promise(resolve => setTimeout(resolve, 600));
-        
-        setProduct({
-          _id: id || 'prod-detail',
-          name: 'The Cashmere Overcoat',
-          description: 'A timeless classic crafted from pure Mongolian cashmere. This overcoat features a tailored fit, notch lapels, and horn buttons. Designed to be layered over both suiting and casual knitwear, it is the ultimate investment piece for the modern wardrobe.',
-          price: 1250.00,
-          category: 'Outerwear',
-          imageUrl: 'https://picsum.photos/seed/coat-detail/800/1200',
-          sizes: ['46', '48', '50', '52', '54'],
-          colors: ['Charcoal', 'Camel', 'Navy'],
-          inStock: true
-        });
+        if (!id) {
+          return;
+        }
+        const data = await api.getProductById(id);
+        setProduct(data);
       } catch (error) {
         console.error('Failed to fetch product', error);
       } finally {
@@ -49,6 +45,32 @@ export default function PDP() {
   if (!product) {
     return <div className="text-center py-24">Product not found</div>;
   }
+
+  const selectedVariant = product.variants.find(
+    (variant) => variant.size === selectedSize && variant.color === selectedColor
+  );
+
+  const handleAddToCart = async () => {
+    if (!selectedVariant) {
+      alert('Please select both size and color.');
+      return;
+    }
+
+    try {
+      setIsAddingToCart(true);
+      await api.addToCart({
+        productId: product._id,
+        productVariantId: selectedVariant._id,
+        quantity: 1
+      });
+      alert('Added to cart');
+    } catch (error) {
+      console.error(error);
+      alert('Please sign in before adding to cart.');
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   return (
     <div className="bg-white">
@@ -152,14 +174,15 @@ export default function PDP() {
             {/* Actions */}
             <div className="flex space-x-4 mb-12">
               <button 
+                onClick={handleAddToCart}
                 className={`flex-1 py-4 font-medium uppercase tracking-widest transition-all duration-300 ${
                   product.inStock 
                     ? 'bg-charcoal text-white hover:bg-gold' 
                     : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                 }`}
-                disabled={!product.inStock}
+                disabled={!product.inStock || isAddingToCart}
               >
-                {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+                {product.inStock ? (isAddingToCart ? 'Adding...' : 'Add to Cart') : 'Out of Stock'}
               </button>
               <button className="p-4 border border-gray-300 text-charcoal hover:border-charcoal hover:bg-gray-50 transition-colors">
                 <Heart className="h-6 w-6" />

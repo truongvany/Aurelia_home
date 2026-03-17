@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MessageSquare, X, Send } from 'lucide-react';
 import { ChatMessage } from '../types';
+import { api } from '../lib/api';
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,8 +14,9 @@ export default function ChatWidget() {
     }
   ]);
   const [input, setInput] = useState('');
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
     
     const newUserMsg: ChatMessage = {
@@ -26,17 +28,25 @@ export default function ChatWidget() {
     
     setMessages(prev => [...prev, newUserMsg]);
     setInput('');
-    
-    // Mock AI response
-    setTimeout(() => {
-      const newAiMsg: ChatMessage = {
-        _id: `msg-${Date.now() + 1}`,
-        sender: 'ai',
-        text: 'I can certainly help you find the perfect piece. Are you looking for something casual or formal?',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, newAiMsg]);
-    }, 1000);
+
+    try {
+      const payload = await api.sendChatMessage({
+        message: newUserMsg.text,
+        conversationId
+      });
+      setConversationId(payload.conversationId);
+      setMessages(prev => [
+        ...prev,
+        {
+          _id: payload.aiMessage._id,
+          sender: 'ai',
+          text: payload.aiMessage.text,
+          timestamp: new Date(payload.aiMessage.createdAt)
+        }
+      ]);
+    } catch (error) {
+      console.error('Chat failed', error);
+    }
   };
 
   return (

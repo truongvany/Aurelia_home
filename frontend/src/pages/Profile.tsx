@@ -1,7 +1,29 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { User, Package, Settings, LogOut, ChevronRight } from 'lucide-react';
+import { api, clearAuthSession } from '../lib/api';
+import { OrderPayload, ProfilePayload } from '../types';
 
 export default function Profile() {
+  const [profile, setProfile] = useState<ProfilePayload | null>(null);
+  const [orders, setOrders] = useState<OrderPayload[]>([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [profileData, ordersData] = await Promise.all([api.getProfile(), api.getMyOrders()]);
+        setProfile(profileData);
+        setOrders(ordersData);
+      } catch (error) {
+        console.error('Failed to load profile', error);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const displayName = profile ? `${profile.user.firstName} ${profile.user.lastName}` : 'Guest User';
+
   return (
     <div className="bg-[#f5f5f5] min-h-screen text-[#0a192f] py-24 selection:bg-[#0a192f] selection:text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -15,7 +37,7 @@ export default function Profile() {
           </h1>
           <div className="w-24 h-[1px] bg-[#1e3a8a] mb-8"></div>
           <p className="text-slate-500 max-w-xl text-lg font-light">
-            Welcome back, Client 007. Manage your preferences, orders, and bespoke measurements.
+            Welcome back, {displayName}. Manage your preferences, orders, and bespoke measurements.
           </p>
         </motion.div>
 
@@ -35,6 +57,12 @@ export default function Profile() {
             ].map((item, idx) => (
               <button 
                 key={idx}
+                onClick={() => {
+                  if (item.label === 'Sign Out') {
+                    clearAuthSession();
+                    window.location.href = '/auth';
+                  }
+                }}
                 className={`w-full flex items-center justify-between p-4 transition-colors duration-300 ${
                   item.active 
                     ? 'bg-[#0a192f] text-white' 
@@ -63,42 +91,43 @@ export default function Profile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest text-[#1e3a8a] mb-2">Full Name</label>
-                  <p className="text-lg border-b border-slate-200 pb-2">James Bond</p>
+                  <p className="text-lg border-b border-slate-200 pb-2">{displayName}</p>
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest text-[#1e3a8a] mb-2">Email Address</label>
-                  <p className="text-lg border-b border-slate-200 pb-2">007@mi6.gov.uk</p>
+                  <p className="text-lg border-b border-slate-200 pb-2">{profile?.user.email ?? '-'}</p>
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest text-[#1e3a8a] mb-2">Phone Number</label>
-                  <p className="text-lg border-b border-slate-200 pb-2">+44 20 7946 0958</p>
+                  <p className="text-lg border-b border-slate-200 pb-2">{profile?.user.phone ?? '-'}</p>
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest text-[#1e3a8a] mb-2">Member Since</label>
-                  <p className="text-lg border-b border-slate-200 pb-2">October 2026</p>
+                  <p className="text-lg border-b border-slate-200 pb-2">{orders[0]?.createdAt ? new Date(orders[0].createdAt).toLocaleDateString() : '-'}</p>
                 </div>
               </div>
 
               <h2 className="font-serif text-2xl font-bold uppercase tracking-tight mb-8 text-[#0a192f] pt-8 border-t border-slate-200">Recent Acquisitions</h2>
               
               <div className="space-y-4">
-                {[
-                  { id: "ORD-001", date: "Oct 12, 2026", item: "Navy Cashmere Overcoat", status: "Delivered" },
-                  { id: "ORD-002", date: "Nov 05, 2026", item: "Silk Tuxedo Shirt", status: "Processing" }
-                ].map((order, idx) => (
+                {orders.map((order, idx) => (
                   <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-6 border border-slate-200 hover:border-[#0a192f] transition-colors">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-widest text-[#1e3a8a] mb-1">{order.id}</p>
-                      <p className="text-lg font-serif">{order.item}</p>
+                      <p className="text-xs font-bold uppercase tracking-widest text-[#1e3a8a] mb-1">{order._id}</p>
+                      <p className="text-lg font-serif">{order.items[0]?.name ?? 'Order item'}</p>
                     </div>
                     <div className="mt-4 sm:mt-0 text-left sm:text-right">
-                      <p className="text-sm text-slate-500 mb-1">{order.date}</p>
-                      <p className={`text-xs font-bold uppercase tracking-widest ${order.status === 'Delivered' ? 'text-green-600' : 'text-amber-600'}`}>
+                      <p className="text-sm text-slate-500 mb-1">{new Date(order.createdAt).toLocaleDateString()}</p>
+                      <p className={`text-xs font-bold uppercase tracking-widest ${order.status === 'paid' ? 'text-green-600' : 'text-amber-600'}`}>
                         {order.status}
                       </p>
                     </div>
                   </div>
                 ))}
+
+                {orders.length === 0 && (
+                  <div className="p-6 border border-slate-200 text-slate-500">No orders yet.</div>
+                )}
               </div>
 
             </div>

@@ -1,56 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight, Bot, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Bot } from 'lucide-react';
 import { Product } from '../types';
-
-const mockBestsellers: Product[] = [
-  {
-    _id: 'prod-1',
-    name: 'Sterling Charcoal Suit',
-    description: 'A timeless classic crafted from pure Mongolian cashmere.',
-    price: 1250.00,
-    category: 'Outerwear',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBf4_zUESdwZhN5Nb9wIt62G81mZ5f3sPAK4bLU-CAdbEydJkZ4OlFyt7W0lMA0SmoSN-27GTpUiGZxvzH4PMTWVUuW6PZUdmMmTNwRRj8z9kkjKgN1f8ldOk1ie6LD7HnvtUH3vF5I0HyoIfNUJ9KfCe2gP0yFlHy_tbz3e-eGwjK_pP5OmGfooVxtetazXnf0FNeLSd3avJayvXdivrfRiYlScZs76izYfc3-2PYxNrIP361Xi-ZnrcKt4OFzPs-Vl85332wkzEY',
-    sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['Charcoal', 'Camel'],
-    inStock: true
-  },
-  {
-    _id: 'prod-2',
-    name: 'Midnight Wool Blazer',
-    description: 'Lightweight, breathable, and incredibly soft.',
-    price: 890.00,
-    category: 'Knitwear',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC9i87OVxxHmXunaf2nV6RiRdkzm0xIfz7Y08mMzSsDa_7UmulYg6nIlHDtegH4XL_-zONXUmzj1tN0WnJGcwc8kuUe-C4hpQobTA6QIMw0Ws8y-DnnCHcg04FeH7sie07O9ibl1mHmSxRSNDWlJhrw3qcNWLu6jJLeZJYdvhRWPsv7ta0uqjXcA8BK4Axsq8Q31Eqt2fDHkbtnTgGy8QNifJ3mhbogqXq_VTs7IG_8iXTeTBD-Z-IS-BroR1dC2AbCO671tI5pA1Q',
-    sizes: ['M', 'L', 'XL'],
-    colors: ['Black', 'Navy'],
-    inStock: true
-  },
-  {
-    _id: 'prod-3',
-    name: 'Egyptian Cotton Shirt',
-    description: 'Precision cut for a modern, tapered silhouette.',
-    price: 220.00,
-    category: 'Shirts',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBkp0y2C5sO1Kmu91TWIe7h52GvFcx0SmWm6yi-P4Q-C8fA1CzZqU4g5fguoaaXzb2x6tuCDAp5hhhQTzDTkFT83YMgOUUWv09T-BjnNNBEPSX8bz9zcvgq3jIgzzDckCKuB_vIouYoyZR7ECLCZR0703Rvs6Tavi0yJI5biQLzxTQ6W6m0ssRY2i3yR6LfpgkhUgtUs23Amzigrm7XQm_5M8rhY6Zf19HqelKZzSH8RkKcGGrBAmj7H07F10NsKCvjSdXxq0TvYq0',
-    sizes: ['30', '32', '34', '36'],
-    colors: ['White', 'Light Blue'],
-    inStock: true
-  },
-  {
-    _id: 'prod-4',
-    name: 'Hand-Stitched Belt',
-    description: 'Handcrafted in Italy using full-grain calf leather.',
-    price: 180.00,
-    category: 'Accessories',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB3fvopJ4PhAVgkq5NfFoID5ynBIrdzvSVBtewp2HioS4M8Jn_5kO10K0n1P_OORiArGz567PAw-qwr3yHNCevPBF7mZ90E6iR2WkoCB8q28DuI9ufe50dRNic7Xu8WHEOO9pNyCW0soMPHCl4fXH0SlH49L-xqTzS3JPdA8nhYxTOCsOKfJJEH0lDnW0NjLKp6AM-bu7V4iSjw6St7fcmp2tvuOogG-F5M4oqME6tYpe8pxv8QjSppX3iqmSBC3yvCjVbAiB2fAQw',
-    sizes: ['32', '34', '36', '38'],
-    colors: ['Black', 'Brown'],
-    inStock: true
-  }
-];
+import { api } from '../lib/api';
 
 export default function HomePage() {
+  const [bestsellers, setBestsellers] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const featured = await api.getFeaturedProducts();
+        setBestsellers(featured);
+      } catch (error) {
+        console.error('Failed to fetch featured products', error);
+      }
+    };
+
+    fetchFeatured();
+  }, []);
+
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased">
       {/* Hero Section */}
@@ -265,7 +234,7 @@ export default function HomePage() {
         </div>
         
         <div className="flex space-x-8 px-6 overflow-x-auto no-scrollbar pb-8 max-w-[1440px] mx-auto">
-          {mockBestsellers.map(product => (
+          {bestsellers.map(product => (
             <div key={product._id} className="min-w-[300px] flex-shrink-0 group cursor-pointer">
               <div className="relative overflow-hidden mb-4 bg-white">
                 <img 
