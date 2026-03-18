@@ -1,0 +1,134 @@
+/* Contact.css - Digital Concierge Service Lounge */
+
+.concierge-bg {
+  background: linear-gradient(135deg, #FFFFF0 0%, #F8F9FA 50%, #E2E8F0 100%);
+}
+
+.hero-macro-bg {
+  background-image: url('https://images.unsplash.com/photo-1614252339460-54058b456671?q=80&w=2000&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.marquee-contact-container {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+  display: flex;
+  background: rgba(15, 23, 42, 0.85); /* Deep Charcoal */
+  border-top: 1px solid rgba(197, 160, 89, 0.5);
+  border-bottom: 1px solid rgba(197, 160, 89, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+.marquee-contact-content {
+  display: flex;
+  animation: marquee-contact 25s linear infinite;
+}
+
+@keyframes marquee-contact {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.dark-glass-portal {
+  background: rgba(15, 23, 42, 0.72); /* softer slate */
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(197, 160, 89, 0.25); /* Champagne Gold */
+  box-shadow: 0 4px 20px -8px rgba(0, 0, 0, 0.25);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.dark-glass-portal:hover {
+  border-color: rgba(197, 160, 89, 0.7);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 35px -12px rgba(197, 160, 89, 0.18);
+}
+
+.light-glass-form {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.08);
+}
+
+.gold-leaf-icon {
+  color: #C5A059;
+  filter: drop-shadow(0 0 8px rgba(197, 160, 89, 0.6));
+  animation: gold-sparkle 3s infinite alternate;
+}
+
+@keyframes gold-sparkle {
+  0% { filter: drop-shadow(0 0 4px rgba(197, 160, 89, 0.4)) brightness(1); }
+  100% { filter: drop-shadow(0 0 12px rgba(197, 160, 89, 0.8)) brightness(1.2); }
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #10B981; /* Emerald 500 */
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10B981;
+  animation: blink 2s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.input-deep {
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.input-deep:focus, .input-deep:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(197, 160, 89, 0.4);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.01), 0 0 0 4px rgba(197, 160, 89, 0.1);
+}
+
+.input-deep-wrapper {
+  position: relative;
+}
+
+.input-deep-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #C5A059;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.input-deep-wrapper:hover::after,
+.input-deep-wrapper:focus-within::after {
+  opacity: 1;
+  animation: blink 1s infinite;
+}
+
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-in-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.animate-spin-slow {
+  animation: spin 4s linear infinite;
+}
