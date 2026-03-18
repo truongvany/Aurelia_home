@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 import { api } from '../lib/api';
 import { CartPayload } from '../types';
+import { formatVND } from '../utils/currency';
 
 export default function CheckoutPage() {
   const [cart, setCart] = useState<CartPayload | null>(null);
@@ -99,7 +100,7 @@ export default function CheckoutPage() {
                     <p className="text-xs text-gray-500 mb-2">Size: {item.size} | Color: {item.color}</p>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Qty: {item.quantity}</span>
-                      <span className="text-sm font-medium text-charcoal">${item.unitPrice.toFixed(2)}</span>
+                      <span className="text-sm font-medium text-charcoal">{formatVND(item.unitPrice)}</span>
                     </div>
                   </div>
                 </div>
@@ -109,15 +110,15 @@ export default function CheckoutPage() {
             <div className="border-t border-gray-200 pt-6 space-y-4">
               <div className="flex justify-between text-sm text-gray-600">
                 <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>{formatVND(subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-600">
                 <span>Shipping</span>
-                <span>{shippingFee === 0 ? 'Complimentary' : `$${shippingFee.toFixed(2)}`}</span>
+                <span>{shippingFee === 0 ? 'Complimentary' : formatVND(shippingFee)}</span>
               </div>
               <div className="border-t border-gray-200 pt-4 flex justify-between items-center">
                 <span className="font-serif font-bold text-charcoal">Total</span>
-                <span className="font-serif font-bold text-xl text-charcoal">${total.toFixed(2)}</span>
+                <span className="font-serif font-bold text-xl text-charcoal">{formatVND(total)}</span>
               </div>
             </div>
           </div>

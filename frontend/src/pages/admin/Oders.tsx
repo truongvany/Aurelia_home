@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Search, Filter, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../../lib/api';
+import { formatVND } from '../../utils/currency';
 
 type AdminOrder = {
   _id: string;
@@ -93,7 +94,7 @@ export default function Orders() {
                   <td className="px-6 py-4 text-sm font-bold text-slate-900">{order._id.slice(-8).toUpperCase()}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{order.customer}</td>
                   <td className="px-6 py-4 text-sm text-slate-500">{new Date(order.date).toLocaleDateString()}</td>
-                  <td className="px-6 py-4 text-sm text-slate-900 font-medium">${order.totalAmount.toFixed(2)}</td>
+                  <td className="px-6 py-4 text-sm text-slate-900 font-medium">{formatVND(order.totalAmount)}</td>
                   <td className="px-6 py-4 text-sm">
                     <span className={`px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold ${
                       order.paymentStatus === 'paid' ? 'bg-emerald-100 text-emerald-700' :

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Search, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../../lib/api';
+import { formatVND } from '../../utils/currency';
 
 type AdminCustomer = {
   _id: string;
@@ -92,7 +93,7 @@ export default function Customers() {
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-600">{customer.email}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{customer.orderCount}</td>
-                  <td className="px-6 py-4 text-sm text-slate-900 font-medium">${customer.totalSpent.toFixed(2)}</td>
+                  <td className="px-6 py-4 text-sm text-slate-900 font-medium">{formatVND(customer.totalSpent)}</td>
                   <td className="px-6 py-4 text-sm text-slate-500">{new Date(customer.createdAt).toLocaleDateString()}</td>
                   <td className="px-6 py-4 text-sm text-right">
                     <Link to={`/admin/customers/${customer._id}`} className="inline-flex items-center p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors opacity-0 group-hover:opacity-100">

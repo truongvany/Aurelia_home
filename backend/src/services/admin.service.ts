@@ -64,6 +64,7 @@ interface UpdateAdminProductInput {
   categorySlug?: string;
   categoryName?: string;
   imageUrl?: string;
+  imageUrls?: string[];
   isActive?: boolean;
   variant?: ProductVariantInput;
 }
@@ -174,11 +175,10 @@ export const listAdminProducts = async (query: AdminProductListQuery) => {
     filter.$or = [{ name: regex }, { slug: regex }, { description: regex }];
   }
 
+  // Always show all products (both active and inactive) in admin view
   if (query.status === "active") {
     filter.isActive = true;
-  }
-
-  if (query.status === "inactive") {
+  } else if (query.status === "inactive") {
     filter.isActive = false;
   }
 
@@ -439,6 +439,36 @@ export const updateAdminProduct = async (
     }
   }
 
+  if (input.imageUrls?.length) {
+    const existingMax = await ProductImageModel.find({ productId: product._id })
+      .sort({ sortOrder: -1 })
+      .limit(1)
+      .lean();
+
+    let sortOrder = (existingMax[0]?.sortOrder ?? -1) + 1;
+
+    const docs = input.imageUrls
+      .filter((url) => Boolean(url?.trim()))
+      .map((url) => {
+        const doc = {
+          productId: product._id,
+          url,
+          alt: product.name,
+          sortOrder
+        };
+        sortOrder += 1;
+        return doc;
+      });
+
+    if (docs.length > 0) {
+      await ProductImageModel.insertMany(docs);
+      if (!product.imageUrl) {
+        product.imageUrl = docs[0].url;
+        await product.save();
+      }
+    }
+  }
+
   await writeAudit(actorUserId, "admin.product.update", "product", product._id.toString(), {
     name: product.name,
     slug: product.slug
@@ -455,6 +485,39 @@ export const archiveAdminProduct = async (actorUserId: string, productId: string
     throw new ApiError(404, "Product not found");
   }
 
+  // Perform hard delete
+  const result = await ProductModel.findByIdAndDelete(productId);
+  
+  if (!result) {
+    throw new ApiError(500, "Failed to delete product");
+  }
+
+  // Remove related data
+  await Promise.all([
+    ProductVariantModel.deleteMany({ productId: product._id }),
+    ProductImageModel.deleteMany({ productId: product._id })
+  ]);
+
+  await writeAudit(actorUserId, "admin.product.delete", "product", product._id.toString(), {
+    name: product.name
+  });
+
+  return {
+    _id: product._id,
+    name: product.name,
+    message: "Product deleted successfully"
+  };
+};
+
+export const archiveAdminProductSoft = async (actorUserId: string, productId: string) => {
+  ensureObjectId(productId, "product id");
+
+  const product = await ProductModel.findById(productId);
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  // Soft delete
   product.isActive = false;
   await product.save();
 

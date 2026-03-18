@@ -32,15 +32,15 @@ export default function Header() {
               <Menu className="h-6 w-6" />
             </button>
             <Link to="/" className="flex items-center font-serif text-2xl font-bold tracking-widest uppercase text-[#0a192f]">
-              <img src={logo} alt="Aurelia Home" className="h-20 w-auto mr-2" />
+              <img src={logo} alt="Aurelia Home" className="h-15 w-auto mr-2" />
             </Link>
           </div>
           
           <nav className="hidden md:flex space-x-8">
-            <Link to="/shop" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Aurelia Shop</Link>
-            <Link to="/about" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">About</Link>
-            <Link to="/contact" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Contact</Link>
-            <Link to="/ai-assistant" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">AI Assistant</Link>
+            <Link to="/shop" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Thời trang mới</Link>
+            <Link to="/about" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Giới thiệu</Link>
+            <Link to="/contact" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Liên hệ</Link>
+            <Link to="/ai-assistant" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Trợ lý AI</Link>
           </nav>
 
           <div className="flex items-center space-x-4">

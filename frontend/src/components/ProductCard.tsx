@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '../types';
+import { formatVND } from '../utils/currency';
 
 interface ProductCardProps {
   product: Product;
@@ -24,7 +25,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
       <div className="flex flex-col items-center text-center">
         <h3 className="text-sm font-medium text-charcoal uppercase tracking-wider mb-2">{product.name}</h3>
-        <p className="text-sm text-gray-500">${product.price.toFixed(2)}</p>
+        <p className="text-sm text-gray-500">{formatVND(product.price)}</p>
       </div>
     </Link>
   );

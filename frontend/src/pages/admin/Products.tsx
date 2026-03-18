@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Search, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../../lib/api';
+import { formatVND } from '../../utils/currency';
 
 type AdminProduct = {
   _id: string;
@@ -20,6 +21,7 @@ export default function Products() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
+  const [user, setUser] = useState<{ role: string } | null>(null);
 
   const backendOrigin = useMemo(() => {
     const apiBase = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:5000/api/v1';
@@ -28,6 +30,10 @@ export default function Products() {
 
   useEffect(() => {
     api.getCategories().then(setCategories).catch(() => setCategories([]));
+  }, []);
+
+  useEffect(() => {
+    api.me().then(setUser).catch(() => setUser(null));
   }, []);
 
   useEffect(() => {
@@ -51,13 +57,15 @@ export default function Products() {
   };
 
   const handleArchive = async (productId: string) => {
-    if (!window.confirm('Archive this product?')) return;
+    if (!window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
 
     try {
       await api.archiveAdminProduct(productId);
       setProducts((prev) => prev.filter((item) => item._id !== productId));
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to archive product');
+      console.error('Delete product error:', err);
+      setError(err instanceof Error ? err.message : 'Không thể xóa sản phẩm');
     }
   };
 
@@ -132,7 +140,7 @@ export default function Products() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-600">{product.category}</td>
-                  <td className="px-6 py-4 text-sm font-medium text-slate-900">${product.price.toFixed(2)}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-slate-900">{formatVND(product.price)}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{product.stockQuantity} units</td>
                   <td className="px-6 py-4 text-sm">
                     <span className={`px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold ${
@@ -148,9 +156,11 @@ export default function Products() {
                       <Link to={`/admin/products/${product._id}`} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
                         <Edit2 className="h-4 w-4" />
                       </Link>
-                      <button onClick={() => handleArchive(product._id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {user?.role === 'admin' && (
+                        <button onClick={() => handleArchive(product._id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

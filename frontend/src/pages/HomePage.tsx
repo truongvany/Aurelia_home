@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, Bot } from 'lucide-react';
 import { Product } from '../types';
 import { api } from '../lib/api';
+import { formatVND } from '../utils/currency';
 import fabricTexture from '../assets/images/pic-1.jpg';
 import hero1 from '../assets/images/hero-1.jpg';
 import hero2 from '../assets/images/hero-2.jpg';
@@ -171,48 +172,84 @@ export default function HomePage() {
       </section>
 
       {/* AI Stylist Intro */}
-      <section className="py-24 bg-slate-800 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+      <section className="relative py-24 bg-white overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-blue-100/70 blur-3xl" />
+          <div className="absolute -bottom-24 -right-16 h-80 w-80 rounded-full bg-cyan-100/70 blur-3xl" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(15,23,42,0.04),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(37,99,235,0.07),transparent_45%)]" />
+        </div>
+
         <div className="max-w-6xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-white text-4xl font-serif mb-4">Gặp Gỡ Trợ Lý AI Cá Nhân Hóa Cho Việc Chăm Sóc Và Phong Cách</h2>
-            <p className="text-white/60 max-w-2xl mx-auto">Lời khuyên phong cách siêu cá nhân hóa dựa trên hình dáng cơ thể, loại sự kiện và tủ đồ hiện tại của bạn.</p>
+          <div className="text-center mb-14">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-blue-600 shadow-sm">
+              AI Styling Concierge
+            </span>
+            <h2 className="mt-5 text-slate-900 text-4xl md:text-5xl font-serif leading-tight">
+              Gặp Gỡ Trợ Lý AI Cá Nhân Hóa
+              <span className="block text-slate-500 mt-2 text-2xl md:text-3xl">Cho Việc Chăm Sóc Và Phong Cách</span>
+            </h2>
+            <p className="text-slate-600 max-w-2xl mx-auto mt-5 leading-relaxed">
+              Lời khuyên phong cách siêu cá nhân hóa dựa trên hình dáng cơ thể, loại sự kiện và tủ đồ hiện tại của bạn.
+            </p>
           </div>
-          
-          <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-6 md:p-10 max-w-4xl mx-auto shadow-2xl flex flex-col md:flex-row gap-8">
-            <div className="flex-1 space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-[10px] text-white font-bold">AH</div>
-                <div className="bg-white/10 rounded-2xl rounded-tl-none p-4 text-sm text-white/90 max-w-[80%]">
-                  "Xin chào, Julian. Dựa trên thân hình thể thao của bạn và sự kiện 'Black Tie Sáng Tạo' tối nay, tôi đề xuất Bộ Vest Hải Quân Giữa Đêm."
+
+          <div className="relative rounded-[2rem] border border-slate-200/80 bg-white/95 p-6 md:p-10 shadow-[0_24px_70px_rgba(15,23,42,0.12)] backdrop-blur-sm">
+            <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-blue-300/80 to-transparent" />
+
+            <div className="flex flex-col md:flex-row gap-8 md:gap-10">
+              <div className="flex-1 space-y-4">
+                <div className="flex items-start gap-3 animate-[fadeIn_0.6s_ease-out]">
+                  <div className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-[10px] text-white font-bold ring-4 ring-blue-50">
+                    AH
+                  </div>
+                  <div className="bg-slate-900 text-white rounded-2xl rounded-tl-none p-4 text-sm md:text-[15px] max-w-[86%] shadow-lg shadow-slate-900/20">
+                    "Xin chào, Julian. Dựa trên thân hình thể thao của bạn và sự kiện 'Black Tie Sáng Tạo' tối nay, tôi đề xuất Bộ Vest Hải Quân Giữa Đêm."
+                  </div>
+                </div>
+
+                <div className="flex items-start flex-row-reverse gap-3 animate-[fadeIn_0.8s_ease-out]">
+                  <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-[10px] text-white font-semibold ring-4 ring-blue-50">
+                    ME
+                  </div>
+                  <div className="bg-blue-50 border border-blue-100 rounded-2xl rounded-tr-none p-4 text-sm md:text-[15px] text-slate-700 max-w-[86%]">
+                    "Hãy cho tôi xem một số phụ kiện để kết hợp với bộ đó."
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <p className="text-[11px] uppercase tracking-[0.2em] font-semibold text-slate-500 mb-3">Gợi Ý Hoàn Thiện Outfit</p>
+                  <div className="flex gap-4">
+                    <div className="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                      <img alt="Product" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBv7nuZWjLmR1ENl_TiiJ6vF2Am1ocD3ig6x_SyVJl4-uvI3V8VhKkEVWjqgNmgolbyAU0rebFkrCNVcdUY8rLEs8MjO7SGqKAFG-elzLdklCBQTkIdXKr08832Cj0n3tv5nKKmCS7CedR05Wt9SVuOejcIIgK39rxII2P170qILpCrMtYJhFDPcvNE6tH5N5THYIMiZE0Ak10tNQ3iBSwxVEgvPWtoAUq6tYSXJg1r-LJDGfQUat5tDk3V3hdZLuvnAJbeva1-PiE" referrerPolicy="no-referrer" />
+                    </div>
+                    <div className="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                      <img alt="Product" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpeO8hFJv8ChrIB3DfP6n0NdIAElu-A1AUsYvjVluF-DwRn6fsBC7mYjckuEwJpYDutVL28umJK0Tjqm5E5WwKfxVFv8dNl2z1M98Wn6TPsiVbRkDEe5A3k0BJhBsTls7jcr6keA5CC4ZoSVpOZwngst7nsiWnQDYNyKBdk2pQMPl4sfAr70uZx-YhyhQ2PQza8i2CoNXfjdaSsp_pNE3GOuJzrjg-2olTV7zf69MKUB-pcCWgux96T0Tl6PHRNesjsMEIFXV-nk8" referrerPolicy="no-referrer" />
+                    </div>
+                    <div className="w-20 h-20 rounded-xl flex items-center justify-center border border-dashed border-slate-300 cursor-pointer hover:border-blue-500 hover:text-blue-600 transition-colors bg-white text-slate-500">
+                      <span className="text-xs font-semibold">+3 More</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-start flex-row-reverse gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-[10px] text-white">ME</div>
-                <div className="bg-blue-600/20 border border-blue-600/30 rounded-2xl rounded-tr-none p-4 text-sm text-white/90 max-w-[80%]">
-                  "Hãy cho tôi xem một số phụ kiện để kết hợp với bộ đó."
+
+              <div className="md:w-1/3 flex flex-col justify-center items-center text-center space-y-6 border-t md:border-t-0 md:border-l border-slate-200 pt-8 md:pt-0 md:pl-8">
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full bg-blue-200/60 blur-lg animate-pulse" />
+                  <div className="relative w-24 h-24 rounded-full border-2 border-blue-600 bg-white flex items-center justify-center">
+                    <Bot className="h-10 w-10 text-blue-600" />
+                  </div>
                 </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-blue-600 font-bold">Phân Tích AI Trực Tiếp</p>
+                  <p className="mt-2 text-sm text-slate-500">Nhận tư vấn phối đồ theo sự kiện, thời tiết và phong cách riêng của bạn.</p>
+                </div>
+                <Link
+                  to="/ai-assistant"
+                  className="w-full py-3.5 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-blue-600 transition-all duration-300 text-center block rounded-xl shadow-lg shadow-slate-900/15"
+                >
+                  Khởi Động Nhà Tư Vấn
+                </Link>
               </div>
-              <div className="flex gap-4 pt-4">
-                <div className="w-20 h-20 bg-slate-900 rounded-lg overflow-hidden border border-white/10">
-                  <img alt="Product" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBv7nuZWjLmR1ENl_TiiJ6vF2Am1ocD3ig6x_SyVJl4-uvI3V8VhKkEVWjqgNmgolbyAU0rebFkrCNVcdUY8rLEs8MjO7SGqKAFG-elzLdklCBQTkIdXKr08832Cj0n3tv5nKKmCS7CedR05Wt9SVuOejcIIgK39rxII2P170qILpCrMtYJhFDPcvNE6tH5N5THYIMiZE0Ak10tNQ3iBSwxVEgvPWtoAUq6tYSXJg1r-LJDGfQUat5tDk3V3hdZLuvnAJbeva1-PiE" referrerPolicy="no-referrer" />
-                </div>
-                <div className="w-20 h-20 bg-slate-900 rounded-lg overflow-hidden border border-white/10">
-                  <img alt="Product" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpeO8hFJv8ChrIB3DfP6n0NdIAElu-A1AUsYvjVluF-DwRn6fsBC7mYjckuEwJpYDutVL28umJK0Tjqm5E5WwKfxVFv8dNl2z1M98Wn6TPsiVbRkDEe5A3k0BJhBsTls7jcr6keA5CC4ZoSVpOZwngst7nsiWnQDYNyKBdk2pQMPl4sfAr70uZx-YhyhQ2PQza8i2CoNXfjdaSsp_pNE3GOuJzrjg-2olTV7zf69MKUB-pcCWgux96T0Tl6PHRNesjsMEIFXV-nk8" referrerPolicy="no-referrer" />
-                </div>
-                <div className="w-20 h-20 bg-slate-900 rounded-lg flex items-center justify-center border border-white/10 cursor-pointer hover:bg-white/5 transition-colors">
-                  <span className="text-white text-xs">+3 More</span>
-                </div>
-              </div>
-            </div>
-            <div className="md:w-1/3 flex flex-col justify-center items-center text-center space-y-6 border-t md:border-t-0 md:border-l border-white/10 pt-8 md:pt-0 md:pl-8">
-              <div className="w-24 h-24 rounded-full border-2 border-blue-600 flex items-center justify-center animate-pulse">
-                <Bot className="h-10 w-10 text-blue-600" />
-              </div>
-              <p className="text-xs uppercase tracking-[0.2em] text-blue-600 font-bold">Phân Tích AI Trực Tiếp</p>
-              <Link to="/ai-assistant" className="w-full py-3 bg-white text-slate-900 text-xs font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all text-center block">
-                Khởi Động Nhà Tư Vấn
-              </Link>
             </div>
           </div>
         </div>
@@ -281,7 +318,7 @@ export default function HomePage() {
                       <h3 className="text-3xl md:text-4xl font-serif leading-tight mb-3">{categoryLeadProduct.name}</h3>
                       <p className="text-white/70 text-sm mb-4 line-clamp-2">{categoryLeadProduct.description}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-xl font-semibold">${categoryLeadProduct.price.toFixed(2)}</span>
+                        <span className="text-xl font-semibold">{formatVND(categoryLeadProduct.price)}</span>
                         <span className="inline-flex items-center text-xs uppercase tracking-[0.2em] font-bold">
                           Mua Ngay <ArrowRight className="ml-2 h-4 w-4" />
                         </span>
@@ -308,7 +345,7 @@ export default function HomePage() {
                           <h4 className="font-semibold text-slate-900 mb-2 line-clamp-1">{product.name}</h4>
                           <p className="text-xs text-slate-500 line-clamp-2 mb-4">{product.description}</p>
                           <div className="flex items-center justify-between">
-                            <span className="text-slate-900 font-semibold">${product.price.toFixed(2)}</span>
+                            <span className="text-slate-900 font-semibold">{formatVND(product.price)}</span>
                             <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-blue-600">Chi Tiết</span>
                           </div>
                         </div>
@@ -382,7 +419,7 @@ export default function HomePage() {
                 </Link>
               </div>
               <h4 className="text-sm font-bold uppercase tracking-widest text-slate-900">{product.name}</h4>
-              <p className="text-slate-500 text-sm mt-1">${product.price.toFixed(2)}</p>
+              <p className="text-slate-500 text-sm mt-1">{formatVND(product.price)}</p>
             </div>
           ))}
         </div>

@@ -53,19 +53,67 @@ export const postAdminProduct = asyncHandler(async (req: Request, res: Response)
   const { name, description, price, categoryId, categorySlug, categoryName, imageUrl, imageUrls, isActive, variant } =
     req.body;
 
-  if (!name || typeof name !== "string") {
-    throw new ApiError(400, "name is required");
+  if (!name || typeof name !== "string" || name.trim().length === 0) {
+    throw new ApiError(400, "Product name is required and cannot be empty");
+  }
+
+  if (!categoryId && !categorySlug && !categoryName) {
+    throw new ApiError(400, "categoryId, categorySlug, or categoryName is required");
   }
 
   const numericPrice = Number(price);
   if (!Number.isFinite(numericPrice) || numericPrice < 0) {
-    throw new ApiError(400, "price must be a valid non-negative number");
+    throw new ApiError(400, "Price must be a valid non-negative number");
   }
 
   const created = await createAdminProduct(getActorUserId(req), {
     name: name.trim(),
     description: typeof description === "string" ? description : undefined,
     price: numericPrice,
+    categoryId: typeof categoryId === "string" ? categoryId : undefined,
+    categorySlug: typeof categorySlug === "string" ? categorySlug : undefined,
+    categoryName: typeof categoryName === "string" ? categoryName : undefined,
+    imageUrl: typeof imageUrl === "string" ? imageUrl : undefined,
+    imageUrls: Array.isArray(imageUrls) ? imageUrls.filter((item) => typeof item === "string") : undefined,
+    isActive: typeof isActive === "boolean" ? isActive : true,
+    variant:
+      variant && typeof variant === "object"
+        ? {
+            sku: typeof variant.sku === "string" ? variant.sku : undefined,
+            size: typeof variant.size === "string" ? variant.size : undefined,
+            color: typeof variant.color === "string" ? variant.color : undefined,
+            stockQuantity:
+              typeof variant.stockQuantity === "number"
+                ? variant.stockQuantity
+                : variant.stockQuantity
+                  ? Number(variant.stockQuantity)
+                  : undefined,
+            priceAdjustment:
+              typeof variant.priceAdjustment === "number"
+                ? variant.priceAdjustment
+                : variant.priceAdjustment
+                  ? Number(variant.priceAdjustment)
+                  : undefined
+          }
+        : undefined
+  });
+
+  sendSuccess(res, created, "Product created successfully", 201);
+});
+
+export const patchAdminProduct = asyncHandler(async (req: Request, res: Response) => {
+  const { name, description, price, categoryId, categorySlug, categoryName, imageUrl, imageUrls, isActive, variant } =
+    req.body;
+
+  const payload = {
+    name: typeof name === "string" && name.trim().length > 0 ? name : undefined,
+    description: typeof description === "string" ? description : undefined,
+    price:
+      typeof price === "number"
+        ? price
+        : typeof price === "string" && price.trim() !== ""
+          ? Number(price)
+          : undefined,
     categoryId: typeof categoryId === "string" ? categoryId : undefined,
     categorySlug: typeof categorySlug === "string" ? categorySlug : undefined,
     categoryName: typeof categoryName === "string" ? categoryName : undefined,
@@ -92,62 +140,19 @@ export const postAdminProduct = asyncHandler(async (req: Request, res: Response)
                   : undefined
           }
         : undefined
-  });
-
-  sendSuccess(res, created, "Product created", 201);
-});
-
-export const patchAdminProduct = asyncHandler(async (req: Request, res: Response) => {
-  const { name, description, price, categoryId, categorySlug, categoryName, imageUrl, isActive, variant } =
-    req.body;
-
-  const payload = {
-    name: typeof name === "string" ? name : undefined,
-    description: typeof description === "string" ? description : undefined,
-    price:
-      typeof price === "number"
-        ? price
-        : typeof price === "string" && price.trim() !== ""
-          ? Number(price)
-          : undefined,
-    categoryId: typeof categoryId === "string" ? categoryId : undefined,
-    categorySlug: typeof categorySlug === "string" ? categorySlug : undefined,
-    categoryName: typeof categoryName === "string" ? categoryName : undefined,
-    imageUrl: typeof imageUrl === "string" ? imageUrl : undefined,
-    isActive: typeof isActive === "boolean" ? isActive : undefined,
-    variant:
-      variant && typeof variant === "object"
-        ? {
-            sku: typeof variant.sku === "string" ? variant.sku : undefined,
-            size: typeof variant.size === "string" ? variant.size : undefined,
-            color: typeof variant.color === "string" ? variant.color : undefined,
-            stockQuantity:
-              typeof variant.stockQuantity === "number"
-                ? variant.stockQuantity
-                : variant.stockQuantity
-                  ? Number(variant.stockQuantity)
-                  : undefined,
-            priceAdjustment:
-              typeof variant.priceAdjustment === "number"
-                ? variant.priceAdjustment
-                : variant.priceAdjustment
-                  ? Number(variant.priceAdjustment)
-                  : undefined
-          }
-        : undefined
   };
 
   if (typeof payload.price === "number" && (!Number.isFinite(payload.price) || payload.price < 0)) {
-    throw new ApiError(400, "price must be a valid non-negative number");
+    throw new ApiError(400, "Price must be a valid non-negative number");
   }
 
   const updated = await updateAdminProduct(getActorUserId(req), req.params.productId, payload);
-  sendSuccess(res, updated, "Product updated");
+  sendSuccess(res, updated, "Product updated successfully");
 });
 
 export const deleteAdminProduct = asyncHandler(async (req: Request, res: Response) => {
-  const archived = await archiveAdminProduct(getActorUserId(req), req.params.productId);
-  sendSuccess(res, archived, "Product archived");
+  const deleted = await archiveAdminProduct(getActorUserId(req), req.params.productId);
+  sendSuccess(res, deleted, "Product deleted successfully");
 });
 
 export const uploadAdminProductImage = asyncHandler(async (req: Request, res: Response) => {

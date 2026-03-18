@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Truck, DollarSign } from 'lucide-react';
 import { api } from '../../lib/api';
+import { formatVND } from '../../utils/currency';
 
 export default function OrderDetail() {
   const { id } = useParams();
@@ -105,7 +106,7 @@ export default function OrderDetail() {
                     <tr key={`${item.productId}-${idx}`} className="hover:bg-slate-50">
                       <td className="px-6 py-4 text-sm font-medium text-slate-900">{item.name}</td>
                       <td className="px-6 py-4 text-sm text-slate-600">{item.quantity}</td>
-                      <td className="px-6 py-4 text-sm text-slate-900 text-right font-medium">${item.unitPrice.toFixed(2)}</td>
+                      <td className="px-6 py-4 text-sm text-slate-900 text-right font-medium">{formatVND(item.unitPrice)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -132,7 +133,7 @@ export default function OrderDetail() {
               <div className="pt-3 border-t border-slate-200">
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-slate-900">Total</span>
-                  <span className="text-lg font-bold text-slate-900">${order.totalAmount.toFixed(2)}</span>
+                  <span className="text-lg font-bold text-slate-900">{formatVND(order.totalAmount)}</span>
                 </div>
               </div>
             </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Mail, Phone, MapPin, Calendar, ShoppingBag, DollarSign } from 'lucide-react';
 import { api } from '../../lib/api';
+import { formatVND } from '../../utils/currency';
 
 export default function CustomerDetail() {
   const { id } = useParams();
@@ -87,7 +88,7 @@ export default function CustomerDetail() {
                   <DollarSign className="h-4 w-4 mr-1" />
                   <span className="text-xs font-medium uppercase tracking-wider">Total Spent</span>
                 </div>
-                <p className="text-xl font-bold text-slate-900">${customer.totalSpent.toFixed(2)}</p>
+                <p className="text-xl font-bold text-slate-900">{formatVND(customer.totalSpent)}</p>
               </div>
               <div className="p-4 bg-slate-50 rounded-lg">
                 <div className="flex items-center text-slate-500 mb-1">
@@ -128,7 +129,7 @@ export default function CustomerDetail() {
                         <Link to={`/admin/orders/${order._id}`} className="hover:text-blue-600">{order.orderCode.slice(-8).toUpperCase()}</Link>
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-500">{new Date(order.createdAt).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 text-sm font-medium text-slate-900">${order.totalAmount.toFixed(2)}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-slate-900">{formatVND(order.totalAmount)}</td>
                       <td className="px-6 py-4 text-sm">
                         <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] uppercase tracking-wider font-bold">{order.status}</span>
                       </td>

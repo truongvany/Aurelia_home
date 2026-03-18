@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { CategoryModel } from "../models/category.model.js";
+import { ProductImageModel } from "../models/productImage.model.js";
 import { ProductModel } from "../models/product.model.js";
 import { ProductVariantModel } from "../models/productVariant.model.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -85,10 +86,19 @@ export const getProductById = async (id: string) => {
     throw new ApiError(404, "Product not found");
   }
 
-  const category = await CategoryModel.findById(product.categoryId).lean();
-  const variants = await ProductVariantModel.find({ productId: product._id }).lean();
+  const [category, variants, images] = await Promise.all([
+    CategoryModel.findById(product.categoryId).lean(),
+    ProductVariantModel.find({ productId: product._id }).lean(),
+    ProductImageModel.find({ productId: product._id }).sort({ sortOrder: 1, createdAt: 1 }).lean()
+  ]);
   const sizes = [...new Set(variants.map((v) => v.size).filter(Boolean))];
   const colors = [...new Set(variants.map((v) => v.color).filter(Boolean))];
+  const imageGallery = images.map((image) => ({
+    _id: image._id,
+    url: image.url,
+    alt: image.alt,
+    sortOrder: image.sortOrder
+  }));
 
   return {
     _id: product._id,
@@ -96,7 +106,9 @@ export const getProductById = async (id: string) => {
     description: product.description,
     price: product.price,
     category: category?.name ?? "Uncategorized",
+    categorySlug: category?.slug ?? "",
     imageUrl: product.imageUrl,
+    images: imageGallery,
     sizes,
     colors,
     inStock: variants.some((v) => v.stockQuantity > 0),

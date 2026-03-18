@@ -243,7 +243,14 @@ export const api = {
   getProducts: (params?: URLSearchParams) =>
     request<Product[]>(`/catalog/products${params ? `?${params.toString()}` : ""}`),
   getFeaturedProducts: () => request<Product[]>("/catalog/products/featured"),
-  getProductById: (id: string) => request<Product & { variants: Array<{ _id: string; size: string; color: string; sku: string; stockQuantity: number }> }>(`/catalog/products/${id}`),
+  getProductById: (id: string) =>
+    request<
+      Product & {
+        categorySlug: string;
+        variants: Array<{ _id: string; size: string; color: string; sku: string; stockQuantity: number }>;
+        images: Array<{ _id: string; url: string; alt: string; sortOrder: number }>;
+      }
+    >(`/catalog/products/${id}`),
 
   register: (input: { email: string; password: string; firstName: string; lastName: string }) =>
     request<AuthPayload>("/auth/register", {
@@ -347,6 +354,7 @@ export const api = {
       categorySlug?: string;
       categoryName?: string;
       imageUrl?: string;
+      imageUrls?: string[];
       isActive?: boolean;
       variant?: {
         sku?: string;
