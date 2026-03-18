@@ -46,6 +46,7 @@ export const placeOrder = async (input: PlaceOrderInput) => {
       productId: item.productId,
       productVariantId: item.productVariantId,
       name: product.name,
+      imageUrl: product.imageUrl ?? "",
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       size: item.size,
@@ -57,7 +58,7 @@ export const placeOrder = async (input: PlaceOrderInput) => {
 
   const order = await OrderModel.create({
     userId: input.userId,
-    status: "paid",
+    status: "pending",
     totalAmount,
     shippingAddress: input.shippingAddress,
     billingAddress: input.billingAddress ?? input.shippingAddress,
@@ -68,7 +69,7 @@ export const placeOrder = async (input: PlaceOrderInput) => {
     orderId: order._id,
     userId: input.userId,
     amount: totalAmount,
-    status: "paid",
+    status: "paid", // demo flow: luôn thành công
     provider: "mock"
   });
 

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { api, setAuthSession } from '../lib/api';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function AuthPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { applyAuthPayload } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,9 +25,10 @@ export default function AuthPage() {
       setError(null);
       setIsSubmitting(true);
       const payload = await api.login(loginForm);
-      setAuthSession(payload);
+      applyAuthPayload(payload);
+      const from = (location.state as { from?: string } | null)?.from;
       // Redirect admins to the admin portal, customers to their profile
-      navigate(payload.user.role === 'admin' ? '/admin' : '/profile');
+      navigate(from ?? (payload.user.role === 'admin' ? '/admin' : '/profile'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to login');
     } finally {
@@ -38,7 +42,7 @@ export default function AuthPage() {
       setError(null);
       setIsSubmitting(true);
       const payload = await api.register(registerForm);
-      setAuthSession(payload);
+      applyAuthPayload(payload);
       navigate('/profile');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to register');

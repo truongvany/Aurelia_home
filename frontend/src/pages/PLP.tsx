@@ -7,11 +7,11 @@ import { formatVND } from '../utils/currency';
 import PriceRangeSlider from '../components/PriceRangeSlider';
 
 export default function PLP() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryCategory = searchParams.get('category') ?? 'all';
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Array<{ _id: string; name: string; slug: string }>>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>(queryCategory);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedSize, setSelectedSize] = useState<string>('all');
   const [selectedColor, setSelectedColor] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
@@ -30,6 +30,19 @@ export default function PLP() {
 
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const updateCategory = (slug: string) => {
+    setSelectedCategory(slug);
+
+    const nextParams = new URLSearchParams(searchParams);
+    if (slug === 'all') {
+      nextParams.delete('category');
+    } else {
+      nextParams.set('category', slug);
+    }
+
+    setSearchParams(nextParams, { replace: true });
   };
 
   useEffect(() => {
@@ -193,7 +206,7 @@ export default function PLP() {
                       <button
                         key={cat.slug}
                         type="button"
-                        onClick={() => setSelectedCategory(cat.slug)}
+                        onClick={() => updateCategory(cat.slug)}
                         className={`block w-full py-2 text-left text-sm uppercase tracking-[0.12em] transition-colors ${
                           selectedCategory === cat.slug ? 'text-slate-950 font-semibold bg-slate-200/70' : 'text-slate-500 hover:text-slate-900'
                         }`}
@@ -314,7 +327,7 @@ export default function PLP() {
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedCategory('all');
+                    updateCategory('all');
                     setSelectedSize('all');
                     setSelectedColor('all');
                     setPriceRange(priceBounds);
@@ -354,7 +367,7 @@ export default function PLP() {
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedCategory('all');
+                    updateCategory('all');
                     setSelectedSize('all');
                     setSelectedColor('all');
                     setPriceRange(priceBounds);

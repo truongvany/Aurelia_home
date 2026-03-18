@@ -2,15 +2,22 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, User, Search, Menu } from 'lucide-react';
 import { api } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
 
 // Logo is located in the parent workspace root (outside the frontend/src folder)
 import logo from '../../../logo.png';
 
 export default function Header() {
   const [cartCount, setCartCount] = useState(0);
+  const { user, isAuthenticated, signOut } = useAuth();
 
   useEffect(() => {
     const loadCart = async () => {
+      if (!isAuthenticated || user?.role !== 'customer') {
+        setCartCount(0);
+        return;
+      }
+
       try {
         const cart = await api.getCart();
         const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
@@ -20,8 +27,19 @@ export default function Header() {
       }
     };
 
+    const handleCartUpdated = () => {
+      loadCart();
+    };
+
+    window.addEventListener('aurelia:cart-updated', handleCartUpdated);
     loadCart();
-  }, []);
+
+    return () => {
+      window.removeEventListener('aurelia:cart-updated', handleCartUpdated);
+    };
+  }, [isAuthenticated, user?.role]);
+
+  const profileTarget = !isAuthenticated ? '/auth' : user?.role === 'admin' ? '/admin' : '/profile';
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
@@ -40,20 +58,28 @@ export default function Header() {
             <Link to="/shop" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Thời trang mới</Link>
             <Link to="/about" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Giới thiệu</Link>
             <Link to="/contact" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Liên hệ</Link>
-            <Link to="/ai-assistant" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Trợ lý AI</Link>
           </nav>
 
           <div className="flex items-center space-x-4">
             <button className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors">
               <Search className="h-5 w-5" />
             </button>
-            <Link to="/profile" className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors">
+            <Link to={profileTarget} className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors">
               <User className="h-5 w-5" />
             </Link>
-            <Link to="/checkout" className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors relative">
+            <Link to="/cart" className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors relative">
               <ShoppingBag className="h-5 w-5" />
               <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#1e3a8a] text-white text-[10px] font-bold flex items-center justify-center">{cartCount}</span>
             </Link>
+            {isAuthenticated && (
+              <button
+                type="button"
+                onClick={signOut}
+                className="text-xs uppercase tracking-widest text-slate-500 hover:text-slate-900"
+              >
+                Đăng xuất
+              </button>
+            )}
           </div>
         </div>
       </div>

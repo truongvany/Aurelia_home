@@ -47,6 +47,10 @@ export const getCart = async (userId: string) => {
 export const addCartItem = async (input: AddCartItemInput) => {
   ensureObjectIds([input.userId, input.productId, input.productVariantId]);
 
+  if (!Number.isInteger(input.quantity) || input.quantity <= 0) {
+    throw new ApiError(400, "Quantity must be a positive integer");
+  }
+
   const [product, variant] = await Promise.all([
     ProductModel.findById(input.productId),
     ProductVariantModel.findById(input.productVariantId)
@@ -69,7 +73,11 @@ export const addCartItem = async (input: AddCartItemInput) => {
   );
 
   if (existingIndex >= 0) {
-    cart.items[existingIndex].quantity += input.quantity;
+    const nextQuantity = cart.items[existingIndex].quantity + input.quantity;
+    if (variant.stockQuantity < nextQuantity) {
+      throw new ApiError(422, "Insufficient stock for selected variant");
+    }
+    cart.items[existingIndex].quantity = nextQuantity;
   } else {
     cart.items.push({
       productId: product._id,
@@ -87,6 +95,11 @@ export const addCartItem = async (input: AddCartItemInput) => {
 
 export const updateCartItemQuantity = async (userId: string, itemId: string, quantity: number) => {
   ensureObjectIds([userId, itemId]);
+
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    throw new ApiError(400, "Quantity must be a positive integer");
+  }
+
   const cart = await CartModel.findOne({ userId });
   if (!cart) {
     throw new ApiError(404, "Cart not found");
@@ -95,6 +108,15 @@ export const updateCartItemQuantity = async (userId: string, itemId: string, qua
   const item = cart.items.id(itemId);
   if (!item) {
     throw new ApiError(404, "Cart item not found");
+  }
+
+  const variant = await ProductVariantModel.findById(item.productVariantId);
+  if (!variant) {
+    throw new ApiError(404, "Product variant not found");
+  }
+
+  if (variant.stockQuantity < quantity) {
+    throw new ApiError(422, "Insufficient stock for selected variant");
   }
 
   item.quantity = quantity;

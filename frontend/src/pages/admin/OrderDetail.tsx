@@ -4,6 +4,36 @@ import { ArrowLeft, Truck, DollarSign } from 'lucide-react';
 import { api } from '../../lib/api';
 import { formatVND } from '../../utils/currency';
 
+const translateOrderStatus = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return 'Chờ xử lý';
+    case 'paid':
+      return 'Đã xác nhận';
+    case 'shipped':
+      return 'Đang giao';
+    case 'delivered':
+      return 'Đã giao';
+    case 'cancelled':
+      return 'Đã hủy';
+    default:
+      return status;
+  }
+};
+
+const translatePaymentStatus = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return 'Chờ thanh toán';
+    case 'paid':
+      return 'Đã thanh toán';
+    case 'failed':
+      return 'Thất bại';
+    default:
+      return status;
+  }
+};
+
 export default function OrderDetail() {
   const { id } = useParams();
   const [order, setOrder] = useState<any>(null);
@@ -24,135 +54,193 @@ export default function OrderDetail() {
       .finally(() => setIsLoading(false));
   }, [id]);
 
-  const handleMarkShipped = async () => {
+  const handleUpdateStatus = async (status: 'pending' | 'paid' | 'cancelled' | 'shipped' | 'delivered') => {
     if (!id) return;
 
     setIsUpdating(true);
     try {
-      await api.updateAdminOrderStatus(id, 'shipped');
+      await api.updateAdminOrderStatus(id, status);
       const refreshed = await api.getAdminOrderById(id);
       setOrder(refreshed);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to update order status');
+      setError(err instanceof Error ? err.message : 'Không thể cập nhật trạng thái');
     } finally {
       setIsUpdating(false);
     }
   };
 
   if (isLoading) {
-    return <div className="text-sm text-slate-500">Loading order...</div>;
+    return <div className="text-sm text-slate-500">Đang tải đơn hàng...</div>;
   }
 
   if (!order) {
-    return <div className="text-sm text-red-600">{error ?? 'Order not found.'}</div>;
+    return <div className="text-sm text-red-600">{error ?? 'Không tìm thấy đơn hàng.'}</div>;
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12">
-      <div className="flex items-center space-x-4">
-        <Link to="/admin/orders" className="p-2 bg-white rounded-full border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h2 className="text-2xl font-bold text-slate-900">Order Details</h2>
+    <div className="max-w-5xl mx-auto space-y-6 pb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Link
+            to="/admin/orders"
+            className="p-2 bg-white rounded-full border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+            title="Quay lại"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div>
+            <h2 className="text-2xl font-semibold text-slate-900">Chi tiết đơn hàng</h2>
+            <p className="text-sm text-slate-500">Mã đơn: <span className="font-medium text-slate-800">#{order.orderCode.slice(-8).toUpperCase()}</span></p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <span className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-medium">
+            <DollarSign className="w-4 h-4" />
+            {translatePaymentStatus(order.payment?.status ?? 'pending')}
+          </span>
+          <span className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-medium">
+            <Truck className="w-4 h-4" />
+            {translateOrderStatus(order.status)}
+          </span>
+        </div>
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
+        {/* Left: Order info */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Order Info */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">{order.orderCode}</h3>
-                <p className="text-sm text-slate-500">{new Date(order.createdAt).toLocaleString()}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Mã đơn</p>
+                  <p className="text-base font-medium text-slate-900">#{order.orderCode.slice(-8).toUpperCase()}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Ngày đặt</p>
+                  <p className="text-base text-slate-700">{new Date(order.createdAt).toLocaleString('vi-VN')}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Khách hàng</p>
+                  <p className="text-base text-slate-700">
+                    {`${order.customer?.firstName ?? ''} ${order.customer?.lastName ?? ''}`.trim() || order.customer?.email}
+                  </p>
+                  <p className="text-sm text-slate-500">{order.customer?.email}</p>
+                  {order.customer?.phone && <p className="text-sm text-slate-500">{order.customer.phone}</p>}
+                </div>
               </div>
-              <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] uppercase tracking-wider font-bold">
-                {order.status}
-              </span>
+
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Trạng thái</p>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
+                    {translateOrderStatus(order.status)}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Thanh toán</p>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
+                    {translatePaymentStatus(order.payment?.status ?? 'pending')}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Tổng hóa đơn</p>
+                  <p className="text-base font-semibold text-slate-900">{formatVND(order.totalAmount)}</p>
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wider font-medium mb-1">Customer</p>
-                <p className="text-sm font-semibold text-slate-900">
-                  {`${order.customer?.firstName ?? ''} ${order.customer?.lastName ?? ''}`.trim() || order.customer?.email}
-                </p>
-                <p className="text-sm text-slate-600">{order.customer?.email}</p>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wider font-medium mb-1">Shipping Address</p>
-                <p className="text-sm text-slate-600">{order.shippingAddress}</p>
-              </div>
+            <div className="mt-6">
+              <p className="text-xs text-slate-500 uppercase tracking-wide">Địa chỉ giao hàng</p>
+              <pre className="mt-2 text-sm text-slate-700 bg-slate-50 p-4 rounded border border-slate-200 whitespace-pre-wrap">{order.shippingAddress}</pre>
             </div>
+
+            {order.billingAddress && (
+              <div className="mt-4">
+                <p className="text-xs text-slate-500 uppercase tracking-wide">Địa chỉ thanh toán</p>
+                <pre className="mt-2 text-sm text-slate-700 bg-slate-50 p-4 rounded border border-slate-200 whitespace-pre-wrap">{order.billingAddress}</pre>
+              </div>
+            )}
           </div>
 
-          {/* Order Items */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
             <div className="px-6 py-4 border-b border-slate-200">
-              <h3 className="font-semibold text-slate-900">Items</h3>
+              <h3 className="text-base font-semibold text-slate-900">Sản phẩm</h3>
+              <p className="text-xs text-slate-500">Danh sách sản phẩm trong đơn hàng</p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
-                    <th className="px-6 py-4 font-medium">Product</th>
-                    <th className="px-6 py-4 font-medium">Quantity</th>
-                    <th className="px-6 py-4 font-medium text-right">Price</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {order.items.map((item: any, idx: number) => (
-                    <tr key={`${item.productId}-${idx}`} className="hover:bg-slate-50">
-                      <td className="px-6 py-4 text-sm font-medium text-slate-900">{item.name}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">{item.quantity}</td>
-                      <td className="px-6 py-4 text-sm text-slate-900 text-right font-medium">{formatVND(item.unitPrice)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="divide-y divide-slate-200">
+              {order.items.map((item: any, idx: number) => (
+                <div key={`${item.productId}-${idx}`} className="flex items-center gap-4 px-6 py-4">
+                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+                    {item.imageUrl ? (
+                      <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-slate-200" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-900 truncate">{item.name}</p>
+                    <p className="text-xs text-slate-500 truncate">
+                      Size: {item.size} • Màu: {item.color}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-slate-900">{formatVND(item.unitPrice)}</p>
+                    <p className="text-xs text-slate-500">x{item.quantity}</p>
+                    <p className="text-xs text-slate-600 font-semibold mt-1">{formatVND(item.unitPrice * item.quantity)}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Sidebar */}
+        {/* Right sidebar */}
         <div className="space-y-6">
-          {/* Payment Status */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <h3 className="font-semibold text-slate-900 mb-4 flex items-center">
-              <DollarSign className="h-5 w-5 mr-2 text-slate-400" />
-              Payment
-            </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm text-slate-600">Status</span>
-                <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-[10px] uppercase font-bold tracking-wider">
-                  {order.payment?.status ?? 'pending'}
-                </span>
-              </div>
-              <div className="pt-3 border-t border-slate-200">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-slate-900">Total</span>
-                  <span className="text-lg font-bold text-slate-900">{formatVND(order.totalAmount)}</span>
-                </div>
-              </div>
+            <h3 className="text-base font-semibold text-slate-900 mb-3">Cập nhật trạng thái</h3>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => handleUpdateStatus('pending')}
+                disabled={isUpdating || order.status === 'pending'}
+                className="w-full text-left px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+              >
+                Chờ xử lý
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUpdateStatus('paid')}
+                disabled={isUpdating || order.status === 'paid'}
+                className="w-full text-left px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+              >
+                Xác nhận (Đã thanh toán)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUpdateStatus('shipped')}
+                disabled={isUpdating || order.status === 'shipped'}
+                className="w-full text-left px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+              >
+                Đang giao
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUpdateStatus('delivered')}
+                disabled={isUpdating || order.status === 'delivered'}
+                className="w-full text-left px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+              >
+                Đã giao
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUpdateStatus('cancelled')}
+                disabled={isUpdating || order.status === 'cancelled'}
+                className="w-full text-left px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+              >
+                Hủy đơn
+              </button>
             </div>
-          </div>
-
-          {/* Fulfillment */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <h3 className="font-semibold text-slate-900 mb-4 flex items-center">
-              <Truck className="h-5 w-5 mr-2 text-slate-400" />
-              Fulfillment
-            </h3>
-            <p className="text-sm text-slate-600 mb-4">Ready to ship</p>
-            <button
-              onClick={handleMarkShipped}
-              disabled={isUpdating || order.status === 'shipped' || order.status === 'delivered'}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-            >
-              {isUpdating ? 'Updating...' : 'Mark as Shipped'}
-            </button>
           </div>
         </div>
       </div>

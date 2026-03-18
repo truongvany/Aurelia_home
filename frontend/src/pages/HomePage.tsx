@@ -243,12 +243,13 @@ export default function HomePage() {
                   <p className="text-[11px] uppercase tracking-[0.2em] text-blue-600 font-bold">Phân Tích AI Trực Tiếp</p>
                   <p className="mt-2 text-sm text-slate-500">Nhận tư vấn phối đồ theo sự kiện, thời tiết và phong cách riêng của bạn.</p>
                 </div>
-                <Link
-                  to="/ai-assistant"
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('aurelia:open-chat'))}
                   className="w-full py-3.5 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-blue-600 transition-all duration-300 text-center block rounded-xl shadow-lg shadow-slate-900/15"
                 >
-                  Khởi Động Nhà Tư Vấn
-                </Link>
+                  Mở Chat Trợ Lý
+                </button>
               </div>
             </div>
           </div>

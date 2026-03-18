@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Product } from '../types';
 import { ChevronRight, Heart, Share2, Truck, RefreshCw, ArrowRight } from 'lucide-react';
 import { api } from '../lib/api';
@@ -30,6 +30,7 @@ const toAbsoluteImageUrl = (url?: string | null) => {
 };
 
 export default function PDP() {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
@@ -37,7 +38,9 @@ export default function PDP() {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string>('');
+  const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -129,7 +132,13 @@ export default function PDP() {
 
   const handleAddToCart = async () => {
     if (!selectedVariant) {
-      alert('Please select both size and color.');
+      alert('Vui lòng chọn cả kích thước và màu sắc.');
+      return;
+    }
+
+    const qty = Math.max(1, quantity);
+    if (selectedVariant.stockQuantity < qty) {
+      alert('Số lượng vượt quá tồn kho. Vui lòng chọn ít hơn.');
       return;
     }
 
@@ -138,14 +147,42 @@ export default function PDP() {
       await api.addToCart({
         productId: product._id,
         productVariantId: selectedVariant._id,
-        quantity: 1
+        quantity: qty
       });
-      alert('Added to cart');
+      alert('Đã thêm vào giỏ hàng');
     } catch (error) {
       console.error(error);
-      alert('Please sign in before adding to cart.');
+      alert('Vui lòng đăng nhập trước khi thêm vào giỏ hàng.');
     } finally {
       setIsAddingToCart(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!selectedVariant) {
+      alert('Please select both size and color.');
+      return;
+    }
+
+    const qty = Math.max(1, quantity);
+    if (selectedVariant.stockQuantity < qty) {
+      alert('Số lượng vượt quá tồn kho. Vui lòng chọn ít hơn.');
+      return;
+    }
+
+    try {
+      setIsBuyingNow(true);
+      await api.addToCart({
+        productId: product._id,
+        productVariantId: selectedVariant._id,
+        quantity: qty
+      });
+      navigate('/checkout?source=buy-now');
+    } catch (error) {
+      console.error(error);
+      alert('Vui lòng đăng nhập trước khi mua hàng.');
+    } finally {
+      setIsBuyingNow(false);
     }
   };
 
@@ -226,7 +263,7 @@ export default function PDP() {
             {/* Color Selection */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-charcoal">Color: {selectedColor || 'Select'}</span>
+                <span className="text-xs font-semibold text-charcoal">Màu sắc: {selectedColor || ''}</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {product.colors.map(color => (
@@ -248,8 +285,8 @@ export default function PDP() {
             {/* Size Selection */}
             <div className="mb-7">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-charcoal">Size: {selectedSize || 'Select'}</span>
-                <button className="text-xs text-slate-500 underline hover:text-charcoal">Size Guide</button>
+                <span className="text-xs font-semibold text-charcoal">Kích thước: {selectedSize || ''}</span>
+                <button className="text-xs text-slate-500 underline hover:text-charcoal">Hướng dẫn chọn kích thước</button>
               </div>
               <div className="grid grid-cols-5 gap-1.5">
                 {product.sizes.map(size => (
@@ -269,32 +306,73 @@ export default function PDP() {
             </div>
 
             {/* Actions */}
-            <div className="flex space-x-3 mb-8">
-              <button 
-                onClick={handleAddToCart}
-                className={`flex-1 py-3.5 font-medium uppercase tracking-[0.2em] text-sm transition-all duration-300 ${
-                  product.inStock 
-                    ? 'bg-charcoal text-white hover:bg-gold' 
-                    : 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                }`}
-                disabled={!product.inStock || isAddingToCart}
-              >
-                {product.inStock ? (isAddingToCart ? 'Adding...' : 'Add to Cart') : 'Out of Stock'}
-              </button>
-              <button className="p-3.5 border border-slate-300 text-charcoal hover:border-charcoal hover:bg-slate-50 transition-colors">
-                <Heart className="h-5 w-5" />
-              </button>
+            <div className="space-y-3 mb-8">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-slate-700">Số lượng</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="w-10 h-10 border border-slate-300 text-slate-600 hover:bg-slate-100"
+                  disabled={!product.inStock || isAddingToCart || isBuyingNow}
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  value={quantity}
+                  min={1}
+                  max={selectedVariant ? selectedVariant.stockQuantity : undefined}
+                  onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
+                  className="w-16 h-10 border-t border-b border-slate-300 text-center text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="w-10 h-10 border border-slate-300 text-slate-600 hover:bg-slate-100"
+                  disabled={!product.inStock || isAddingToCart || isBuyingNow}
+                >
+                  +
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button
+                  onClick={handleAddToCart}
+                  className={`py-3.5 font-medium uppercase tracking-[0.2em] text-sm transition-all duration-300 ${
+                    product.inStock
+                      ? 'bg-charcoal text-white hover:bg-gold'
+                      : 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                  }`}
+                  disabled={!product.inStock || isAddingToCart}
+                >
+                  {product.inStock ? (isAddingToCart ? 'Đang thêm...' : 'Thêm vào giỏ') : 'Hết hàng'}
+                </button>
+                <button
+                  onClick={handleBuyNow}
+                  className={`py-3.5 font-medium uppercase tracking-[0.2em] text-sm transition-all duration-300 ${
+                    product.inStock
+                      ? 'border border-charcoal text-charcoal hover:bg-charcoal hover:text-white'
+                      : 'border border-slate-200 text-slate-400 cursor-not-allowed'
+                  }`}
+                  disabled={!product.inStock || isBuyingNow}
+                >
+                  {product.inStock ? (isBuyingNow ? 'Đang xử lý...' : 'Mua ngay') : 'Không khả dụng'}
+                </button>
+                <button className="p-3.5 border border-slate-300 text-charcoal hover:border-charcoal hover:bg-slate-50 transition-colors">
+                  <Heart className="h-5 w-5" />
+                </button>
+              </div>
             </div>
 
             {/* Value Props */}
             <div className="space-y-3 border-t border-slate-200 pt-6">
               <div className="flex items-center text-sm text-slate-600">
                 <Truck className="h-5 w-5 mr-3 text-gold" />
-                Complimentary shipping on orders over $500
+                Miễn phí vận chuyển cho đơn hàng trên 500.000₫
               </div>
               <div className="flex items-center text-sm text-slate-600">
                 <RefreshCw className="h-5 w-5 mr-3 text-gold" />
-                Free returns within 30 days
+                Đổi trả miễn phí trong vòng 30 ngày
               </div>
             </div>
           </div>

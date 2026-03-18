@@ -33,6 +33,26 @@ export interface ChatMessage {
   sender: 'user' | 'ai';
   text: string;
   timestamp: Date;
+  sources?: ChatSource[];
+  suggestedProducts?: ChatSuggestedProduct[];
+}
+
+export interface ChatSource {
+  id: string;
+  title: string;
+  kind: 'faq' | 'policy' | 'support' | 'checkout' | string;
+  url: string;
+  snippet: string;
+}
+
+export interface ChatSuggestedProduct {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  inStock: boolean;
+  url: string;
 }
 
 export interface AuthPayload {
@@ -85,6 +105,7 @@ export interface OrderPayload {
     productId: string;
     productVariantId: string;
     name: string;
+    imageUrl?: string;
     quantity: number;
     unitPrice: number;
     size: string;

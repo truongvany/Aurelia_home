@@ -1,6 +1,8 @@
 import type {
   AuthPayload,
   CartPayload,
+  ChatSource,
+  ChatSuggestedProduct,
   OrderPayload,
   Product,
   ProfilePayload
@@ -152,6 +154,11 @@ const REFRESH_TOKEN_KEY = "aurelia_refresh_token";
 
 const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
 const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
+const emitCartUpdated = () => {
+  window.dispatchEvent(new Event("aurelia:cart-updated"));
+};
+
+export const hasAuthSession = () => Boolean(getAccessToken() && getRefreshToken());
 
 export const clearAuthSession = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
@@ -276,27 +283,43 @@ export const api = {
     request<CartPayload>("/cart/items", {
       method: "POST",
       body: JSON.stringify(input)
+    }).then((payload) => {
+      emitCartUpdated();
+      return payload;
     }),
   updateCartItem: (itemId: string, quantity: number) =>
     request<CartPayload>(`/cart/items/${itemId}`, {
       method: "PUT",
       body: JSON.stringify({ quantity })
+    }).then((payload) => {
+      emitCartUpdated();
+      return payload;
     }),
   removeCartItem: (itemId: string) =>
     request<CartPayload>(`/cart/items/${itemId}`, {
       method: "DELETE"
+    }).then((payload) => {
+      emitCartUpdated();
+      return payload;
     }),
   clearCart: () =>
     request<CartPayload>("/cart/clear", {
       method: "POST"
+    }).then((payload) => {
+      emitCartUpdated();
+      return payload;
     }),
 
   placeOrder: (input: { shippingAddress: string; billingAddress?: string }) =>
     request<OrderPayload>("/orders", {
       method: "POST",
       body: JSON.stringify(input)
+    }).then((payload) => {
+      emitCartUpdated();
+      return payload;
     }),
   getMyOrders: () => request<OrderPayload[]>("/orders"),
+  getMyOrderById: (orderId: string) => request<OrderPayload>(`/orders/${orderId}`),
 
   submitContact: (input: { name: string; email: string; subject: string; message: string }) =>
     request<{ _id: string }>("/contact", {
@@ -305,7 +328,13 @@ export const api = {
     }),
 
   sendChatMessage: (input: { message: string; conversationId?: string }) =>
-    request<{ conversationId: string; userMessage: { _id: string; sender: "user" | "ai"; text: string; createdAt: string }; aiMessage: { _id: string; sender: "user" | "ai"; text: string; createdAt: string } }>(
+    request<{
+      conversationId: string;
+      userMessage: { _id: string; sender: "user" | "ai"; text: string; createdAt: string };
+      aiMessage: { _id: string; sender: "user" | "ai"; text: string; createdAt: string };
+      sources: ChatSource[];
+      suggestedProducts: ChatSuggestedProduct[];
+    }>(
       "/chat/messages",
       {
         method: "POST",

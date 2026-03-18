@@ -17,5 +17,6 @@ export const env = {
   JWT_SECRET: getRequired("JWT_SECRET"),
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN ?? "1d",
   REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN ?? "7d",
-  CORS_ORIGIN: process.env.CORS_ORIGIN ?? "http://localhost:3000"
+  CORS_ORIGIN: process.env.CORS_ORIGIN ?? "http://localhost:3000",
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? ""
 };

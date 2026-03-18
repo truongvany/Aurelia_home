@@ -25,7 +25,9 @@ export const fetchCart = asyncHandler(async (req: Request, res: Response) => {
 
 export const addItem = asyncHandler(async (req: Request, res: Response) => {
   const { productId, productVariantId, quantity } = req.body;
-  if (!productId || !productVariantId || !quantity) {
+  const parsedQuantity = Number(quantity);
+
+  if (!productId || !productVariantId || !Number.isInteger(parsedQuantity) || parsedQuantity <= 0) {
     throw new ApiError(400, "Missing required fields");
   }
 
@@ -33,21 +35,23 @@ export const addItem = asyncHandler(async (req: Request, res: Response) => {
     userId: getUserId(req),
     productId,
     productVariantId,
-    quantity: Number(quantity)
+    quantity: parsedQuantity
   });
   sendSuccess(res, cart, "Item added to cart", 201);
 });
 
 export const updateItem = asyncHandler(async (req: Request, res: Response) => {
   const { quantity } = req.body;
-  if (!quantity) {
+  const parsedQuantity = Number(quantity);
+
+  if (!Number.isInteger(parsedQuantity) || parsedQuantity <= 0) {
     throw new ApiError(400, "Missing quantity");
   }
 
   const cart = await updateCartItemQuantity(
     getUserId(req),
     req.params.itemId,
-    Number(quantity)
+    parsedQuantity
   );
   sendSuccess(res, cart, "Cart item updated");
 });

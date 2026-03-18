@@ -662,7 +662,9 @@ export const listAdminOrders = async (query: AdminOrderListQuery) => {
         date: order.createdAt,
         totalAmount: order.totalAmount,
         status: order.status,
-        paymentStatus: payment?.status ?? "pending"
+        paymentStatus: payment?.status ?? "pending",
+        productImageUrl: (order.items && order.items.length > 0 && order.items[0].imageUrl) || "",
+        productName: (order.items && order.items.length > 0 && order.items[0].name) || "Sản phẩm"
       };
     })
     .filter((item) => (query.paymentStatus ? item.paymentStatus === query.paymentStatus : true));

@@ -1,6 +1,10 @@
 import { Types } from "mongoose";
+import { env } from "../config/env.js";
+import { ASSISTANT_KNOWLEDGE_BASE } from "../constants/assistantKnowledge.js";
 import { AiConversationModel } from "../models/aiConversation.model.js";
 import { AiMessageModel } from "../models/aiMessage.model.js";
+import { ProductModel } from "../models/product.model.js";
+import { ProductVariantModel } from "../models/productVariant.model.js";
 import { ApiError } from "../utils/ApiError.js";
 
 interface SendMessageInput {
@@ -9,22 +13,289 @@ interface SendMessageInput {
   conversationId?: string;
 }
 
-const buildAssistantReply = (message: string): string => {
-  const normalized = message.toLowerCase();
+interface ChatSource {
+  id: string;
+  title: string;
+  kind: string;
+  url: string;
+  snippet: string;
+}
 
-  if (normalized.includes("wedding") || normalized.includes("formal")) {
-    return "For formal events, start with a sharp blazer and neutral trousers, then add one statement accessory for balance.";
+interface SuggestedProduct {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  inStock: boolean;
+  url: string;
+}
+
+type ScoredKnowledgeSource = (typeof ASSISTANT_KNOWLEDGE_BASE)[number] & {
+  relevance: number;
+};
+
+interface ProductSearchDoc {
+  _id: Types.ObjectId;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+}
+
+interface RetrievalOutput {
+  sources: ScoredKnowledgeSource[];
+  suggestedProducts: SuggestedProduct[];
+}
+
+const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+
+const tokenize = (value: string): string[] =>
+  value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .filter((token) => token.length >= 2);
+
+const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const scoreKnowledge = (queryTokens: string[], keywords: string[]): number => {
+  const keywordTokens = keywords.flatMap((keyword) => tokenize(keyword));
+  const keywordSet = new Set(keywordTokens);
+  const overlap = queryTokens.filter((token) => keywordSet.has(token)).length;
+  return overlap;
+};
+
+const retrieveKnowledge = (query: string): ScoredKnowledgeSource[] => {
+  const queryTokens = tokenize(query);
+
+  const scored = ASSISTANT_KNOWLEDGE_BASE.map((source) => ({
+    ...source,
+    relevance: scoreKnowledge(queryTokens, source.keywords)
+  }))
+    .filter((source) => source.relevance > 0)
+    .sort((a, b) => b.relevance - a.relevance)
+    .slice(0, 4);
+
+  if (scored.length > 0) {
+    return scored;
   }
 
-  if (normalized.includes("coat") || normalized.includes("outerwear")) {
-    return "For outerwear, choose a tailored silhouette in charcoal or navy so it layers easily across your wardrobe.";
+  return ASSISTANT_KNOWLEDGE_BASE.slice(0, 3).map((source) => ({
+    ...source,
+    relevance: 1
+  }));
+};
+
+const retrieveProducts = async (query: string): Promise<SuggestedProduct[]> => {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return [];
   }
 
-  if (normalized.includes("casual")) {
-    return "For a refined casual look, pair knitwear with structured trousers and keep your palette to two main tones.";
+  const keywordTokens = tokenize(trimmed).slice(0, 8);
+  const regex = keywordTokens.length
+    ? new RegExp(keywordTokens.map((token) => escapeRegex(token)).join("|"), "i")
+    : null;
+
+  let products: ProductSearchDoc[] = [];
+
+  if (trimmed.length >= 3) {
+    try {
+      products = await ProductModel.find({ isActive: true, $text: { $search: trimmed } })
+        .sort({ createdAt: -1 })
+        .limit(6)
+        .select({ _id: 1, name: 1, description: 1, price: 1, imageUrl: 1 })
+        .lean<ProductSearchDoc[]>();
+    } catch {
+      products = [];
+    }
   }
 
-  return "Great choice. Share your preferred occasion, fit, and color palette and I can suggest a focused set of pieces.";
+  if (products.length === 0 && regex) {
+    products = await ProductModel.find({
+      isActive: true,
+      $or: [{ name: regex }, { description: regex }]
+    })
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .select({ _id: 1, name: 1, description: 1, price: 1, imageUrl: 1 })
+      .lean<ProductSearchDoc[]>();
+  }
+
+  if (products.length === 0) {
+    products = await ProductModel.find({ isActive: true })
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .select({ _id: 1, name: 1, description: 1, price: 1, imageUrl: 1 })
+      .lean<ProductSearchDoc[]>();
+  }
+
+  const variants = await ProductVariantModel.find({
+    productId: { $in: products.map((product) => product._id) }
+  }).lean();
+
+  const stockByProductId = new Map<string, boolean>();
+  for (const variant of variants) {
+    const key = variant.productId.toString();
+    const hasStock = (stockByProductId.get(key) ?? false) || variant.stockQuantity > 0;
+    stockByProductId.set(key, hasStock);
+  }
+
+  return products.map((product) => ({
+    _id: product._id.toString(),
+    name: product.name,
+    description: product.description,
+    price: product.price,
+    imageUrl: product.imageUrl,
+    inStock: stockByProductId.get(product._id.toString()) ?? false,
+    url: `/product/${product._id.toString()}`
+  }));
+};
+
+const runRetrieval = async (query: string): Promise<RetrievalOutput> => {
+  const sources = retrieveKnowledge(query);
+  const suggestedProducts = await retrieveProducts(query);
+  return { sources, suggestedProducts };
+};
+
+const buildPrompt = (
+  query: string,
+  sources: ScoredKnowledgeSource[],
+  suggestedProducts: SuggestedProduct[]
+) => {
+  const sourceContext = sources
+    .map(
+      (source, index) =>
+        `${index + 1}. [${source.kind}] ${source.title} | URL: ${source.url}\n${source.content}`
+    )
+    .join("\n\n");
+
+  const productContext = suggestedProducts.length
+    ? suggestedProducts
+        .map(
+          (product, index) =>
+            `${index + 1}. ${product.name} | Price: ${product.price} | In stock: ${product.inStock ? "yes" : "no"} | URL: ${product.url} | Notes: ${product.description}`
+        )
+        .join("\n")
+    : "No specific product matched strongly. You may suggest browsing /shop.";
+
+  return `
+You are the friendly Aurelia Home AI Stylist assistant. Respond in Vietnamese.
+
+Rules:
+- VERY SHORT replies (2-3 sentences max). Be direct and natural, like texting a friend.
+- Use casual, friendly Vietnamese (có thể dùng từ thân thiết như "bạn", "mình").
+- If you suggest products, show 2-3 max with prices and links only.
+- Reply naturally - don't be robotic. Skip unnecessary formatting.
+- For policies you don't know, just say "Mình không chắc, vào /contact nhé!" instead of long explanations.
+
+Knowledge context:
+${sourceContext}
+
+Product context:
+${productContext}
+
+User question:
+${query}
+`.trim();
+};
+
+const generateGeminiReply = async (
+  query: string,
+  sources: ScoredKnowledgeSource[],
+  suggestedProducts: SuggestedProduct[]
+): Promise<string | null> => {
+  if (!env.GEMINI_API_KEY) {
+    console.warn('GEMINI_API_KEY is not set; falling back to non-AI response mode.');
+    return null;
+  }
+
+  const prompt = buildPrompt(query, sources, suggestedProducts);
+
+  try {
+    const response = await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(env.GEMINI_API_KEY)}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.35,
+          maxOutputTokens: 200,
+          topP: 0.9
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const statusText = response.status === 429 ? "Quota exceeded" : response.statusText;
+      const errorText = await response.text();
+      console.error("Gemini API error:", response.status, statusText, errorText);
+
+      if (response.status === 429) {
+        // Quota exceeded / rate limited
+        return "Dịch vụ AI đang quá tải hoặc đã hết hạn mức (quota); vui lòng thử lại sau vài phút.";
+      }
+
+      return null;
+    }
+
+    const payload = (await response.json()) as {
+      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+    };
+
+    const text = payload.candidates?.[0]?.content?.parts
+      ?.map((part) => part.text ?? "")
+      .join("\n")
+      .trim();
+
+    return text || null;
+  } catch (error) {
+    console.error("Gemini request failed", error);
+    return null;
+  }
+};
+
+const buildFallbackReply = (
+  query: string,
+  sources: ScoredKnowledgeSource[],
+  suggestedProducts: SuggestedProduct[]
+): string => {
+  const parts = [];
+
+  // Add helpful info from knowledge base
+  if (sources.length > 0) {
+    parts.push(
+      "Bạn có thể tham khảo:\n" +
+        sources
+          .slice(0, 2)
+          .map((s) => `• ${s.title}: ${s.url}`)
+          .join("\n")
+    );
+  }
+
+  // Add product suggestions if relevant
+  if (suggestedProducts.length > 0) {
+    parts.push(
+      "Sản phẩm đó:\n" +
+        suggestedProducts
+          .slice(0, 2)
+          .map((p) => `• ${p.name} (${p.price.toLocaleString()}) → ${p.url}`)
+          .join("\n")
+    );
+  }
+
+  // Default response
+  if (parts.length === 0) {
+    parts.push("Mình không hiểu rõ. Vào /contact để được hỗ trợ nhé! 😊");
+  } else {
+    parts.push("Có câu hỏi khác không?");
+  }
+
+  return parts.join("\n\n");
 };
 
 export const sendChatMessage = async (input: SendMessageInput) => {
@@ -38,7 +309,16 @@ export const sendChatMessage = async (input: SendMessageInput) => {
     throw new ApiError(400, "Invalid conversation id");
   }
 
-  if (!conversationId) {
+  if (conversationId) {
+    const existingConversation = await AiConversationModel.findById(conversationId).lean();
+    if (!existingConversation) {
+      throw new ApiError(404, "Conversation not found");
+    }
+
+    if (input.userId && existingConversation.userId.toString() !== input.userId) {
+      throw new ApiError(403, "Conversation does not belong to current user");
+    }
+  } else {
     const conversation = await AiConversationModel.create({
       userId: input.userId && Types.ObjectId.isValid(input.userId) ? input.userId : new Types.ObjectId(),
       title: "Styling session"
@@ -52,7 +332,10 @@ export const sendChatMessage = async (input: SendMessageInput) => {
     text: input.message.trim()
   });
 
-  const replyText = buildAssistantReply(input.message);
+  const retrieval = await runRetrieval(input.message);
+  const replyText =
+    (await generateGeminiReply(input.message, retrieval.sources, retrieval.suggestedProducts)) ??
+    buildFallbackReply(input.message, retrieval.sources, retrieval.suggestedProducts);
 
   const aiMessage = await AiMessageModel.create({
     conversationId,
@@ -63,6 +346,14 @@ export const sendChatMessage = async (input: SendMessageInput) => {
   return {
     conversationId,
     userMessage,
-    aiMessage
+    aiMessage,
+    sources: retrieval.sources.map((source) => ({
+      id: source.id,
+      title: source.title,
+      kind: source.kind,
+      url: source.url,
+      snippet: source.snippet
+    })),
+    suggestedProducts: retrieval.suggestedProducts
   };
 };

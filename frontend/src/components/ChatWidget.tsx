@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MessageSquare, X, Send } from 'lucide-react';
 import { ChatMessage } from '../types';
 import { api } from '../lib/api';
@@ -15,6 +15,12 @@ export default function ChatWidget() {
   ]);
   const [input, setInput] = useState('');
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('aurelia:open-chat', handleOpen);
+    return () => window.removeEventListener('aurelia:open-chat', handleOpen);
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim()) return;
