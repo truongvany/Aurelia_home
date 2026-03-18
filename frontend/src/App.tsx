@@ -17,6 +17,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Profile from './pages/Profile';
 import OrderDetail from './pages/OrderDetail';
+import WishlistPage from './pages/WishlistPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
@@ -50,6 +51,7 @@ function AppRoutes() {
           </Route>
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/profile" element={<ProtectedRoute roles={['customer']} />}>
             <Route index element={<Profile />} />
           </Route>

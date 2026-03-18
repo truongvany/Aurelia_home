@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Product } from '../types';
-import { ChevronRight, Heart, Share2, Truck, RefreshCw, ArrowRight } from 'lucide-react';
+import { ChevronRight, Heart, Share2, Truck, RefreshCw, ArrowRight, X } from 'lucide-react';
 import { api } from '../lib/api';
 import { formatVND } from '../utils/currency';
+import { isProductWishlisted, toggleWishlistProduct } from '../utils/wishlist';
+import sizeGuideTemplate from '../assets/images/size-guide-template.svg';
 
 type ProductDetail = Product & {
   categorySlug: string;
+  sizeGuideImageUrl: string;
   images: Array<{ _id: string; url: string; alt: string; sortOrder: number }>;
   variants: Array<{ _id: string; size: string; color: string; sku: string; stockQuantity: number }>;
 };
@@ -41,6 +44,8 @@ export default function PDP() {
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -112,6 +117,30 @@ export default function PDP() {
     setSelectedImage(galleryImages[0].url);
   }, [galleryImages]);
 
+  useEffect(() => {
+    if (!id) {
+      setIsWishlisted(false);
+      return;
+    }
+
+    setIsWishlisted(isProductWishlisted(id));
+  }, [id]);
+
+  useEffect(() => {
+    if (!isSizeGuideOpen) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsSizeGuideOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isSizeGuideOpen]);
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center items-center min-h-[60vh]">
@@ -129,6 +158,9 @@ export default function PDP() {
   const selectedVariant = product.variants.find(
     (variant) => variant.size === selectedSize && variant.color === selectedColor
   );
+  const sizeGuidePreviewUrl = product.sizeGuideImageUrl
+    ? toAbsoluteImageUrl(product.sizeGuideImageUrl)
+    : sizeGuideTemplate;
 
   const handleAddToCart = async () => {
     if (!selectedVariant) {
@@ -186,6 +218,11 @@ export default function PDP() {
     }
   };
 
+  const handleToggleWishlist = () => {
+    const next = toggleWishlistProduct(product._id);
+    setIsWishlisted(next);
+  };
+
   return (
     <div className="bg-white text-slate-900">
       {/* Breadcrumbs */}
@@ -236,7 +273,7 @@ export default function PDP() {
           <div className="lg:w-5/12 flex flex-col">
             <div className="flex justify-between items-start mb-2">
               <h1 className="font-serif text-3xl md:text-[2.5rem] leading-tight text-charcoal font-semibold">{product.name}</h1>
-              <button className="p-2 text-slate-400 hover:text-gold transition-colors">
+              <button className="p-2 rounded-full border border-slate-200 text-slate-400 hover:text-gold hover:border-slate-300 transition-colors">
                 <Share2 className="h-5 w-5" />
               </button>
             </div>
@@ -286,7 +323,13 @@ export default function PDP() {
             <div className="mb-7">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs font-semibold text-charcoal">Kích thước: {selectedSize || ''}</span>
-                <button className="text-xs text-slate-500 underline hover:text-charcoal">Hướng dẫn chọn kích thước</button>
+                <button
+                  type="button"
+                  onClick={() => setIsSizeGuideOpen(true)}
+                  className="text-xs text-slate-500 underline hover:text-charcoal"
+                >
+                  Hướng dẫn chọn kích thước
+                </button>
               </div>
               <div className="grid grid-cols-5 gap-1.5">
                 {product.sizes.map(size => (
@@ -306,41 +349,43 @@ export default function PDP() {
             </div>
 
             {/* Actions */}
-            <div className="space-y-3 mb-8">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-slate-700">Số lượng</span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="w-10 h-10 border border-slate-300 text-slate-600 hover:bg-slate-100"
-                  disabled={!product.inStock || isAddingToCart || isBuyingNow}
-                >
-                  −
-                </button>
-                <input
-                  type="number"
-                  value={quantity}
-                  min={1}
-                  max={selectedVariant ? selectedVariant.stockQuantity : undefined}
-                  onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
-                  className="w-16 h-10 border-t border-b border-slate-300 text-center text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={() => setQuantity((q) => q + 1)}
-                  className="w-10 h-10 border border-slate-300 text-slate-600 hover:bg-slate-100"
-                  disabled={!product.inStock || isAddingToCart || isBuyingNow}
-                >
-                  +
-                </button>
+            <div className="space-y-3 mb-8 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 md:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xs uppercase tracking-[0.16em] font-semibold text-slate-700">Số lượng</span>
+                <div className="flex items-center gap-1.5 rounded-full border border-slate-300 bg-white p-1">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="h-8 w-8 rounded-full border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors"
+                    disabled={!product.inStock || isAddingToCart || isBuyingNow}
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    value={quantity}
+                    min={1}
+                    max={selectedVariant ? selectedVariant.stockQuantity : undefined}
+                    onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
+                    className="w-14 h-8 bg-transparent text-center text-sm font-semibold text-slate-800 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => q + 1)}
+                    className="h-8 w-8 rounded-full border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors"
+                    disabled={!product.inStock || isAddingToCart || isBuyingNow}
+                  >
+                    +
+                  </button>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 <button
                   onClick={handleAddToCart}
-                  className={`py-3.5 font-medium uppercase tracking-[0.2em] text-sm transition-all duration-300 ${
+                  className={`h-11 rounded-full px-4 font-semibold uppercase tracking-[0.18em] text-[11px] transition-all duration-300 ${
                     product.inStock
-                      ? 'bg-charcoal text-white hover:bg-gold'
+                      ? 'bg-charcoal text-white hover:bg-gold shadow-sm hover:shadow-md'
                       : 'bg-slate-200 text-slate-500 cursor-not-allowed'
                   }`}
                   disabled={!product.inStock || isAddingToCart}
@@ -349,7 +394,7 @@ export default function PDP() {
                 </button>
                 <button
                   onClick={handleBuyNow}
-                  className={`py-3.5 font-medium uppercase tracking-[0.2em] text-sm transition-all duration-300 ${
+                  className={`h-11 rounded-full px-4 font-semibold uppercase tracking-[0.18em] text-[11px] transition-all duration-300 ${
                     product.inStock
                       ? 'border border-charcoal text-charcoal hover:bg-charcoal hover:text-white'
                       : 'border border-slate-200 text-slate-400 cursor-not-allowed'
@@ -358,8 +403,18 @@ export default function PDP() {
                 >
                   {product.inStock ? (isBuyingNow ? 'Đang xử lý...' : 'Mua ngay') : 'Không khả dụng'}
                 </button>
-                <button className="p-3.5 border border-slate-300 text-charcoal hover:border-charcoal hover:bg-slate-50 transition-colors">
-                  <Heart className="h-5 w-5" />
+                <button
+                  type="button"
+                  onClick={handleToggleWishlist}
+                  className={`h-11 rounded-full border px-4 transition-colors flex items-center justify-center gap-2 ${
+                    isWishlisted
+                      ? 'border-rose-300 bg-rose-50 text-rose-600'
+                      : 'border-slate-300 text-charcoal hover:border-charcoal hover:bg-white'
+                  }`}
+                  aria-label={isWishlisted ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích'}
+                >
+                  <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`} />
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">Yêu thích</span>
                 </button>
               </div>
             </div>
@@ -424,6 +479,38 @@ export default function PDP() {
           )}
         </section>
       </div>
+
+      {isSizeGuideOpen && (
+        <div className="fixed inset-0 z-[70] bg-slate-900/70 backdrop-blur-sm p-4 md:p-6" role="dialog" aria-modal="true">
+          <div className="max-w-4xl mx-auto h-full flex items-center justify-center">
+            <div className="w-full max-h-full bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
+              <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-slate-200">
+                <div>
+                  <h3 className="font-semibold text-slate-900">Hướng dẫn chọn kích thước</h3>
+                  <p className="text-xs text-slate-500">Đối chiếu số đo của bạn với bảng size trước khi đặt hàng.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsSizeGuideOpen(false)}
+                  className="h-9 w-9 rounded-full border border-slate-300 text-slate-600 hover:bg-slate-100 transition-colors flex items-center justify-center"
+                  aria-label="Đóng"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="p-3 md:p-5 bg-slate-50 max-h-[80vh] overflow-auto">
+                <img
+                  src={sizeGuidePreviewUrl}
+                  alt="Bảng hướng dẫn chọn kích thước"
+                  className="w-full h-auto rounded-xl border border-slate-200 bg-white"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, Check, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Upload, Check, AlertCircle, Plus, Trash2, Ruler } from 'lucide-react';
 import { api } from '../../lib/api';
 
 const formatVND = (value: string | number): string => {
@@ -31,10 +31,26 @@ const toAbsoluteImageUrl = (url?: string | null) => {
   return `${API_ORIGIN}${normalized}`;
 };
 
+type VariantForm = {
+  _id?: string;
+  sku: string;
+  size: string;
+  color: string;
+  stockQuantity: string;
+  priceAdjustment: string;
+};
+
+const createEmptyVariant = (): VariantForm => ({
+  sku: '',
+  size: 'M',
+  color: '#1e293b',
+  stockQuantity: '0',
+  priceAdjustment: '0'
+});
+
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  // "new" is a static route (no id param), so `id` may be undefined.
   const isNew = !id || id === 'new';
 
   const [categories, setCategories] = useState<Array<{ _id: string; name: string; slug: string }>>([]);
@@ -43,15 +59,14 @@ export default function ProductDetail() {
     description: '',
     categoryId: '',
     price: '',
-    stock: '',
-    sku: '',
-    size: 'M',
-    color: '#1e293b',
     imageUrl: ''
   });
+  const [variants, setVariants] = useState<VariantForm[]>([createEmptyVariant()]);
   const [galleryInput, setGalleryInput] = useState('');
   const [existingImages, setExistingImages] = useState<Array<{ _id: string; url: string; alt: string; sortOrder: number }>>([]);
   const [files, setFiles] = useState<File[]>([]);
+  const [sizeGuideImageUrl, setSizeGuideImageUrl] = useState('');
+  const [sizeGuideFile, setSizeGuideFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(!isNew);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,12 +76,12 @@ export default function ProductDetail() {
       .getCategories()
       .then((data) => {
         setCategories(data);
-        if (!isNew && data.length > 0 && !form.categoryId) {
+        if (isNew && data.length > 0 && !form.categoryId) {
           setForm((prev) => ({ ...prev, categoryId: data[0]._id }));
         }
       })
       .catch(() => setCategories([]));
-  }, [isNew]);
+  }, [isNew, form.categoryId]);
 
   useEffect(() => {
     if (isNew) {
@@ -79,24 +94,48 @@ export default function ProductDetail() {
     api
       .getAdminProductById(id!)
       .then((detail) => {
-        const firstVariant = detail.variants[0];
         setExistingImages(detail.images ?? []);
         setGalleryInput((detail.images ?? []).map((image) => image.url).join('\n'));
+        setSizeGuideImageUrl(detail.sizeGuideImageUrl ?? '');
+
+        const loadedVariants = (detail.variants ?? []).map((variant) => ({
+          _id: variant._id,
+          sku: variant.sku ?? '',
+          size: variant.size || 'M',
+          color: variant.color || '#1e293b',
+          stockQuantity: String(variant.stockQuantity ?? 0),
+          priceAdjustment: String(variant.priceAdjustment ?? 0)
+        }));
+
+        setVariants(loadedVariants.length > 0 ? loadedVariants : [createEmptyVariant()]);
         setForm({
           name: detail.name,
           description: detail.description,
           categoryId: detail.category?._id ?? '',
           price: String(detail.price),
-          stock: String(firstVariant?.stockQuantity ?? 0),
-          sku: firstVariant?.sku ?? '',
-          size: firstVariant?.size ?? 'M',
-          color: firstVariant?.color ?? '#1e293b',
           imageUrl: detail.imageUrl ?? ''
         });
       })
       .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Unable to load product'))
       .finally(() => setIsLoading(false));
   }, [id, isNew]);
+
+  const handleVariantChange = (index: number, key: keyof VariantForm, value: string) => {
+    setVariants((prev) => prev.map((item, idx) => (idx === index ? { ...item, [key]: value } : item)));
+  };
+
+  const addVariant = () => {
+    setVariants((prev) => [...prev, createEmptyVariant()]);
+  };
+
+  const removeVariant = (index: number) => {
+    setVariants((prev) => {
+      if (prev.length === 1) {
+        return prev;
+      }
+      return prev.filter((_, idx) => idx !== index);
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,14 +151,31 @@ export default function ProductDetail() {
     }
 
     const price = Number(form.price);
-    const stock = Number(form.stock);
     if (!Number.isFinite(price) || price < 0) {
       setError('Giá phải là số hợp lệ và không âm');
       return;
     }
 
-    if (!Number.isFinite(stock) || stock < 0) {
-      setError('Số lượng tồn kho phải là số hợp lệ và không âm');
+    const normalizedVariants = variants
+      .map((variant) => ({
+        sku: variant.sku.trim(),
+        size: variant.size.trim(),
+        color: variant.color.trim(),
+        stockQuantity: Number(variant.stockQuantity),
+        priceAdjustment: Number(variant.priceAdjustment || 0)
+      }))
+      .filter((variant) => variant.sku.length > 0);
+
+    if (normalizedVariants.length === 0) {
+      setError('Cần ít nhất 1 biến thể có SKU hợp lệ');
+      return;
+    }
+
+    const hasInvalidStock = normalizedVariants.some(
+      (variant) => !Number.isFinite(variant.stockQuantity) || variant.stockQuantity < 0
+    );
+    if (hasInvalidStock) {
+      setError('Tồn kho của biến thể phải là số hợp lệ và không âm');
       return;
     }
 
@@ -139,22 +195,19 @@ export default function ProductDetail() {
         price,
         imageUrl: form.imageUrl || undefined,
         imageUrls,
-        variant: {
-          sku: form.sku,
-          stockQuantity: stock,
-          size: form.size,
-          color: form.color
-        }
+        variants: normalizedVariants
       };
 
-      const product = isNew
-        ? await api.createAdminProduct(payload)
-        : await api.updateAdminProduct(id!, payload);
+      const product = isNew ? await api.createAdminProduct(payload) : await api.updateAdminProduct(id!, payload);
 
       if (files.length > 0) {
         for (const nextFile of files) {
           await api.uploadAdminProductImage(product._id, nextFile, form.name);
         }
+      }
+
+      if (sizeGuideFile) {
+        await api.uploadAdminProductSizeGuideImage(product._id, sizeGuideFile);
       }
 
       navigate('/admin/products');
@@ -177,7 +230,7 @@ export default function ProductDetail() {
         </Link>
         <h2 className="text-3xl font-bold text-slate-900">{isNew ? 'Thêm Sản Phẩm Mới' : 'Chỉnh Sửa Sản Phẩm'}</h2>
       </div>
-      
+
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
           <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -186,18 +239,16 @@ export default function ProductDetail() {
       )}
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Form */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Thông Tin Cơ Bản */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
             <h3 className="text-lg font-semibold text-slate-900">Thông Tin Cơ Bản</h3>
-            
+
             <div>
               <label className="block text-sm font-medium text-slate-900 mb-2">Tên Sản Phẩm *</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={form.name}
-                onChange={(e) => setForm({...form, name: e.target.value})}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="VD: Giày Thể Thao Nam"
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               />
@@ -205,9 +256,9 @@ export default function ProductDetail() {
 
             <div>
               <label className="block text-sm font-medium text-slate-900 mb-2">Mô Tả</label>
-              <textarea 
+              <textarea
                 value={form.description}
-                onChange={(e) => setForm({...form, description: e.target.value})}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
                 rows={4}
                 placeholder="Nhập mô tả chi tiết về sản phẩm..."
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors resize-none"
@@ -217,150 +268,124 @@ export default function ProductDetail() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-900 mb-2">Danh Mục *</label>
-                <select 
+                <select
                   value={form.categoryId}
-                  onChange={(e) => setForm({...form, categoryId: e.target.value})}
+                  onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
                   className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors bg-white"
                 >
                   <option value="">-- Chọn danh mục --</option>
                   {categories.map((category) => (
-                    <option key={category._id} value={category._id}>{category.name}</option>
+                    <option key={category._id} value={category._id}>
+                      {category.name}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-900 mb-2">SKU</label>
-                <input 
-                  type="text" 
-                  value={form.sku}
-                  onChange={(e) => setForm({...form, sku: e.target.value})}
-                  placeholder="VD: SKU-001"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Giá Và Tồn Kho */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-slate-900">Giá Và Tồn Kho</h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
                 <label className="block text-sm font-medium text-slate-900 mb-2">Giá (VND) *</label>
-                <div className="flex items-center space-x-2">
-                  <input 
-                    type="number" 
-                    value={form.price}
-                    onChange={(e) => setForm({...form, price: e.target.value})}
-                    placeholder="0"
-                    min="0"
-                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  />
-                </div>
-                {form.price && Number(form.price) > 0 && (
-                  <p className="text-xs text-slate-500 mt-2">Hiển thị: {formatVND(form.price)}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-900 mb-2">Số Lượng Tồn Kho *</label>
-                <input 
-                  type="number" 
-                  value={form.stock}
-                  onChange={(e) => setForm({...form, stock: e.target.value})}
+                <input
+                  type="number"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
                   placeholder="0"
                   min="0"
                   className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                 />
+                {form.price && Number(form.price) > 0 && (
+                  <p className="text-xs text-slate-500 mt-2">Hiển thị: {formatVND(form.price)}</p>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Biến Thể Sản Phẩm */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-slate-900">Biến Thể Sản Phẩm</h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-900 mb-3">Kích Cỡ</label>
-                
-                {/* Size Presets */}
-                <div className="space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-slate-900">Biến Thể Sản Phẩm (Màu / Size)</h3>
+              <button
+                type="button"
+                onClick={addVariant}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold uppercase tracking-[0.12em] hover:bg-blue-600 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                Thêm biến thể
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {variants.map((variant, index) => (
+                <div key={`${variant._id ?? 'new'}-${index}`} className="rounded-xl border border-slate-200 p-4 bg-slate-50/60 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <p className="text-xs uppercase tracking-[0.18em] font-semibold text-slate-700">Biến thể {index + 1}</p>
+                    {variants.length > 1 && (
                       <button
-                        key={size}
                         type="button"
-                        onClick={() => setForm({ ...form, size })}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                          form.size === size
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
+                        onClick={() => removeVariant(index)}
+                        className="inline-flex items-center gap-1 text-xs text-rose-600 hover:text-rose-700"
                       >
-                        {size}
+                        <Trash2 className="h-4 w-4" />
+                        Xóa
                       </button>
-                    ))}
+                    )}
                   </div>
-                  
-                  <div className="relative">
-                    <p className="text-xs text-slate-500 mb-2">Số kích cỡ:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'].map((size) => (
-                        <button
-                          key={size}
-                          type="button"
-                          onClick={() => setForm({ ...form, size })}
-                          className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
-                            form.size === size
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                          }`}
-                        >
-                          {size}
-                        </button>
-                      ))}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-slate-700 mb-1.5">SKU *</label>
+                      <input
+                        type="text"
+                        value={variant.sku}
+                        onChange={(e) => handleVariantChange(index, 'sku', e.target.value)}
+                        placeholder="VD: SKU-001-BL-42"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-700 mb-1.5">Kích cỡ</label>
+                      <input
+                        type="text"
+                        value={variant.size}
+                        onChange={(e) => handleVariantChange(index, 'size', e.target.value)}
+                        placeholder="VD: M, 42, One Size"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-700 mb-1.5">Màu sắc</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={variant.color || '#1e293b'}
+                          onChange={(e) => handleVariantChange(index, 'color', e.target.value)}
+                          className="h-9 w-12 rounded border border-slate-300 cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={variant.color}
+                          onChange={(e) => handleVariantChange(index, 'color', e.target.value)}
+                          placeholder="#1e293b"
+                          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-700 mb-1.5">Tồn kho</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={variant.stockQuantity}
+                        onChange={(e) => handleVariantChange(index, 'stockQuantity', e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
                     </div>
                   </div>
                 </div>
-                
-                {/* Custom Size Input */}
-                <div className="mt-3 pt-3 border-t border-slate-200">
-                  <label className="block text-xs font-medium text-slate-600 mb-2">Hoặc nhập tùy chỉnh:</label>
-                  <input
-                    type="text"
-                    value={form.size}
-                    onChange={(e) => setForm({ ...form, size: e.target.value })}
-                    placeholder="VD: Freesize, One Size"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-900 mb-2">Màu Sắc</label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="color"
-                    value={form.color}
-                    onChange={(e) => setForm({ ...form, color: e.target.value })}
-                    className="h-10 w-14 rounded-lg border border-slate-300 cursor-pointer"
-                  />
-                  <input
-                    type="text"
-                    value={form.color}
-                    onChange={(e) => setForm({ ...form, color: e.target.value })}
-                    placeholder="#1e293b"
-                    className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm"
-                  />
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* Hình Ảnh */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
             <h3 className="text-lg font-semibold text-slate-900">Hình Ảnh Sản Phẩm</h3>
-            
+
             <div>
               <label className="block text-sm font-medium text-slate-900 mb-2">URL Hình Ảnh</label>
               <input
@@ -381,7 +406,6 @@ export default function ProductDetail() {
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors resize-y text-sm"
                 placeholder="https://example.com/image-1.jpg&#10;https://example.com/image-2.jpg"
               />
-              <p className="text-xs text-slate-500 mt-2">Những ảnh này sẽ hiển thị ở cột thumbnail bên trái trang chi tiết sản phẩm.</p>
             </div>
 
             {existingImages.length > 0 && (
@@ -421,14 +445,50 @@ export default function ProductDetail() {
               />
             </label>
           </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Ruler className="h-5 w-5 text-slate-700" />
+              <h3 className="text-lg font-semibold text-slate-900">Ảnh Hướng Dẫn Chọn Size</h3>
+            </div>
+
+            {sizeGuideImageUrl && !sizeGuideFile && (
+              <div className="rounded-lg overflow-hidden border border-slate-200">
+                <img
+                  src={toAbsoluteImageUrl(sizeGuideImageUrl)}
+                  alt="Size guide"
+                  className="w-full max-h-[420px] object-contain bg-slate-50"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            )}
+
+            {sizeGuideFile && (
+              <div className="rounded-lg overflow-hidden border border-slate-200 p-3 bg-slate-50">
+                <p className="text-xs text-slate-600 mb-2">Ảnh sẽ upload khi bấm lưu:</p>
+                <p className="text-sm font-medium text-slate-900">{sizeGuideFile.name}</p>
+              </div>
+            )}
+
+            <label className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-slate-400 hover:bg-slate-50 transition-colors cursor-pointer block">
+              <Upload className="h-7 w-7 text-slate-400 mx-auto mb-2" />
+              <p className="text-sm font-medium text-slate-900">Tải lên ảnh bảng size chuyên nghiệp</p>
+              <p className="text-xs text-slate-500 mt-1">Ảnh này sẽ hiển thị trong popup "Hướng dẫn chọn kích thước" ở trang chi tiết sản phẩm.</p>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => setSizeGuideFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+          </div>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 sticky top-24">
             <h3 className="font-semibold text-slate-900 mb-4">Công Bố</h3>
             <div className="space-y-3">
-              <button 
+              <button
                 type="submit"
                 disabled={isSaving}
                 className="w-full bg-blue-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-400 transition-colors flex items-center justify-center space-x-2"
@@ -436,7 +496,7 @@ export default function ProductDetail() {
                 {isSaving && <div className="animate-spin h-4 w-4 border-2 border-white border-t-blue-400 rounded-full"></div>}
                 <span>{isSaving ? 'Đang Lưu...' : isNew ? 'Tạo Sản Phẩm' : 'Lưu Thay Đổi'}</span>
               </button>
-              <Link 
+              <Link
                 to="/admin/products"
                 className="w-full block text-center text-slate-700 px-4 py-2.5 rounded-lg border border-slate-300 font-medium hover:bg-slate-50 transition-colors"
               >
@@ -445,15 +505,12 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* Thông Tin Bổ Sung */}
           <div className="bg-blue-50 rounded-xl border border-blue-200 shadow-sm p-4">
             <h4 className="text-sm font-semibold text-blue-900 mb-3">Hướng Dẫn</h4>
             <ul className="text-xs text-blue-800 space-y-2">
-              <li>• Tên sản phẩm là bắt buộc</li>
-              <li>• Chọn danh mục để phân loại</li>
-              <li>• Nhập giá bằng VND</li>
-              <li>• Thêm hình ảnh để tăng bán hàng</li>
-              <li>• SKU giúp quản lý hàng tồn kho</li>
+              <li>• Mỗi biến thể cần SKU riêng để quản lý tồn kho chính xác</li>
+              <li>• Có thể thêm nhiều màu và nhiều size trong cùng sản phẩm</li>
+              <li>• Upload ảnh bảng size để popup hướng dẫn ở trang chi tiết hiển thị chuyên nghiệp</li>
             </ul>
           </div>
         </div>

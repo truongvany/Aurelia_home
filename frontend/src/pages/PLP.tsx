@@ -202,18 +202,33 @@ export default function PLP() {
                 </button>
                 {openSections.category && (
                   <div className="space-y-1">
-                    {[{ slug: 'all', name: 'Tất cả' }, ...categories].map((cat) => (
-                      <button
-                        key={cat.slug}
-                        type="button"
-                        onClick={() => updateCategory(cat.slug)}
-                        className={`block w-full py-2 text-left text-sm uppercase tracking-[0.12em] transition-colors ${
-                          selectedCategory === cat.slug ? 'text-slate-950 font-semibold bg-slate-200/70' : 'text-slate-500 hover:text-slate-900'
-                        }`}
-                      >
-                        {cat.name}
-                      </button>
-                    ))}
+                    {[{ slug: 'all', name: 'Tất cả' }, ...categories].map((cat) => {
+                      const isSelected = selectedCategory === cat.slug;
+
+                      return (
+                        <button
+                          key={cat.slug}
+                          type="button"
+                          role="radio"
+                          aria-checked={isSelected}
+                          onClick={() => updateCategory(cat.slug)}
+                          className={`group flex items-center gap-3 w-full py-2 text-left text-sm uppercase tracking-[0.12em] transition-colors rounded-md ${
+                            isSelected
+                              ? 'text-slate-950 font-semibold bg-slate-200/70'
+                              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                          }`}
+                        >
+                          <span
+                            className={`flex items-center justify-center w-4 h-4 rounded-full border transition-colors ${
+                              isSelected ? 'border-slate-900 bg-slate-900' : 'border-slate-400 bg-white group-hover:border-slate-900'
+                            }`}
+                          >
+                            {isSelected && <span className="w-2 h-2 rounded-full bg-white" />}
+                          </span>
+                          <span>{cat.name}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>

@@ -108,6 +108,7 @@ export const getProductById = async (id: string) => {
     category: category?.name ?? "Uncategorized",
     categorySlug: category?.slug ?? "",
     imageUrl: product.imageUrl,
+    sizeGuideImageUrl: product.sizeGuideImageUrl ?? "",
     images: imageGallery,
     sizes,
     colors,

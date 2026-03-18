@@ -1,0 +1,47 @@
+<svg width="1200" height="1600" viewBox="0 0 1200 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="1600" fill="#F8FAFC"/>
+  <rect x="70" y="70" width="1060" height="1460" rx="28" fill="white" stroke="#E2E8F0" stroke-width="4"/>
+  <text x="120" y="170" font-family="Georgia, serif" font-size="58" fill="#0F172A" font-weight="700">SIZE GUIDE</text>
+  <text x="120" y="218" font-family="Arial, sans-serif" font-size="28" fill="#64748B">Aurelia Home - Bảng quy đổi kích thước</text>
+
+  <rect x="120" y="280" width="960" height="70" rx="12" fill="#0F172A"/>
+  <text x="170" y="325" font-family="Arial, sans-serif" font-size="28" fill="white" font-weight="700">Size</text>
+  <text x="360" y="325" font-family="Arial, sans-serif" font-size="28" fill="white" font-weight="700">Ngực (cm)</text>
+  <text x="580" y="325" font-family="Arial, sans-serif" font-size="28" fill="white" font-weight="700">Eo (cm)</text>
+  <text x="770" y="325" font-family="Arial, sans-serif" font-size="28" fill="white" font-weight="700">Hông (cm)</text>
+  <text x="950" y="325" font-family="Arial, sans-serif" font-size="28" fill="white" font-weight="700">Dài áo</text>
+
+  <g font-family="Arial, sans-serif" font-size="30" fill="#0F172A">
+    <rect x="120" y="366" width="960" height="82" fill="#F8FAFC"/>
+    <text x="185" y="418" font-weight="700">S</text><text x="395" y="418">84-88</text><text x="605" y="418">66-70</text><text x="798" y="418">90-94</text><text x="975" y="418">64</text>
+
+    <rect x="120" y="448" width="960" height="82" fill="white"/>
+    <text x="180" y="500" font-weight="700">M</text><text x="395" y="500">89-94</text><text x="605" y="500">71-76</text><text x="798" y="500">95-100</text><text x="975" y="500">66</text>
+
+    <rect x="120" y="530" width="960" height="82" fill="#F8FAFC"/>
+    <text x="185" y="582" font-weight="700">L</text><text x="395" y="582">95-101</text><text x="605" y="582">77-83</text><text x="798" y="582">101-107</text><text x="975" y="582">68</text>
+
+    <rect x="120" y="612" width="960" height="82" fill="white"/>
+    <text x="168" y="664" font-weight="700">XL</text><text x="395" y="664">102-108</text><text x="605" y="664">84-90</text><text x="798" y="664">108-114</text><text x="975" y="664">70</text>
+  </g>
+
+  <rect x="120" y="760" width="460" height="470" rx="20" fill="#F1F5F9" stroke="#CBD5E1"/>
+  <text x="160" y="820" font-family="Georgia, serif" font-size="42" fill="#0F172A" font-weight="700">How To Measure</text>
+  <text x="160" y="880" font-family="Arial, sans-serif" font-size="28" fill="#334155">1. Ngực: Đo vòng lớn nhất quanh ngực.</text>
+  <text x="160" y="935" font-family="Arial, sans-serif" font-size="28" fill="#334155">2. Eo: Đo tại điểm eo nhỏ nhất.</text>
+  <text x="160" y="990" font-family="Arial, sans-serif" font-size="28" fill="#334155">3. Hông: Đo vòng qua phần hông lớn nhất.</text>
+  <text x="160" y="1045" font-family="Arial, sans-serif" font-size="28" fill="#334155">4. Dài áo: Từ vai đến gấu áo.</text>
+
+  <rect x="620" y="760" width="460" height="470" rx="20" fill="#0F172A"/>
+  <circle cx="850" cy="920" r="110" stroke="white" stroke-width="8"/>
+  <line x1="850" y1="810" x2="850" y2="1030" stroke="white" stroke-width="8"/>
+  <line x1="770" y1="870" x2="930" y2="870" stroke="#38BDF8" stroke-width="10"/>
+  <line x1="790" y1="940" x2="910" y2="940" stroke="#22C55E" stroke-width="10"/>
+  <line x1="760" y1="1010" x2="940" y2="1010" stroke="#F59E0B" stroke-width="10"/>
+  <text x="700" y="1125" font-family="Arial, sans-serif" font-size="30" fill="white">Blue: Chest  Green: Waist  Yellow: Hip</text>
+
+  <rect x="120" y="1280" width="960" height="170" rx="16" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="160" y="1340" font-family="Arial, sans-serif" font-size="30" fill="#1E3A8A" font-weight="700">Tip:</text>
+  <text x="240" y="1340" font-family="Arial, sans-serif" font-size="30" fill="#1E3A8A">Nếu số đo nằm giữa 2 size, ưu tiên size lớn hơn để mặc thoải mái.</text>
+  <text x="160" y="1395" font-family="Arial, sans-serif" font-size="26" fill="#1E40AF">Sản phẩm có thể sai số 1-2cm tùy chất liệu và kỹ thuật may.</text>
+</svg>

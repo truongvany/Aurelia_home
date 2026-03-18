@@ -3,7 +3,7 @@ import { ArrowUp, Facebook, Instagram, Mail, MapPin, Phone, Truck, Wallet } from
 
 export default function Footer() {
   return (
-    <footer className="bg-[#f3f3f3] text-[#132033] mt-20">
+    <footer className="bg-[#f3f3f3] text-[#132033]">
       <div className="max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-10 xl:gap-14 pb-12 border-b border-slate-300/70">
           <div className="xl:pr-8 xl:border-r xl:border-slate-300/70">

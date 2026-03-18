@@ -14,6 +14,7 @@ import {
   listAdminCustomers,
   listAdminOrders,
   listAdminProducts,
+  setAdminProductSizeGuideImage,
   updateAdminOrderStatus,
   updateAdminPaymentStatus,
   updateAdminProduct
@@ -25,6 +26,48 @@ const getActorUserId = (req: Request): string => {
     throw new ApiError(401, "Unauthorized");
   }
   return userId;
+};
+
+const parseVariantPayload = (variant: unknown) => {
+  if (!variant || typeof variant !== "object") {
+    return undefined;
+  }
+
+  const value = variant as {
+    sku?: unknown;
+    size?: unknown;
+    color?: unknown;
+    stockQuantity?: unknown;
+    priceAdjustment?: unknown;
+  };
+
+  return {
+    sku: typeof value.sku === "string" ? value.sku : undefined,
+    size: typeof value.size === "string" ? value.size : undefined,
+    color: typeof value.color === "string" ? value.color : undefined,
+    stockQuantity:
+      typeof value.stockQuantity === "number"
+        ? value.stockQuantity
+        : value.stockQuantity
+          ? Number(value.stockQuantity)
+          : undefined,
+    priceAdjustment:
+      typeof value.priceAdjustment === "number"
+        ? value.priceAdjustment
+        : value.priceAdjustment
+          ? Number(value.priceAdjustment)
+          : undefined
+  };
+};
+
+const parseVariantsPayload = (variants: unknown) => {
+  if (!Array.isArray(variants)) {
+    return undefined;
+  }
+
+  return variants
+    .map((item) => parseVariantPayload(item))
+    .filter((item): item is NonNullable<ReturnType<typeof parseVariantPayload>> => Boolean(item));
 };
 
 export const getAdminDashboard = asyncHandler(async (_req: Request, res: Response) => {
@@ -50,8 +93,20 @@ export const getAdminProduct = asyncHandler(async (req: Request, res: Response) 
 });
 
 export const postAdminProduct = asyncHandler(async (req: Request, res: Response) => {
-  const { name, description, price, categoryId, categorySlug, categoryName, imageUrl, imageUrls, isActive, variant } =
-    req.body;
+  const {
+    name,
+    description,
+    price,
+    categoryId,
+    categorySlug,
+    categoryName,
+    imageUrl,
+    sizeGuideImageUrl,
+    imageUrls,
+    isActive,
+    variant,
+    variants
+  } = req.body;
 
   if (!name || typeof name !== "string" || name.trim().length === 0) {
     throw new ApiError(400, "Product name is required and cannot be empty");
@@ -74,36 +129,31 @@ export const postAdminProduct = asyncHandler(async (req: Request, res: Response)
     categorySlug: typeof categorySlug === "string" ? categorySlug : undefined,
     categoryName: typeof categoryName === "string" ? categoryName : undefined,
     imageUrl: typeof imageUrl === "string" ? imageUrl : undefined,
+    sizeGuideImageUrl: typeof sizeGuideImageUrl === "string" ? sizeGuideImageUrl : undefined,
     imageUrls: Array.isArray(imageUrls) ? imageUrls.filter((item) => typeof item === "string") : undefined,
     isActive: typeof isActive === "boolean" ? isActive : true,
-    variant:
-      variant && typeof variant === "object"
-        ? {
-            sku: typeof variant.sku === "string" ? variant.sku : undefined,
-            size: typeof variant.size === "string" ? variant.size : undefined,
-            color: typeof variant.color === "string" ? variant.color : undefined,
-            stockQuantity:
-              typeof variant.stockQuantity === "number"
-                ? variant.stockQuantity
-                : variant.stockQuantity
-                  ? Number(variant.stockQuantity)
-                  : undefined,
-            priceAdjustment:
-              typeof variant.priceAdjustment === "number"
-                ? variant.priceAdjustment
-                : variant.priceAdjustment
-                  ? Number(variant.priceAdjustment)
-                  : undefined
-          }
-        : undefined
+    variant: parseVariantPayload(variant),
+    variants: parseVariantsPayload(variants)
   });
 
   sendSuccess(res, created, "Product created successfully", 201);
 });
 
 export const patchAdminProduct = asyncHandler(async (req: Request, res: Response) => {
-  const { name, description, price, categoryId, categorySlug, categoryName, imageUrl, imageUrls, isActive, variant } =
-    req.body;
+  const {
+    name,
+    description,
+    price,
+    categoryId,
+    categorySlug,
+    categoryName,
+    imageUrl,
+    sizeGuideImageUrl,
+    imageUrls,
+    isActive,
+    variant,
+    variants
+  } = req.body;
 
   const payload = {
     name: typeof name === "string" && name.trim().length > 0 ? name : undefined,
@@ -118,28 +168,11 @@ export const patchAdminProduct = asyncHandler(async (req: Request, res: Response
     categorySlug: typeof categorySlug === "string" ? categorySlug : undefined,
     categoryName: typeof categoryName === "string" ? categoryName : undefined,
     imageUrl: typeof imageUrl === "string" ? imageUrl : undefined,
+    sizeGuideImageUrl: typeof sizeGuideImageUrl === "string" ? sizeGuideImageUrl : undefined,
     imageUrls: Array.isArray(imageUrls) ? imageUrls.filter((item) => typeof item === "string") : undefined,
     isActive: typeof isActive === "boolean" ? isActive : undefined,
-    variant:
-      variant && typeof variant === "object"
-        ? {
-            sku: typeof variant.sku === "string" ? variant.sku : undefined,
-            size: typeof variant.size === "string" ? variant.size : undefined,
-            color: typeof variant.color === "string" ? variant.color : undefined,
-            stockQuantity:
-              typeof variant.stockQuantity === "number"
-                ? variant.stockQuantity
-                : variant.stockQuantity
-                  ? Number(variant.stockQuantity)
-                  : undefined,
-            priceAdjustment:
-              typeof variant.priceAdjustment === "number"
-                ? variant.priceAdjustment
-                : variant.priceAdjustment
-                  ? Number(variant.priceAdjustment)
-                  : undefined
-          }
-        : undefined
+    variant: parseVariantPayload(variant),
+    variants: parseVariantsPayload(variants)
   };
 
   if (typeof payload.price === "number" && (!Number.isFinite(payload.price) || payload.price < 0)) {
@@ -170,6 +203,22 @@ export const uploadAdminProductImage = asyncHandler(async (req: Request, res: Re
   });
 
   sendSuccess(res, image, "Product image uploaded", 201);
+});
+
+export const uploadAdminProductSizeGuideImage = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.file) {
+    throw new ApiError(400, "image file is required");
+  }
+
+  const normalizedPath = req.file.path.replace(/\\/g, "/");
+  const uploadsIndex = normalizedPath.lastIndexOf("uploads/");
+  const pathUrl = uploadsIndex >= 0 ? `/${normalizedPath.slice(uploadsIndex)}` : `/uploads/${req.file.filename}`;
+
+  const updated = await setAdminProductSizeGuideImage(getActorUserId(req), req.params.productId, {
+    pathUrl
+  });
+
+  sendSuccess(res, updated, "Size guide image uploaded", 201);
 });
 
 export const getAdminOrders = asyncHandler(async (req: Request, res: Response) => {

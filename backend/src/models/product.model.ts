@@ -8,6 +8,7 @@ const productSchema = new Schema(
     description: { type: String, default: "" },
     price: { type: Number, required: true, min: 0 },
     imageUrl: { type: String, default: "" },
+    sizeGuideImageUrl: { type: String, default: "" },
     isActive: { type: Boolean, default: true }
   },
   {

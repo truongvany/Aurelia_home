@@ -16,7 +16,8 @@ import {
   patchAdminPaymentStatus,
   patchAdminProduct,
   postAdminProduct,
-  uploadAdminProductImage
+  uploadAdminProductImage,
+  uploadAdminProductSizeGuideImage
 } from "../controllers/admin.controller.js";
 import { requireAdmin, requireAuth } from "../middlewares/auth.middleware.js";
 
@@ -58,6 +59,7 @@ router.post("/products", postAdminProduct);
 router.patch("/products/:productId", patchAdminProduct);
 router.delete("/products/:productId", deleteAdminProduct);
 router.post("/products/:productId/images", upload.single("image"), uploadAdminProductImage);
+router.post("/products/:productId/size-guide-image", upload.single("image"), uploadAdminProductSizeGuideImage);
 
 router.get("/orders", getAdminOrders);
 router.get("/orders/:orderId", getAdminOrder);

@@ -1,15 +1,33 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, User, Search, Menu } from 'lucide-react';
+import { ShoppingBag, User, Menu, Heart } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
+import { getWishlistProductIds, getWishlistUpdatedEventName } from '../utils/wishlist';
 
 // Logo is located in the parent workspace root (outside the frontend/src folder)
-import logo from '../../../logo.png';
+import logo from '../assets/images/logo.png';
 
 export default function Header() {
   const [cartCount, setCartCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const { user, isAuthenticated, signOut } = useAuth();
+
+  useEffect(() => {
+    const syncWishlistCount = () => {
+      setWishlistCount(getWishlistProductIds().length);
+    };
+
+    syncWishlistCount();
+
+    window.addEventListener(getWishlistUpdatedEventName(), syncWishlistCount);
+    window.addEventListener('storage', syncWishlistCount);
+
+    return () => {
+      window.removeEventListener(getWishlistUpdatedEventName(), syncWishlistCount);
+      window.removeEventListener('storage', syncWishlistCount);
+    };
+  }, []);
 
   useEffect(() => {
     const loadCart = async () => {
@@ -64,6 +82,14 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             <Link to={profileTarget} className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors">
               <User className="h-5 w-5" />
+            </Link>
+            <Link to="/wishlist" className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors relative" aria-label="Sản phẩm yêu thích">
+              <Heart className="h-5 w-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute top-1 right-1 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
             </Link>
             <Link to="/cart" className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors relative">
               <ShoppingBag className="h-5 w-5" />

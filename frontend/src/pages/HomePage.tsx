@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight, Bot } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Bot, Package, RefreshCw, Headset, CreditCard } from 'lucide-react';
 import { Product } from '../types';
 import { api } from '../lib/api';
 import { formatVND } from '../utils/currency';
@@ -25,6 +25,7 @@ export default function HomePage() {
   const [categoryProducts, setCategoryProducts] = useState<Product[]>([]);
   const [categoryLoading, setCategoryLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
+  const [isCarouselPaused, setIsCarouselPaused] = useState(false);
   const carouselRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -105,15 +106,17 @@ export default function HomePage() {
     const carousel = carouselRef.current;
     if (!carousel) return;
 
-    const scrollSpeed = 2;
+    const scrollSpeed = 0.6;
     let animationId: number;
 
     const animate = () => {
-      carousel.scrollLeft += scrollSpeed;
+      if (!isCarouselPaused) {
+        carousel.scrollLeft += scrollSpeed;
 
-      // Reset when reached end
-      if (carousel.scrollLeft >= carousel.scrollWidth / 2) {
-        carousel.scrollLeft = 0;
+        // Reset when reached end
+        if (carousel.scrollLeft >= carousel.scrollWidth / 2) {
+          carousel.scrollLeft = 0;
+        }
       }
 
       animationId = requestAnimationFrame(animate);
@@ -122,7 +125,7 @@ export default function HomePage() {
     animationId = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(animationId);
-  }, [bestsellers]);
+  }, [bestsellers, isCarouselPaused]);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased">
@@ -186,7 +189,7 @@ export default function HomePage() {
             <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-4 block">Di Sản Của Chúng Tôi</span>
             <h2 className="text-4xl md:text-5xl font-serif text-slate-900 mb-8 leading-tight">Nghệ Thuật Thủ Công Vĩnh Cửu, Nguồn Gốc Bền Vững.</h2>
             <p className="text-slate-600 text-lg leading-relaxed mb-6">
-              Tại Aurelia Homme, mỗi mũi kim kể một câu chuyện về sự tận tâm. Chúng tôi tin rằng sự xa xỉ đích thực nằm ở sự kết hợp giữa các loại vải hiệu suất cao tự nhiên và các kỹ thuật may đo hàng thế kỷ.
+              Tại Aurelia Home, mỗi mũi kim kể một câu chuyện về sự tận tâm. Chúng tôi tin rằng sự xa xỉ đích thực nằm ở sự kết hợp giữa các loại vải hiệu suất cao tự nhiên và các kỹ thuật may đo hàng thế kỷ.
             </p>
             <div className="grid grid-cols-2 gap-8 mt-10">
               <div>
@@ -221,97 +224,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* AI Stylist Intro */}
-      <section className="relative py-24 bg-white overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-blue-100/70 blur-3xl" />
-          <div className="absolute -bottom-24 -right-16 h-80 w-80 rounded-full bg-cyan-100/70 blur-3xl" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(15,23,42,0.04),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(37,99,235,0.07),transparent_45%)]" />
-        </div>
-
-        <div className="max-w-6xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-14">
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-blue-600 shadow-sm">
-              AI Styling Concierge
-            </span>
-            <h2 className="mt-5 text-slate-900 text-4xl md:text-5xl font-serif leading-tight">
-              Gặp Gỡ Trợ Lý AI Cá Nhân Hóa
-              <span className="block text-slate-500 mt-2 text-2xl md:text-3xl">Cho Việc Chăm Sóc Và Phong Cách</span>
-            </h2>
-            <p className="text-slate-600 max-w-2xl mx-auto mt-5 leading-relaxed">
-              Lời khuyên phong cách siêu cá nhân hóa dựa trên hình dáng cơ thể, loại sự kiện và tủ đồ hiện tại của bạn.
-            </p>
-          </div>
-
-          <div className="relative rounded-[2rem] border border-slate-200/80 bg-white/95 p-6 md:p-10 shadow-[0_24px_70px_rgba(15,23,42,0.12)] backdrop-blur-sm">
-            <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-blue-300/80 to-transparent" />
-
-            <div className="flex flex-col md:flex-row gap-8 md:gap-10">
-              <div className="flex-1 space-y-4">
-                <div className="flex items-start gap-3 animate-[fadeIn_0.6s_ease-out]">
-                  <div className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-[10px] text-white font-bold ring-4 ring-blue-50">
-                    AH
-                  </div>
-                  <div className="bg-slate-900 text-white rounded-2xl rounded-tl-none p-4 text-sm md:text-[15px] max-w-[86%] shadow-lg shadow-slate-900/20">
-                    "Xin chào, Julian. Dựa trên thân hình thể thao của bạn và sự kiện 'Black Tie Sáng Tạo' tối nay, tôi đề xuất Bộ Vest Hải Quân Giữa Đêm."
-                  </div>
-                </div>
-
-                <div className="flex items-start flex-row-reverse gap-3 animate-[fadeIn_0.8s_ease-out]">
-                  <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-[10px] text-white font-semibold ring-4 ring-blue-50">
-                    ME
-                  </div>
-                  <div className="bg-blue-50 border border-blue-100 rounded-2xl rounded-tr-none p-4 text-sm md:text-[15px] text-slate-700 max-w-[86%]">
-                    "Hãy cho tôi xem một số phụ kiện để kết hợp với bộ đó."
-                  </div>
-                </div>
-
-                <div className="pt-4">
-                  <p className="text-[11px] uppercase tracking-[0.2em] font-semibold text-slate-500 mb-3">Gợi Ý Hoàn Thiện Outfit</p>
-                  <div className="flex gap-4">
-                    <div className="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                      <img alt="Product" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBv7nuZWjLmR1ENl_TiiJ6vF2Am1ocD3ig6x_SyVJl4-uvI3V8VhKkEVWjqgNmgolbyAU0rebFkrCNVcdUY8rLEs8MjO7SGqKAFG-elzLdklCBQTkIdXKr08832Cj0n3tv5nKKmCS7CedR05Wt9SVuOejcIIgK39rxII2P170qILpCrMtYJhFDPcvNE6tH5N5THYIMiZE0Ak10tNQ3iBSwxVEgvPWtoAUq6tYSXJg1r-LJDGfQUat5tDk3V3hdZLuvnAJbeva1-PiE" referrerPolicy="no-referrer" />
-                    </div>
-                    <div className="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                      <img alt="Product" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpeO8hFJv8ChrIB3DfP6n0NdIAElu-A1AUsYvjVluF-DwRn6fsBC7mYjckuEwJpYDutVL28umJK0Tjqm5E5WwKfxVFv8dNl2z1M98Wn6TPsiVbRkDEe5A3k0BJhBsTls7jcr6keA5CC4ZoSVpOZwngst7nsiWnQDYNyKBdk2pQMPl4sfAr70uZx-YhyhQ2PQza8i2CoNXfjdaSsp_pNE3GOuJzrjg-2olTV7zf69MKUB-pcCWgux96T0Tl6PHRNesjsMEIFXV-nk8" referrerPolicy="no-referrer" />
-                    </div>
-                    <div className="w-20 h-20 rounded-xl flex items-center justify-center border border-dashed border-slate-300 cursor-pointer hover:border-blue-500 hover:text-blue-600 transition-colors bg-white text-slate-500">
-                      <span className="text-xs font-semibold">+3 More</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="md:w-1/3 flex flex-col justify-center items-center text-center space-y-6 border-t md:border-t-0 md:border-l border-slate-200 pt-8 md:pt-0 md:pl-8">
-                <div className="relative">
-                  <div className="absolute inset-0 rounded-full bg-blue-200/60 blur-lg animate-pulse" />
-                  <div className="relative w-24 h-24 rounded-full border-2 border-blue-600 bg-white flex items-center justify-center">
-                    <Bot className="h-10 w-10 text-blue-600" />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-blue-600 font-bold">Phân Tích AI Trực Tiếp</p>
-                  <p className="mt-2 text-sm text-slate-500">Nhận tư vấn phối đồ theo sự kiện, thời tiết và phong cách riêng của bạn.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => window.dispatchEvent(new CustomEvent('aurelia:open-chat'))}
-                  className="w-full py-3.5 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-blue-600 transition-all duration-300 text-center block rounded-xl shadow-lg shadow-slate-900/15"
-                >
-                  Mở Chat Trợ Lý
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
           {/* Dynamic Category Showcase */}
           <section className="py-24 bg-slate-50">
             <div className="max-w-[1440px] mx-auto px-6">
               <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
                 <div>
-                  <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-3 block">Danh Mục Từ Database</span>
+                  <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-3 block">Khám phá danh mục</span>
                   <h2 className="text-4xl md:text-5xl font-serif text-slate-900">Khám Phá Theo Danh Mục</h2>
                 </div>
                 <Link
@@ -342,10 +260,10 @@ export default function HomePage() {
 
               {categoryLoading ? (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-pulse">
-                  <div className="lg:col-span-7 h-[480px] bg-slate-200 rounded-3xl" />
+                  <div className="lg:col-span-7 h-[480px] bg-slate-200 rounded-tl-[40px] rounded-br-[40px]" />
                   <div className="lg:col-span-5 grid sm:grid-cols-2 gap-6">
                     {Array.from({ length: 4 }).map((_, index) => (
-                      <div key={index} className="h-[227px] bg-slate-200 rounded-2xl" />
+                      <div key={index} className="h-[227px] bg-slate-200 rounded-tl-[24px] rounded-br-[24px]" />
                     ))}
                   </div>
                 </div>
@@ -353,7 +271,7 @@ export default function HomePage() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   <Link
                     to={`/product/${categoryLeadProduct._id}`}
-                    className="lg:col-span-7 relative h-[460px] md:h-[520px] rounded-3xl overflow-hidden group"
+                    className="lg:col-span-7 relative h-[460px] md:h-[520px] rounded-tl-[40px] rounded-br-[40px] overflow-hidden group"
                   >
                     <img
                       alt={categoryLeadProduct.name}
@@ -382,7 +300,7 @@ export default function HomePage() {
                       <Link
                         key={product._id}
                         to={`/product/${product._id}`}
-                        className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-slate-900/10 transition-all"
+                        className="group bg-white border border-slate-200 rounded-tl-[24px] rounded-br-[24px] overflow-hidden hover:shadow-xl hover:shadow-slate-900/10 transition-all"
                       >
                         <div className="h-40 overflow-hidden">
                           <img
@@ -405,7 +323,7 @@ export default function HomePage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-14 text-center">
+                <div className="rounded-tl-[40px] rounded-br-[40px] border border-dashed border-slate-300 bg-white p-14 text-center">
                   <h3 className="text-2xl font-serif text-slate-900 mb-3">Danh mục này chưa có sản phẩm hiển thị</h3>
                   <p className="text-slate-500 mb-6">Hệ thống đã đọc đúng danh mục trong database nhưng chưa có dữ liệu sản phẩm hoạt động.</p>
                   <Link
@@ -443,227 +361,89 @@ export default function HomePage() {
         
         <div 
           ref={carouselRef}
-          className="flex space-x-8 px-6 overflow-x-auto no-scrollbar max-w-[1440px] mx-auto"
+          onMouseEnter={() => setIsCarouselPaused(true)}
+          onMouseLeave={() => setIsCarouselPaused(false)}
+          className="flex space-x-6 px-6 overflow-x-auto no-scrollbar max-w-[1440px] mx-auto py-4"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {[...bestsellers, ...bestsellers].map((product, index) => (
-            <div key={`${product._id}-${index}`} className="min-w-[300px] flex-shrink-0 group cursor-pointer">
-              <div className="relative overflow-hidden mb-4 bg-white">
+            <div key={`${product._id}-${index}`} className="w-[260px] shrink-0 group cursor-pointer">
+              <div className="relative overflow-hidden mb-4 bg-white rounded-tl-[32px] rounded-br-[32px] shadow-sm border border-slate-100 group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300">
                 <img 
                   alt={product.name} 
-                  className="w-full h-[400px] object-cover transition-transform duration-700 group-hover:scale-105" 
+                  className="w-full h-[340px] object-cover transition-transform duration-700 group-hover:scale-105" 
                   src={product.imageUrl}
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute top-4 left-4 bg-blue-600 text-white text-[10px] uppercase px-2 py-1 tracking-widest">
+                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-slate-900 text-[10px] font-bold uppercase px-3 py-1.5 tracking-widest rounded-tl-xl rounded-br-xl shadow-sm border border-slate-200">
                   Mới Nhập
                 </div>
                 <Link 
                   to={`/product/${product._id}`} 
-                  className="absolute bottom-0 left-0 w-full bg-slate-900 text-white py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-widest font-bold text-center block"
+                  className="absolute bottom-0 left-0 w-full bg-slate-900/95 backdrop-blur-sm text-white py-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-[0.2em] font-bold text-center block"
                 >
-                  Thêm Nhanh
+                  Mua Ngay
                 </Link>
               </div>
-              <h4 className="text-sm font-bold uppercase tracking-widest text-slate-900">{product.name}</h4>
-              <p className="text-slate-500 text-sm mt-1">{formatVND(product.price)}</p>
+              <div className="px-1">
+                <h4 className="text-sm font-bold uppercase tracking-widest text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">{product.name}</h4>
+                <p className="text-slate-500 text-sm mt-1">{formatVND(product.price)}</p>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section className="py-24 bg-gradient-to-b from-slate-50 to-white relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/40 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-50/40 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-16">
-            <span className="inline-block text-blue-600 uppercase tracking-widest text-xs font-semibold mb-4 px-4 py-2 bg-blue-50 rounded-full">Kết Nối Với Chúng Tôi</span>
-            <h2 className="text-5xl md:text-6xl font-serif text-slate-900 mb-6 leading-tight">Hãy Nói Chuyện Với Chúng Tôi</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto text-lg font-light leading-relaxed">
-              Chúng tôi luôn sẵn sàng lắng nghe. Gửi tin nhắn của bạn và đội ngũ chuyên gia của chúng tôi sẽ phản hồi trong 24 giờ.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-            {/* Left Side - Contact Info */}
-            <div className="space-y-8">
-              <div className="space-y-6">
-                <div className="group p-6 rounded-2xl border border-slate-200 hover:border-blue-400 bg-white hover:bg-blue-50 transition-all duration-300 cursor-pointer">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">Email</h3>
-                      <p className="text-slate-600 text-sm">support@aurelia.com</p>
-                      <p className="text-slate-500 text-xs mt-2">Phản hồi trong 2 giờ</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="group p-6 rounded-2xl border border-slate-200 hover:border-blue-400 bg-white hover:bg-blue-50 transition-all duration-300 cursor-pointer">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773c.26.559.742 1.367 1.53 2.155.788.788 1.597 1.271 2.155 1.53l.773-1.548a1 1 0 011.06-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">Điện Thoại</h3>
-                      <p className="text-slate-600 text-sm">+84 (0) 123 456 789</p>
-                      <p className="text-slate-500 text-xs mt-2">Thứ 2-6, 09:00-18:00</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="group p-6 rounded-2xl border border-slate-200 hover:border-blue-400 bg-white hover:bg-blue-50 transition-all duration-300 cursor-pointer">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-slate-900 mb-1">Địa Chỉ</h3>
-                      <p className="text-slate-600 text-sm">125 Fifth Avenue, New York, NY</p>
-                      <p className="text-slate-500 text-xs mt-2">Chỉ dành cho lịch hẹn</p>
-                    </div>
-                  </div>
-                </div>
+      {/* Features Section */}
+      <section className="border-t border-slate-200 bg-white py-12 lg:py-16">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Feature 1 */}
+            <div className="flex items-center space-x-4">
+              <div className="shrink-0 flex items-center justify-center">
+                <Package className="w-10 h-10 text-slate-700" strokeWidth={1} />
               </div>
-
-              <div className="p-6 rounded-2xl bg-blue-600 text-white">
-                <h4 className="font-semibold mb-3">⏰ Giờ Làm Việc</h4>
-                <ul className="space-y-2 text-sm opacity-90">
-                  <li className="flex justify-between"><span>Thứ 2 - Thứ 6:</span><span className="font-semibold">09:00 - 18:00</span></li>
-                  <li className="flex justify-between"><span>Thứ 7:</span><span className="font-semibold">10:00 - 16:00</span></li>
-                  <li className="flex justify-between"><span>Chủ Nhật:</span><span className="font-semibold">Đóng cửa</span></li>
-                </ul>
+              <div className="flex flex-col">
+                <h4 className="text-[15px] font-medium text-slate-900 mb-0.5">Miễn phí vận chuyển</h4>
+                <p className="text-[13px] text-slate-500">Áp dụng cho mọi đơn hàng từ 500k</p>
               </div>
             </div>
 
-            {/* Right Side - Contact Form */}
-            <div>
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  try {
-                    const formData = new FormData(e.target as HTMLFormElement);
-                    await api.submitContact({
-                      name: formData.get('name') as string,
-                      email: formData.get('email') as string,
-                      subject: formData.get('subject') as string,
-                      message: formData.get('message') as string,
-                    });
-                    alert('Cảm ơn! Yêu cầu của bạn đã được gửi thành công.');
-                    (e.target as HTMLFormElement).reset();
-                  } catch (error) {
-                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
-                  }
-                }}
-                className="bg-white border border-slate-200 rounded-3xl p-8 md:p-10 shadow-lg hover:shadow-xl transition-shadow"
-              >
-                <h3 className="text-2xl font-serif text-slate-900 mb-8">Gửi Thông Tin Liên Hệ</h3>
+            {/* Feature 2 */}
+            <div className="flex items-center space-x-4">
+              <div className="shrink-0 flex items-center justify-center">
+                <RefreshCw className="w-10 h-10 text-slate-700" strokeWidth={1} />
+              </div>
+              <div className="flex flex-col">
+                <h4 className="text-[15px] font-medium text-slate-900 mb-0.5">Đổi hàng dễ dàng</h4>
+                <p className="text-[13px] text-slate-500">7 ngày đổi hàng vì bất kì lí do gì</p>
+              </div>
+            </div>
 
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="name" className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-2">
-                        Tên Của Bạn
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        required
-                        className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all placeholder-slate-400"
-                        placeholder="John Doe"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="phone" className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-2">
-                        Số Điện Thoại
-                      </label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all placeholder-slate-400"
-                        placeholder="+84 123 456 789"
-                      />
-                    </div>
-                  </div>
+            {/* Feature 3 */}
+            <div className="flex items-center space-x-4">
+              <div className="shrink-0 flex items-center justify-center">
+                <Headset className="w-10 h-10 text-slate-700" strokeWidth={1} />
+              </div>
+              <div className="flex flex-col">
+                <h4 className="text-[15px] font-medium text-slate-900 mb-0.5">Hỗ trợ nhanh chóng</h4>
+                <p className="text-[13px] text-slate-500">HOTLINE 24/7: 0964942121</p>
+              </div>
+            </div>
 
-                  <div>
-                    <label htmlFor="email" className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      required
-                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all placeholder-slate-400"
-                      placeholder="you@example.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="subject" className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-2">
-                      Chủ Đề
-                    </label>
-                    <select
-                      id="subject"
-                      name="subject"
-                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white cursor-pointer placeholder-slate-400"
-                    >
-                      <option value="">Chọn chủ đề...</option>
-                      <option value="order">Hỏi về đơn hàng</option>
-                      <option value="product">Hỏi về sản phẩm</option>
-                      <option value="shipping">Hỏi về giao hàng</option>
-                      <option value="appointment">Đặt lịch hẹn</option>
-                      <option value="other">Khác</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="message" className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-2">
-                      Tin Nhắn
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      rows={4}
-                      required
-                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none placeholder-slate-400"
-                      placeholder="Viết tin nhắn của bạn ở đây..."
-                    ></textarea>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-slate-900 to-blue-600 hover:from-slate-800 hover:to-blue-700 text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-                  >
-                    <span>Gửi Liên Hệ</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-
-                  <p className="text-xs text-slate-500 text-center mt-4">
-                    Chúng tôi sẽ trả lời trong vòng 24 giờ làm việc.
-                  </p>
-                </div>
-              </form>
+            {/* Feature 4 */}
+            <div className="flex items-center space-x-4">
+              <div className="shrink-0 flex items-center justify-center">
+                <CreditCard className="w-10 h-10 text-slate-700" strokeWidth={1} />
+              </div>
+              <div className="flex flex-col">
+                <h4 className="text-[15px] font-medium text-slate-900 mb-0.5">Thanh toán đa dạng</h4>
+                <p className="text-[13px] text-slate-500">Thanh toán khi nhận hàng, Napas, Visa,<br className="hidden lg:block 2xl:hidden" /> Chuyển Khoản</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
     </div>
   );
 }

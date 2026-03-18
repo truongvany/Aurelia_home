@@ -44,6 +44,7 @@ interface AdminProductDetail {
   description: string;
   price: number;
   imageUrl: string;
+  sizeGuideImageUrl: string;
   isActive: boolean;
   category: { _id: string; name: string; slug: string } | null;
   variants: Array<{
@@ -254,6 +255,7 @@ export const api = {
     request<
       Product & {
         categorySlug: string;
+        sizeGuideImageUrl: string;
         variants: Array<{ _id: string; size: string; color: string; sku: string; stockQuantity: number }>;
         images: Array<{ _id: string; url: string; alt: string; sortOrder: number }>;
       }
@@ -359,6 +361,7 @@ export const api = {
     categorySlug?: string;
     categoryName?: string;
     imageUrl?: string;
+    sizeGuideImageUrl?: string;
     imageUrls?: string[];
     isActive?: boolean;
     variant?: {
@@ -368,6 +371,13 @@ export const api = {
       stockQuantity?: number;
       priceAdjustment?: number;
     };
+    variants?: Array<{
+      sku?: string;
+      size?: string;
+      color?: string;
+      stockQuantity?: number;
+      priceAdjustment?: number;
+    }>;
   }) =>
     request<AdminProductDetail>("/admin/products", {
       method: "POST",
@@ -383,6 +393,7 @@ export const api = {
       categorySlug?: string;
       categoryName?: string;
       imageUrl?: string;
+      sizeGuideImageUrl?: string;
       imageUrls?: string[];
       isActive?: boolean;
       variant?: {
@@ -392,6 +403,13 @@ export const api = {
         stockQuantity?: number;
         priceAdjustment?: number;
       };
+      variants?: Array<{
+        sku?: string;
+        size?: string;
+        color?: string;
+        stockQuantity?: number;
+        priceAdjustment?: number;
+      }>;
     }
   ) =>
     request<AdminProductDetail>(`/admin/products/${productId}`, {
@@ -411,6 +429,18 @@ export const api = {
 
     return request<{ _id: string; url: string; alt: string; sortOrder: number }>(
       `/admin/products/${productId}/images`,
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+  },
+  uploadAdminProductSizeGuideImage: (productId: string, file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    return request<{ _id: string; sizeGuideImageUrl: string }>(
+      `/admin/products/${productId}/size-guide-image`,
       {
         method: "POST",
         body: formData

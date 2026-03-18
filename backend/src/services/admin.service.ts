@@ -51,9 +51,11 @@ interface CreateAdminProductInput {
   categorySlug?: string;
   categoryName?: string;
   imageUrl?: string;
+  sizeGuideImageUrl?: string;
   imageUrls?: string[];
   isActive?: boolean;
   variant?: ProductVariantInput;
+  variants?: ProductVariantInput[];
 }
 
 interface UpdateAdminProductInput {
@@ -64,10 +66,42 @@ interface UpdateAdminProductInput {
   categorySlug?: string;
   categoryName?: string;
   imageUrl?: string;
+  sizeGuideImageUrl?: string;
   imageUrls?: string[];
   isActive?: boolean;
   variant?: ProductVariantInput;
+  variants?: ProductVariantInput[];
 }
+
+const normalizeVariantInput = (variant: ProductVariantInput | undefined) => {
+  if (!variant?.sku?.trim()) {
+    return null;
+  }
+
+  return {
+    sku: variant.sku.trim(),
+    size: variant.size?.trim() ?? "",
+    color: variant.color?.trim() ?? "",
+    stockQuantity: Math.max(0, Number(variant.stockQuantity ?? 0)),
+    priceAdjustment: Number(variant.priceAdjustment ?? 0)
+  };
+};
+
+const resolveVariantInputs = (input: {
+  variants?: ProductVariantInput[];
+  variant?: ProductVariantInput;
+}) => {
+  const normalizedFromArray = (input.variants ?? [])
+    .map((variant) => normalizeVariantInput(variant))
+    .filter((variant): variant is NonNullable<ReturnType<typeof normalizeVariantInput>> => Boolean(variant));
+
+  if (normalizedFromArray.length > 0) {
+    return normalizedFromArray;
+  }
+
+  const fallback = normalizeVariantInput(input.variant);
+  return fallback ? [fallback] : [];
+};
 
 const toPagination = (query: AdminListQuery) => {
   const page = Math.max(1, Number(query.page ?? 1) || 1);
@@ -286,6 +320,7 @@ export const getAdminProductDetail = async (productId: string) => {
     description: product.description,
     price: product.price,
     imageUrl: product.imageUrl,
+    sizeGuideImageUrl: product.sizeGuideImageUrl ?? "",
     isActive: product.isActive,
     category: category
       ? {
@@ -328,19 +363,22 @@ export const createAdminProduct = async (actorUserId: string, input: CreateAdmin
     description: input.description ?? "",
     price: input.price,
     imageUrl: input.imageUrl ?? "",
+    sizeGuideImageUrl: input.sizeGuideImageUrl ?? "",
     isActive: input.isActive ?? true
   });
 
-  const variantSku = input.variant?.sku?.trim();
-  if (variantSku) {
-    await ProductVariantModel.create({
-      productId: product._id,
-      sku: variantSku,
-      size: input.variant?.size ?? "",
-      color: input.variant?.color ?? "",
-      stockQuantity: Math.max(0, Number(input.variant?.stockQuantity ?? 0)),
-      priceAdjustment: Number(input.variant?.priceAdjustment ?? 0)
-    });
+  const variants = resolveVariantInputs(input);
+  if (variants.length > 0) {
+    await ProductVariantModel.insertMany(
+      variants.map((variant) => ({
+        productId: product._id,
+        sku: variant.sku,
+        size: variant.size,
+        color: variant.color,
+        stockQuantity: variant.stockQuantity,
+        priceAdjustment: variant.priceAdjustment
+      }))
+    );
   }
 
   if (input.imageUrls?.length) {
@@ -399,6 +437,10 @@ export const updateAdminProduct = async (
     product.imageUrl = input.imageUrl;
   }
 
+  if (typeof input.sizeGuideImageUrl === "string") {
+    product.sizeGuideImageUrl = input.sizeGuideImageUrl;
+  }
+
   if (typeof input.isActive === "boolean") {
     product.isActive = input.isActive;
   }
@@ -410,32 +452,22 @@ export const updateAdminProduct = async (
 
   await product.save();
 
-  if (input.variant?.sku?.trim()) {
-    const existingVariant = await ProductVariantModel.findOne({ productId: product._id }).sort({ createdAt: 1 });
-    if (existingVariant) {
-      existingVariant.sku = input.variant.sku.trim();
-      if (typeof input.variant.size === "string") {
-        existingVariant.size = input.variant.size;
-      }
-      if (typeof input.variant.color === "string") {
-        existingVariant.color = input.variant.color;
-      }
-      if (typeof input.variant.stockQuantity === "number") {
-        existingVariant.stockQuantity = Math.max(0, input.variant.stockQuantity);
-      }
-      if (typeof input.variant.priceAdjustment === "number") {
-        existingVariant.priceAdjustment = input.variant.priceAdjustment;
-      }
-      await existingVariant.save();
-    } else {
-      await ProductVariantModel.create({
-        productId: product._id,
-        sku: input.variant.sku.trim(),
-        size: input.variant.size ?? "",
-        color: input.variant.color ?? "",
-        stockQuantity: Math.max(0, Number(input.variant.stockQuantity ?? 0)),
-        priceAdjustment: Number(input.variant.priceAdjustment ?? 0)
-      });
+  const hasVariantsInput = Array.isArray(input.variants) || Boolean(input.variant);
+  if (hasVariantsInput) {
+    const nextVariants = resolveVariantInputs(input);
+
+    if (nextVariants.length > 0) {
+      await ProductVariantModel.deleteMany({ productId: product._id });
+      await ProductVariantModel.insertMany(
+        nextVariants.map((variant) => ({
+          productId: product._id,
+          sku: variant.sku,
+          size: variant.size,
+          color: variant.color,
+          stockQuantity: variant.stockQuantity,
+          priceAdjustment: variant.priceAdjustment
+        }))
+      );
     }
   }
 
@@ -572,6 +604,31 @@ export const createAdminProductImage = async (
     url: productImage.url,
     alt: productImage.alt,
     sortOrder: productImage.sortOrder
+  };
+};
+
+export const setAdminProductSizeGuideImage = async (
+  actorUserId: string,
+  productId: string,
+  image: { pathUrl: string }
+) => {
+  ensureObjectId(productId, "product id");
+
+  const product = await ProductModel.findById(productId);
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  product.sizeGuideImageUrl = image.pathUrl;
+  await product.save();
+
+  await writeAudit(actorUserId, "admin.product.sizeGuide.upload", "product", product._id.toString(), {
+    sizeGuideImageUrl: image.pathUrl
+  });
+
+  return {
+    _id: product._id,
+    sizeGuideImageUrl: product.sizeGuideImageUrl
   };
 };
 
