@@ -24,6 +24,7 @@ export default function HomePage() {
   const [categoryProducts, setCategoryProducts] = useState<Product[]>([]);
   const [categoryLoading, setCategoryLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
+  const carouselRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -97,6 +98,30 @@ export default function HomePage() {
 
     return () => window.clearInterval(interval);
   }, [heroImages.length]);
+
+  // Auto-scroll carousel - infinite loop left to right
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const scrollSpeed = 2;
+    let animationId: number;
+
+    const animate = () => {
+      carousel.scrollLeft += scrollSpeed;
+
+      // Reset when reached end
+      if (carousel.scrollLeft >= carousel.scrollWidth / 2) {
+        carousel.scrollLeft = 0;
+      }
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationId);
+  }, [bestsellers]);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased">
@@ -384,24 +409,19 @@ export default function HomePage() {
 
       {/* Bestseller Carousel */}
       <section className="py-24 bg-gray-50 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 mb-12 flex items-end justify-between">
+        <div className="max-w-7xl mx-auto px-6 mb-12">
           <div>
             <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-2 block">Tinh Hoa Của Chúng Tôi</span>
             <h2 className="text-4xl font-serif text-slate-900">Những Sản Phẩm Bán Chạy Nhất Mùa</h2>
           </div>
-          <div className="hidden md:flex space-x-4">
-            <button className="w-12 h-12 rounded-full border border-slate-900/20 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all">
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button className="w-12 h-12 rounded-full border border-slate-900/20 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all">
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
         </div>
         
-        <div className="flex space-x-8 px-6 overflow-x-auto no-scrollbar pb-8 max-w-[1440px] mx-auto">
-          {bestsellers.map(product => (
-            <div key={product._id} className="min-w-[300px] flex-shrink-0 group cursor-pointer">
+        <div 
+          ref={carouselRef}
+          className="flex space-x-8 px-6 overflow-x-auto no-scrollbar max-w-[1440px] mx-auto"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          {[...bestsellers, ...bestsellers].map((product, index) => (
+            <div key={`${product._id}-${index}`} className="min-w-[300px] flex-shrink-0 group cursor-pointer">
               <div className="relative overflow-hidden mb-4 bg-white">
                 <img 
                   alt={product.name} 
@@ -423,6 +443,200 @@ export default function HomePage() {
               <p className="text-slate-500 text-sm mt-1">{formatVND(product.price)}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="py-24 bg-gradient-to-b from-slate-50 to-white relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100/40 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-50/40 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="text-center mb-16">
+            <span className="inline-block text-blue-600 uppercase tracking-widest text-xs font-semibold mb-4 px-4 py-2 bg-blue-50 rounded-full">Kết Nối Với Chúng Tôi</span>
+            <h2 className="text-5xl md:text-6xl font-serif text-slate-900 mb-6 leading-tight">Hãy Nói Chuyện Với Chúng Tôi</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto text-lg font-light leading-relaxed">
+              Chúng tôi luôn sẵn sàng lắng nghe. Gửi tin nhắn của bạn và đội ngũ chuyên gia của chúng tôi sẽ phản hồi trong 24 giờ.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+            {/* Left Side - Contact Info */}
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <div className="group p-6 rounded-2xl border border-slate-200 hover:border-blue-400 bg-white hover:bg-blue-50 transition-all duration-300 cursor-pointer">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 mb-1">Email</h3>
+                      <p className="text-slate-600 text-sm">support@aurelia.com</p>
+                      <p className="text-slate-500 text-xs mt-2">Phản hồi trong 2 giờ</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="group p-6 rounded-2xl border border-slate-200 hover:border-blue-400 bg-white hover:bg-blue-50 transition-all duration-300 cursor-pointer">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773c.26.559.742 1.367 1.53 2.155.788.788 1.597 1.271 2.155 1.53l.773-1.548a1 1 0 011.06-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 mb-1">Điện Thoại</h3>
+                      <p className="text-slate-600 text-sm">+84 (0) 123 456 789</p>
+                      <p className="text-slate-500 text-xs mt-2">Thứ 2-6, 09:00-18:00</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="group p-6 rounded-2xl border border-slate-200 hover:border-blue-400 bg-white hover:bg-blue-50 transition-all duration-300 cursor-pointer">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 mb-1">Địa Chỉ</h3>
+                      <p className="text-slate-600 text-sm">125 Fifth Avenue, New York, NY</p>
+                      <p className="text-slate-500 text-xs mt-2">Chỉ dành cho lịch hẹn</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-2xl bg-blue-600 text-white">
+                <h4 className="font-semibold mb-3">⏰ Giờ Làm Việc</h4>
+                <ul className="space-y-2 text-sm opacity-90">
+                  <li className="flex justify-between"><span>Thứ 2 - Thứ 6:</span><span className="font-semibold">09:00 - 18:00</span></li>
+                  <li className="flex justify-between"><span>Thứ 7:</span><span className="font-semibold">10:00 - 16:00</span></li>
+                  <li className="flex justify-between"><span>Chủ Nhật:</span><span className="font-semibold">Đóng cửa</span></li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Right Side - Contact Form */}
+            <div>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  try {
+                    const formData = new FormData(e.target as HTMLFormElement);
+                    await api.submitContact({
+                      name: formData.get('name') as string,
+                      email: formData.get('email') as string,
+                      subject: formData.get('subject') as string,
+                      message: formData.get('message') as string,
+                    });
+                    alert('Cảm ơn! Yêu cầu của bạn đã được gửi thành công.');
+                    (e.target as HTMLFormElement).reset();
+                  } catch (error) {
+                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                  }
+                }}
+                className="bg-white border border-slate-200 rounded-3xl p-8 md:p-10 shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <h3 className="text-2xl font-serif text-slate-900 mb-8">Gửi Thông Tin Liên Hệ</h3>
+
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="name" className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-2">
+                        Tên Của Bạn
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        required
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all placeholder-slate-400"
+                        placeholder="John Doe"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="phone" className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-2">
+                        Số Điện Thoại
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all placeholder-slate-400"
+                        placeholder="+84 123 456 789"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="email" className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      required
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all placeholder-slate-400"
+                      placeholder="you@example.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="subject" className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-2">
+                      Chủ Đề
+                    </label>
+                    <select
+                      id="subject"
+                      name="subject"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white cursor-pointer placeholder-slate-400"
+                    >
+                      <option value="">Chọn chủ đề...</option>
+                      <option value="order">Hỏi về đơn hàng</option>
+                      <option value="product">Hỏi về sản phẩm</option>
+                      <option value="shipping">Hỏi về giao hàng</option>
+                      <option value="appointment">Đặt lịch hẹn</option>
+                      <option value="other">Khác</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="message" className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-2">
+                      Tin Nhắn
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      rows={4}
+                      required
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none placeholder-slate-400"
+                      placeholder="Viết tin nhắn của bạn ở đây..."
+                    ></textarea>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-slate-900 to-blue-600 hover:from-slate-800 hover:to-blue-700 text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                  >
+                    <span>Gửi Liên Hệ</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+
+                  <p className="text-xs text-slate-500 text-center mt-4">
+                    Chúng tôi sẽ trả lời trong vòng 24 giờ làm việc.
+                  </p>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       </section>
     </div>
