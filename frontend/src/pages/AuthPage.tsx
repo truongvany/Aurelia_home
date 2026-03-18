@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import loginImage from '../assets/images/login.png';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -19,6 +20,11 @@ export default function AuthPage() {
     password: ''
   });
 
+  const activeTitle = isLogin ? 'Chào mừng quay trở lại' : 'Tạo tài khoản mới';
+  const activeSubtitle = isLogin
+    ? 'Đăng nhập để quản lý đơn hàng, theo dõi ưu đãi và nhận gợi ý sản phẩm phù hợp phong cách của bạn.'
+    : 'Đăng ký để nhận ưu đãi thành viên, cập nhật bộ sưu tập mới và trải nghiệm mua sắm nhanh hơn.';
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -30,7 +36,7 @@ export default function AuthPage() {
       // Redirect admins to the admin portal, customers to their profile
       navigate(from ?? (payload.user.role === 'admin' ? '/admin' : '/profile'));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to login');
+      setError(err instanceof Error ? err.message : 'Không thể đăng nhập');
     } finally {
       setIsSubmitting(false);
     }
@@ -45,162 +51,207 @@ export default function AuthPage() {
       applyAuthPayload(payload);
       navigate('/profile');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to register');
+      setError(err instanceof Error ? err.message : 'Không thể đăng ký');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-offwhite">
-      <div className="max-w-4xl w-full bg-white shadow-xl flex flex-col md:flex-row overflow-hidden">
-        
-        {/* Image Section */}
-        <div className="md:w-1/2 relative hidden md:block">
-          <img 
-            src="https://picsum.photos/seed/auth-bg/800/1000" 
-            alt="Aurelia Home Lifestyle" 
-            className="absolute inset-0 w-full h-full object-cover"
+    <div className="relative min-h-[84vh] overflow-hidden bg-[#f3f1ed] px-4 py-10 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-28 top-0 h-80 w-80 rounded-full bg-[#1f3a5f]/12 blur-3xl" />
+        <div className="absolute -right-20 bottom-0 h-96 w-96 rounded-full bg-[#b38a4c]/18 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto grid w-full max-w-6xl overflow-hidden rounded-none bg-white/85 shadow-[0_30px_90px_-30px_rgba(18,27,38,0.45)] backdrop-blur-sm md:grid-cols-2">
+        <section className="relative hidden min-h-[680px] p-10 md:flex md:flex-col md:justify-between">
+          <img
+            src={loginImage}
+            alt="Aurelia Home Fashion"
+            className="absolute inset-0 h-full w-full object-cover"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-charcoal/30 flex items-center justify-center p-12">
-            <div className="text-center">
-              <h2 className="font-serif text-3xl text-white font-bold mb-4">Aurelia Home</h2>
-              <p className="text-white/90 text-sm leading-relaxed">
-                Join our exclusive community to access personalized styling, early access to collections, and complimentary shipping.
-              </p>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0f2238]/75 via-[#1a2e46]/65 to-[#8f6a35]/45" />
+
+          <div className="relative z-10">
+            <p className="mb-3 text-[11px] uppercase tracking-[0.3em] text-white/85">Aurelia Home</p>
+            <h2 className="max-w-sm font-serif text-4xl leading-tight text-white">Nâng tầm trải nghiệm mua sắm thời trang cao cấp.</h2>
+          </div>
+
+          <div className="relative z-10 grid grid-cols-2 gap-3 text-white/90">
+            <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
+              <p className="text-2xl font-semibold">24/7</p>
+              <p className="text-xs uppercase tracking-[0.16em]">Hỗ trợ khách hàng</p>
+            </div>
+            <div className="rounded-2xl bg-white/15 p-4 backdrop-blur-md">
+              <p className="text-2xl font-semibold">500k+</p>
+              <p className="text-xs uppercase tracking-[0.16em]">Thành viên đã đăng ký</p>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Form Section */}
-        <div className="md:w-1/2 p-8 md:p-12">
-          <div className="flex justify-center space-x-8 mb-10 border-b border-gray-200">
-            <button 
-              className={`pb-4 text-sm font-medium uppercase tracking-widest transition-colors relative ${
-                isLogin ? 'text-charcoal' : 'text-gray-400 hover:text-charcoal'
+        <section className="p-6 sm:p-10 md:p-12">
+          <div className="mb-8 flex items-center justify-between rounded-full bg-slate-100/80 p-1.5">
+            <button
+              type="button"
+              className={`w-1/2 rounded-full px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition-all ${
+                isLogin ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'
               }`}
               onClick={() => setIsLogin(true)}
             >
-              Sign In
-              {isLogin && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-charcoal"></span>}
+              Đăng nhập
             </button>
-            <button 
-              className={`pb-4 text-sm font-medium uppercase tracking-widest transition-colors relative ${
-                !isLogin ? 'text-charcoal' : 'text-gray-400 hover:text-charcoal'
+            <button
+              type="button"
+              className={`w-1/2 rounded-full px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition-all ${
+                !isLogin ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'
               }`}
               onClick={() => setIsLogin(false)}
             >
-              Register
-              {!isLogin && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-charcoal"></span>}
+              Đăng ký
             </button>
           </div>
 
-          {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
+          <div className="mb-6">
+            <h1 className="mb-2 font-serif text-3xl text-slate-900">{activeTitle}</h1>
+            <p className="text-sm leading-relaxed text-slate-600">{activeSubtitle}</p>
+          </div>
+
+          {error && (
+            <div className="mb-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {error}
+            </div>
+          )}
 
           {isLogin ? (
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div>
-                <label htmlFor="email" className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Email Address</label>
-                <input 
-                  id="email" 
-                  name="email" 
-                  type="email" 
-                  required 
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
                   value={loginForm.email}
                   onChange={(e) => setLoginForm((prev) => ({ ...prev, email: e.target.value }))}
-                  className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-charcoal transition-colors bg-transparent"
+                  className="h-12 w-full rounded-2xl bg-slate-100/80 px-4 text-sm text-slate-900 placeholder:text-slate-400 outline-none ring-0 transition focus:bg-white focus:shadow-[0_0_0_3px_rgba(30,58,138,0.12)]"
+                  placeholder="you@email.com"
                 />
               </div>
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label htmlFor="password" className="block text-xs font-medium text-gray-700 uppercase tracking-wider">Password</label>
-                  <a href="#" className="text-xs text-gray-500 hover:text-charcoal">Forgot Password?</a>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="password" className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Mật khẩu
+                  </label>
+                  <button type="button" className="text-xs text-slate-500 transition hover:text-slate-800">
+                    Quên mật khẩu?
+                  </button>
                 </div>
-                <input 
-                  id="password" 
-                  name="password" 
-                  type="password" 
-                  required 
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
                   value={loginForm.password}
                   onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
-                  className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-charcoal transition-colors bg-transparent"
+                  className="h-12 w-full rounded-2xl bg-slate-100/80 px-4 text-sm text-slate-900 placeholder:text-slate-400 outline-none ring-0 transition focus:bg-white focus:shadow-[0_0_0_3px_rgba(30,58,138,0.12)]"
+                  placeholder="********"
                 />
               </div>
-              <button 
-                type="submit" 
+
+              <button
+                type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-charcoal text-white py-4 font-medium uppercase tracking-widest hover:bg-gold transition-colors mt-8"
+                className="mt-2 h-12 w-full rounded-full bg-slate-900 text-[11px] font-semibold uppercase tracking-[0.22em] text-white transition hover:bg-[#b38a4c] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSubmitting ? 'Signing In...' : 'Sign In'}
+                {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </button>
             </form>
           ) : (
-            <form onSubmit={handleRegister} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="firstName" className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">First Name</label>
-                  <input 
-                    id="firstName" 
-                    name="firstName" 
-                    type="text" 
-                    required 
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label htmlFor="firstName" className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Họ
+                  </label>
+                  <input
+                    id="firstName"
+                    name="firstName"
+                    type="text"
+                    required
                     value={registerForm.firstName}
-                    onChange={(e) =>
-                      setRegisterForm((prev) => ({ ...prev, firstName: e.target.value }))
-                    }
-                    className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-charcoal transition-colors bg-transparent"
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, firstName: e.target.value }))}
+                    className="h-12 w-full rounded-2xl bg-slate-100/80 px-4 text-sm text-slate-900 outline-none transition focus:bg-white focus:shadow-[0_0_0_3px_rgba(30,58,138,0.12)]"
+                    placeholder="Nguyễn"
                   />
                 </div>
-                <div>
-                  <label htmlFor="lastName" className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Last Name</label>
-                  <input 
-                    id="lastName" 
-                    name="lastName" 
-                    type="text" 
-                    required 
+                <div className="space-y-2">
+                  <label htmlFor="lastName" className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Tên
+                  </label>
+                  <input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    required
                     value={registerForm.lastName}
-                    onChange={(e) =>
-                      setRegisterForm((prev) => ({ ...prev, lastName: e.target.value }))
-                    }
-                    className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-charcoal transition-colors bg-transparent"
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, lastName: e.target.value }))}
+                    className="h-12 w-full rounded-2xl bg-slate-100/80 px-4 text-sm text-slate-900 outline-none transition focus:bg-white focus:shadow-[0_0_0_3px_rgba(30,58,138,0.12)]"
+                    placeholder="Văn A"
                   />
                 </div>
               </div>
-              <div>
-                <label htmlFor="reg-email" className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Email Address</label>
-                <input 
-                  id="reg-email" 
-                  name="email" 
-                  type="email" 
-                  required 
+
+              <div className="space-y-2">
+                <label htmlFor="reg-email" className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Email
+                </label>
+                <input
+                  id="reg-email"
+                  name="email"
+                  type="email"
+                  required
                   value={registerForm.email}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, email: e.target.value }))}
-                  className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-charcoal transition-colors bg-transparent"
+                  className="h-12 w-full rounded-2xl bg-slate-100/80 px-4 text-sm text-slate-900 outline-none transition focus:bg-white focus:shadow-[0_0_0_3px_rgba(30,58,138,0.12)]"
+                  placeholder="you@email.com"
                 />
               </div>
-              <div>
-                <label htmlFor="reg-password" className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Password</label>
-                <input 
-                  id="reg-password" 
-                  name="password" 
-                  type="password" 
-                  required 
+
+              <div className="space-y-2">
+                <label htmlFor="reg-password" className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Mật khẩu
+                </label>
+                <input
+                  id="reg-password"
+                  name="password"
+                  type="password"
+                  required
                   value={registerForm.password}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
-                  className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-charcoal transition-colors bg-transparent"
+                  className="h-12 w-full rounded-2xl bg-slate-100/80 px-4 text-sm text-slate-900 outline-none transition focus:bg-white focus:shadow-[0_0_0_3px_rgba(30,58,138,0.12)]"
+                  placeholder="Ít nhất 8 ký tự"
                 />
               </div>
-              <button 
-                type="submit" 
+
+              <button
+                type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-charcoal text-white py-4 font-medium uppercase tracking-widest hover:bg-gold transition-colors mt-8"
+                className="mt-2 h-12 w-full rounded-full bg-slate-900 text-[11px] font-semibold uppercase tracking-[0.22em] text-white transition hover:bg-[#b38a4c] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSubmitting ? 'Creating Account...' : 'Create Account'}
+                {isSubmitting ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
               </button>
             </form>
           )}
-        </div>
+
+          <p className="mt-6 text-center text-xs text-slate-500">
+            Tiếp tục nghĩa là bạn đồng ý với điều khoản sử dụng và chính sách bảo mật của Aurelia Home.
+          </p>
+        </section>
       </div>
     </div>
   );

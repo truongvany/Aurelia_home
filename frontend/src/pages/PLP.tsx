@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, Filter, ShoppingBag } from 'lucide-react';
 import { Product } from '../types';
@@ -19,6 +19,9 @@ export default function PLP() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [addingToCartProductId, setAddingToCartProductId] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const itemImageRefs = useRef<Record<string, HTMLImageElement | null>>({});
   const itemsPerPage = 20;
 
   // Accordion state
@@ -30,6 +33,101 @@ export default function PLP() {
 
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    window.setTimeout(() => setToastMessage(null), 2400);
+  };
+
+  const animateFlyToCart = (productId: string) => {
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(() => {
+      const imageEl = itemImageRefs.current[productId];
+      const cartButtonEl = document.querySelector('[data-cart-icon-button]') as HTMLElement | null;
+      
+      if (!imageEl) {
+        console.warn(`Image ref not found for product ${productId}`);
+        return;
+      }
+      if (!cartButtonEl) {
+        console.warn('Cart button element not found');
+        return;
+      }
+
+      const startRect = imageEl.getBoundingClientRect();
+      const endRect = cartButtonEl.getBoundingClientRect();
+
+      // Clone the image and position it over the original
+      const flyImg = imageEl.cloneNode(true) as HTMLImageElement;
+      flyImg.style.position = 'fixed';
+      flyImg.style.top = `${startRect.top}px`;
+      flyImg.style.left = `${startRect.left}px`;
+      flyImg.style.width = `${startRect.width}px`;
+      flyImg.style.height = `${startRect.height}px`;
+      flyImg.style.borderRadius = '20px';
+      flyImg.style.boxShadow = '0 25px 50px rgba(0,0,0,0.3)';
+      flyImg.style.pointerEvents = 'none';
+      flyImg.style.transformOrigin = 'center center';
+      flyImg.style.transition = 'all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      flyImg.style.zIndex = '9999';
+      document.body.appendChild(flyImg);
+
+      // Start at smallest size for strong visual impact
+      flyImg.style.transform = 'scale(0.5)';
+      flyImg.style.opacity = '1';
+
+      requestAnimationFrame(() => {
+        const translateX = endRect.left + endRect.width / 2 - (startRect.left + startRect.width / 2);
+        const translateY = endRect.top + endRect.height / 2 - (startRect.top + startRect.height / 2);
+        const scaleDown = Math.min(endRect.width / startRect.width, endRect.height / startRect.height, 0.2);
+        flyImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleDown})`;
+        flyImg.style.opacity = '0.3';
+      });
+
+      const cartIconWrapper = document.querySelector('[data-cart-icon]') as HTMLElement | null;
+      const cleanup = () => {
+        flyImg.remove();
+        if (cartIconWrapper) {
+          cartIconWrapper.classList.remove('animate-pulse');
+          cartIconWrapper.classList.add('cart-shake');
+          window.setTimeout(() => {
+            cartIconWrapper.classList.remove('cart-shake');
+          }, 600);
+        }
+      };
+
+      if (cartIconWrapper) {
+        cartIconWrapper.classList.add('animate-pulse');
+      }
+      window.setTimeout(cleanup, 1200);
+    }, 50);
+  };
+
+  const handleAddToCart = async (productId: string) => {
+    setAddingToCartProductId(productId);
+    try {
+      const productDetail = await api.getProductById(productId);
+      const variant = productDetail.variants.find((v) => v.stockQuantity > 0) ?? productDetail.variants[0];
+      if (!variant) {
+        showToast('Sản phẩm hiện không có phiên bản khả dụng.');
+        return;
+      }
+
+      await api.addToCart({
+        productId,
+        productVariantId: variant._id,
+        quantity: 1
+      });
+
+      animateFlyToCart(productId);
+      showToast('Đã thêm vào giỏ hàng');
+    } catch (error) {
+      console.error(error);
+      showToast('Vui lòng đăng nhập trước khi thêm vào giỏ hàng.');
+    } finally {
+      setAddingToCartProductId(null);
+    }
   };
 
   const updateCategory = (slug: string) => {
@@ -167,6 +265,18 @@ export default function PLP() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
+      <style>{`
+        @keyframes cartShake {
+          0%, 100% { transform: translateX(0) scale(1); }
+          20% { transform: translateX(-2px) scale(1.04); }
+          40% { transform: translateX(2px) scale(1.04); }
+          60% { transform: translateX(-1px) scale(1.02); }
+          80% { transform: translateX(1px) scale(1.02); }
+        }
+        .cart-shake {
+          animation: cartShake 0.45s ease-out !important;
+        }
+      `}</style>
       <div className="max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14">
         <section className="mb-10 px-2">
           <p className="text-[11px] uppercase tracking-[0.3em] text-slate-500 mb-3">Aurelia Shop</p>
@@ -402,6 +512,7 @@ export default function PLP() {
                       <div className="relative overflow-hidden bg-[#ece8e2] mb-3">
                         <Link to={`/product/${product._id}`} className="block">
                           <img
+                            ref={(el) => (itemImageRefs.current[product._id] = el)}
                             alt={product.name}
                             className="aspect-[4/5] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                             src={product.imageUrl}
@@ -410,19 +521,18 @@ export default function PLP() {
                         </Link>
                         <div className="absolute left-0 right-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                           <div className="flex items-stretch">
-                            <Link
-                              to={product.inStock ? `/product/${product._id}` : '#'}
-                              onClick={(event) => {
-                                if (!product.inStock) {
-                                  event.preventDefault();
-                                }
-                              }}
-                              className={`flex-1 py-3 px-3 text-[11px] uppercase tracking-[0.14em] font-semibold flex items-center justify-center gap-2 ${
-                                product.inStock ? 'bg-[#f2efe9] text-slate-900 hover:bg-[#dfd9ce]' : 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                              }`}
-                            >
-                              <ShoppingBag className="h-4 w-4" /> Thêm vào giỏ
-                            </Link>
+                            <button
+                            type="button"
+                            onClick={() => handleAddToCart(product._id)}
+                            disabled={!product.inStock || addingToCartProductId === product._id}
+                            className={`flex-1 py-3 px-3 text-[11px] uppercase tracking-[0.14em] font-semibold flex items-center justify-center gap-2 ${
+                              product.inStock
+                                ? 'bg-[#f2efe9] text-slate-900 hover:bg-[#dfd9ce]'
+                                : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                            } ${addingToCartProductId === product._id ? 'cursor-wait opacity-70' : ''}`}
+                          >
+                            <ShoppingBag className="h-4 w-4" /> {addingToCartProductId === product._id ? 'Đang thêm...' : 'Thêm vào giỏ'}
+                          </button>
                             <Link
                               to={`/product/${product._id}`}
                               className="w-12 bg-[#2f2f2f] text-white hover:bg-black flex items-center justify-center"
@@ -485,6 +595,11 @@ export default function PLP() {
           </main>
         </div>
       </div>
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 z-50 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 opacity-95">
+            {toastMessage}
+          </div>
+        )}
     </div>
   );
 }
