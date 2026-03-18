@@ -58,8 +58,8 @@ export default function PLP() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-12 text-center">
-        <h1 className="font-serif text-4xl text-charcoal font-bold mb-4">The Collection</h1>
-        <p className="text-gray-500 max-w-2xl mx-auto">Explore our full range of meticulously crafted garments, designed for the modern gentleman.</p>
+        <h1 className="font-serif text-4xl text-charcoal font-bold mb-4">Bộ Sưu Tập</h1>
+        <p className="text-gray-500 max-w-2xl mx-auto">Khám phá bộ sưu tập đầy đủ các trang phục được chế tác tỉ mỉ, dành cho quý ông hiện đại.</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-12">
@@ -69,7 +69,7 @@ export default function PLP() {
           onClick={() => setIsFilterOpen(!isFilterOpen)}
         >
           <Filter className="mr-2 h-5 w-5" />
-          Filter & Sort
+          Lọc & Sắp Xếp
         </button>
 
         {/* Sidebar Filters */}
@@ -81,12 +81,12 @@ export default function PLP() {
                 className="flex justify-between items-center w-full text-left font-medium text-charcoal uppercase tracking-wider text-sm"
                 onClick={() => toggleSection('category')}
               >
-                Category
+                Danh Mục
                 {openSections.category ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
               {openSections.category && (
                 <div className="mt-4 space-y-3">
-                  {[{ slug: 'all', name: 'All' }, ...categories].map(cat => (
+                  {[{ slug: 'all', name: 'Tất Cả' }, ...categories].map(cat => (
                     <label key={cat.slug} className="flex items-center space-x-3 cursor-pointer group">
                       <input
                         type="checkbox"
@@ -107,7 +107,7 @@ export default function PLP() {
                 className="flex justify-between items-center w-full text-left font-medium text-charcoal uppercase tracking-wider text-sm"
                 onClick={() => toggleSection('size')}
               >
-                Size
+                Kích Cỡ
                 {openSections.size ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
               {openSections.size && (
@@ -127,16 +127,16 @@ export default function PLP() {
                 className="flex justify-between items-center w-full text-left font-medium text-charcoal uppercase tracking-wider text-sm"
                 onClick={() => toggleSection('color')}
               >
-                Color
+                Màu Sắc
                 {openSections.color ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
               {openSections.color && (
                 <div className="mt-4 space-y-3">
                   {[
-                    { name: 'Charcoal', hex: '#333333' },
-                    { name: 'Navy', hex: '#000080' },
-                    { name: 'Camel', hex: '#C19A6B' },
-                    { name: 'Olive', hex: '#556B2F' }
+                    { name: 'Than', hex: '#333333' },
+                    { name: 'Hải Quân', hex: '#000080' },
+                    { name: 'Lạc Đà', hex: '#C19A6B' },
+                    { name: 'Ô Liu', hex: '#556B2F' }
                   ].map(color => (
                     <label key={color.name} className="flex items-center space-x-3 cursor-pointer group">
                       <input type="checkbox" className="form-checkbox h-4 w-4 text-charcoal border-gray-300 rounded-sm focus:ring-charcoal" />
@@ -153,13 +153,13 @@ export default function PLP() {
         {/* Product Grid */}
         <main className="flex-1">
           <div className="flex justify-between items-center mb-6">
-            <p className="text-sm text-gray-500">{products.length} Results</p>
+            <p className="text-sm text-gray-500">{products.length} Kết Quả</p>
             <div className="hidden lg:flex items-center space-x-2">
-              <span className="text-sm text-gray-500">Sort by:</span>
+              <span className="text-sm text-gray-500">Sắp xếp theo:</span>
               <select className="text-sm border-none bg-transparent font-medium text-charcoal focus:ring-0 cursor-pointer">
-                <option>Newest Arrivals</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
+                <option>Mới Nhất</option>
+                <option>Giá: Thấp Đến Cao</option>
+                <option>Giá: Cao Đến Thấp</option>
               </select>
             </div>
           </div>

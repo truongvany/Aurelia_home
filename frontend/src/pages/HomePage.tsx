@@ -3,9 +3,80 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, Bot } from 'lucide-react';
 import { Product } from '../types';
 import { api } from '../lib/api';
+import fabricTexture from '../assets/images/pic-1.jpg';
+import hero1 from '../assets/images/hero-1.jpg';
+import hero2 from '../assets/images/hero-2.jpg';
+import hero3 from '../assets/images/hero-3.jpg';
+
+const heroImages = [hero1, hero2, hero3];
+
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+}
 
 export default function HomePage() {
   const [bestsellers, setBestsellers] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [activeCategory, setActiveCategory] = useState('');
+  const [categoryProducts, setCategoryProducts] = useState<Product[]>([]);
+  const [categoryLoading, setCategoryLoading] = useState(true);
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categoryData = await api.getCategories();
+        setCategories(categoryData);
+        setActiveCategory(categoryData[0]?.slug ?? '');
+      } catch (error) {
+        console.error('Failed to fetch categories', error);
+        setCategoryLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    if (!activeCategory) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchCategoryProducts = async () => {
+      try {
+        setCategoryLoading(true);
+        const params = new URLSearchParams({ category: activeCategory });
+        const products = await api.getProducts(params);
+        if (!cancelled) {
+          setCategoryProducts(products);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Failed to fetch category products', error);
+          setCategoryProducts([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setCategoryLoading(false);
+        }
+      }
+    };
+
+    fetchCategoryProducts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeCategory]);
+
+  const activeCategoryName =
+    categories.find((category) => category.slug === activeCategory)?.name ?? 'Danh Mục';
+  const categoryLeadProduct = categoryProducts[0];
+  const categoryGridProducts = categoryProducts.slice(1, 5);
 
   useEffect(() => {
     const fetchFeatured = async () => {
@@ -18,7 +89,13 @@ export default function HomePage() {
     };
 
     fetchFeatured();
-  }, []);
+
+    const interval = window.setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, [heroImages.length]);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased">
@@ -26,21 +103,21 @@ export default function HomePage() {
       <section className="relative h-screen w-full overflow-hidden bg-slate-900">
         <img 
           alt="Cinematic tailored suit detail" 
-          className="absolute inset-0 w-full h-full object-cover opacity-80" 
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJAJCi1iFk5Z1Q6oRQlyH-NeAhPLrnClaubd6IeWZP7dFgdMIdezERq6Q_yR6AJ9d3j7M8IdNc7riQCbon0i-6vb_dkF2nSga5ZzvRdUZngqjv2rMxuELLlW7OH1dKSIoIGx_DVVMEu6X4vj-NhYhNNOjuz2CWlI4UqK9fkAmC2hhHoEFjNgWMVukZ3JwQM1D95G1TyuxEs_-E5c8H8rwaEF36Dj8zlRWKnqz3n8xgDR7GpUT-r5oFhnFOOkbTxxZgRRnjpBkqFbM"
+          className="absolute inset-0 w-full h-full object-cover opacity-80 transition-opacity duration-1000"
+          src={heroImages[heroIndex]}
           referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-slate-900/60"></div>
         <div className="relative h-full flex flex-col items-center justify-center text-center px-4">
           <h1 className="text-white text-5xl md:text-7xl lg:text-8xl font-serif mb-8 max-w-4xl leading-tight">
-            The Modern <br/> <span className="italic">Gentleman</span> Collection
+            Bộ Sưu Tập <br/> <span className="italic">Quý Ông</span> Hiện Đại
           </h1>
           <div className="flex flex-col items-center space-y-6">
             <p className="text-white/80 text-lg font-light tracking-wide max-w-xl">
-              Redefining luxury through architectural precision and sustainable craftsmanship.
+              Định nghĩa lại sự xa xỉ qua độ chính xác kiến trúc và nghệ thuật thủ công bền vững.
             </p>
             <Link to="/shop" className="bg-blue-600 text-white px-12 py-4 text-sm uppercase tracking-[0.2em] font-medium hover:bg-blue-700 transition-all duration-500 shadow-xl">
-              Shop Now
+              Mua Ngay
             </Link>
           </div>
         </div>
@@ -55,23 +132,23 @@ export default function HomePage() {
       <section className="py-24 px-6 lg:px-20 bg-white">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-5 order-2 lg:order-1">
-            <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-4 block">Our Heritage</span>
-            <h2 className="text-4xl md:text-5xl font-serif text-slate-900 mb-8 leading-tight">Timeless Craftsmanship, Sustainably Sourced.</h2>
+            <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-4 block">Di Sản Của Chúng Tôi</span>
+            <h2 className="text-4xl md:text-5xl font-serif text-slate-900 mb-8 leading-tight">Nghệ Thuật Thủ Công Vĩnh Cửu, Nguồn Gốc Bền Vững.</h2>
             <p className="text-slate-600 text-lg leading-relaxed mb-6">
-              At Aurelia Homme, every stitch tells a story of dedication. We believe that true luxury lies in the marriage of high-performance natural fibers and centuries-old tailoring techniques.
+              Tại Aurelia Homme, mỗi mũi kim kể một câu chuyện về sự tận tâm. Chúng tôi tin rằng sự xa xỉ đích thực nằm ở sự kết hợp giữa các loại vải hiệu suất cao tự nhiên và các kỹ thuật may đo hàng thế kỷ.
             </p>
             <div className="grid grid-cols-2 gap-8 mt-10">
               <div>
-                <h4 className="font-bold text-slate-900 uppercase text-xs tracking-widest mb-2">Virgin Wool</h4>
-                <p className="text-sm text-slate-500">Sourced from ethical farms in the Italian Highlands.</p>
+                <h4 className="font-bold text-slate-900 uppercase text-xs tracking-widest mb-2">Len Nguyên Chất</h4>
+                <p className="text-sm text-slate-500">Nguồn gốc từ các trang trại đạo đức ở vùng núi Ý.</p>
               </div>
               <div>
-                <h4 className="font-bold text-slate-900 uppercase text-xs tracking-widest mb-2">Full Grain</h4>
-                <p className="text-sm text-slate-500">Leather cured with natural extracts for longevity.</p>
+                <h4 className="font-bold text-slate-900 uppercase text-xs tracking-widest mb-2">Da Nguyên Bán</h4>
+                <p className="text-sm text-slate-500">Da được ủ bằng chiết xuất tự nhiên để tăng độ bền.</p>
               </div>
             </div>
             <Link to="/about" className="inline-block mt-12 border-b border-slate-900 pb-1 text-sm uppercase tracking-widest font-bold hover:text-blue-600 hover:border-blue-600 transition-all">
-              Discover Our Process
+              Khám Phá Quy Trình Của Chúng Tôi
             </Link>
           </div>
           <div className="lg:col-span-7 order-1 lg:order-2">
@@ -85,7 +162,7 @@ export default function HomePage() {
               <img 
                 alt="Fabric texture detail" 
                 className="absolute -bottom-10 -left-6 w-1/2 h-80 object-cover border-8 border-white shadow-xl hidden md:block" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeWRNnBcl2qXgHaw1jaN14NuGCjFXt3_cONYBcSXoEBb_YbkcY7RHUwAIZsxsvMe8DvuNZmykI73JkzMF7nQIF8vdMPn4K8atrpAztxCw6E5NVpdtQs2e6XxfJljxZ_Y-PvihJS0XNR3Sx38lPos35yZin3yrJRQAFsjfFM7f3JKvaN29YaVX_2-vykZlIMIjo7OME7JxYkaC8YY5FuKJwv4T6F5XIg60gJgqiqftxwqXCi5GuMtb5GatTPew3a5EMO8IFhcdhDnY"
+                src={fabricTexture}
                 referrerPolicy="no-referrer"
               />
             </div>
@@ -98,8 +175,8 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-white text-4xl font-serif mb-4">Meet Your Personal AI Grooming & Style Assistant</h2>
-            <p className="text-white/60 max-w-2xl mx-auto">Hyper-personalized styling advice based on your body shape, event type, and current wardrobe.</p>
+            <h2 className="text-white text-4xl font-serif mb-4">Gặp Gỡ Trợ Lý AI Cá Nhân Hóa Cho Việc Chăm Sóc Và Phong Cách</h2>
+            <p className="text-white/60 max-w-2xl mx-auto">Lời khuyên phong cách siêu cá nhân hóa dựa trên hình dáng cơ thể, loại sự kiện và tủ đồ hiện tại của bạn.</p>
           </div>
           
           <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-6 md:p-10 max-w-4xl mx-auto shadow-2xl flex flex-col md:flex-row gap-8">
@@ -107,13 +184,13 @@ export default function HomePage() {
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-[10px] text-white font-bold">AH</div>
                 <div className="bg-white/10 rounded-2xl rounded-tl-none p-4 text-sm text-white/90 max-w-[80%]">
-                  "Hello, Julian. Based on your athletic build and tonight's 'Creative Black Tie' event, I suggest the Midnight Navy Tuxedo."
+                  "Xin chào, Julian. Dựa trên thân hình thể thao của bạn và sự kiện 'Black Tie Sáng Tạo' tối nay, tôi đề xuất Bộ Vest Hải Quân Giữa Đêm."
                 </div>
               </div>
               <div className="flex items-start flex-row-reverse gap-3">
                 <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-[10px] text-white">ME</div>
                 <div className="bg-blue-600/20 border border-blue-600/30 rounded-2xl rounded-tr-none p-4 text-sm text-white/90 max-w-[80%]">
-                  "Show me some accessories to pair with that."
+                  "Hãy cho tôi xem một số phụ kiện để kết hợp với bộ đó."
                 </div>
               </div>
               <div className="flex gap-4 pt-4">
@@ -132,96 +209,147 @@ export default function HomePage() {
               <div className="w-24 h-24 rounded-full border-2 border-blue-600 flex items-center justify-center animate-pulse">
                 <Bot className="h-10 w-10 text-blue-600" />
               </div>
-              <p className="text-xs uppercase tracking-[0.2em] text-blue-600 font-bold">Live AI Analysis</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-blue-600 font-bold">Phân Tích AI Trực Tiếp</p>
               <Link to="/ai-assistant" className="w-full py-3 bg-white text-slate-900 text-xs font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all text-center block">
-                Launch Stylist
+                Khởi Động Nhà Tư Vấn
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Collections */}
-      <section className="py-24 bg-white">
-        <div className="max-w-[1440px] mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[1000px]">
-            {/* Tailored Suits */}
-            <Link to="/shop?category=suits" className="md:col-span-8 relative group overflow-hidden h-[300px] md:h-auto block">
-              <img 
-                alt="Tailored Suits" 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_zja9JwieBVbbrn67olX8hpr8lnJvT3FdXrlLvLN-XBTEiC9DvkUoacjcvK3dOPkJoCspLP82of4C3g5Lw7YBEL0F47a1QqeMOxKqEf8blwXd_nTZc6aaBLjC0HNUVSO3pyYwPjEdB6b8QtjT1bloKr6MKZmuMewm_glVgUEFOOELvrcwkPeBP4pZcLSDH5z631derB5OQymUvMEWb4X0fRcTPib_Jv0_LGlc8GDHIB4bSuN9ez7TFykiM9zIu39Bqg5vbZXjXI4"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-500"></div>
-              <div className="absolute bottom-10 left-10 text-white">
-                <h3 className="text-3xl font-serif mb-2">Tailored Suits</h3>
-                <p className="text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center">
-                  Shop The Edit <ArrowRight className="ml-2 h-4 w-4" />
-                </p>
+          {/* Dynamic Category Showcase */}
+          <section className="py-24 bg-slate-50">
+            <div className="max-w-[1440px] mx-auto px-6">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+                <div>
+                  <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-3 block">Danh Mục Từ Database</span>
+                  <h2 className="text-4xl md:text-5xl font-serif text-slate-900">Khám Phá Theo Danh Mục</h2>
+                </div>
+                <Link
+                  to="/shop"
+                  className="inline-flex items-center text-xs uppercase tracking-[0.2em] font-bold text-slate-900 hover:text-blue-600 transition-colors"
+                >
+                  Xem Toàn Bộ Cửa Hàng
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </div>
-            </Link>
-            
-            {/* Urban Casual */}
-            <Link to="/shop?category=casual" className="md:col-span-4 relative group overflow-hidden h-[300px] md:h-auto block">
-              <img 
-                alt="Urban Casual" 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYTwHdDbZTA29tVB4azM_jwTmcdRONwWp6r4uNJDPg_QeuTmpy-T7PrTPBW8M8ebwfxLRaorvTHR01gSThr6NA3RObbnRM-bZf9vrJYnaEuyZChLjHKsE2xBX9DIvoe6OOa5YVMW6XYfBvtwslwZke5n_-CVhUX50PREGPV7wHm9D00i8cxXHULeTOUB05zpSw-EuHRH6PYELfBzUYEkIZPOB6zz4GeRwtXhOMOPEpykhk-F5AMojYEIlMTdSndBQgHlcHZCUibCk"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-500"></div>
-              <div className="absolute bottom-10 left-10 text-white">
-                <h3 className="text-3xl font-serif mb-2">Urban Casual</h3>
-                <p className="text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center">
-                  Shop The Edit <ArrowRight className="ml-2 h-4 w-4" />
-                </p>
+
+              <div className="flex gap-3 overflow-x-auto pb-3 mb-8 no-scrollbar">
+                {categories.map((category) => (
+                  <button
+                    key={category._id}
+                    type="button"
+                    onClick={() => setActiveCategory(category.slug)}
+                    className={`shrink-0 px-5 py-2.5 rounded-full border text-xs uppercase tracking-[0.2em] font-semibold transition-all duration-300 ${
+                      activeCategory === category.slug
+                        ? 'bg-slate-900 border-slate-900 text-white shadow-lg shadow-slate-900/25'
+                        : 'bg-white border-slate-200 text-slate-700 hover:border-slate-900 hover:text-slate-900'
+                    }`}
+                  >
+                    {category.name}
+                  </button>
+                ))}
               </div>
-            </Link>
-            
-            {/* Classic Essentials */}
-            <Link to="/shop?category=essentials" className="md:col-span-4 relative group overflow-hidden h-[300px] md:h-auto block">
-              <img 
-                alt="Classic Essentials" 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTGLoS-X8bCeo8RGpzcFSk37za_-yNoRPQBUAeZet5XNrv_VBKqyni9ZMkzLZVVHOjbybXd9fJcLJi1S2tShJrTrreeUUCCLK7gkttLeIptapndRCwzfsPe7DET9nhMSJyPuEu4J4zXgOXN4REEe6Cx0HnfXFUeFnaTwzwfP_CuJjZ5MQCsNVyhmxcfEEGxPFeEncD_gn5Lgk2yqJ_JLwXDOtREenzE-SXeKeWLQ55DIplh5P5umgsmbGxmFFFGqvNVGJOdjDuEDc"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-500"></div>
-              <div className="absolute bottom-10 left-10 text-white">
-                <h3 className="text-3xl font-serif mb-2">Classic Essentials</h3>
-                <p className="text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center">
-                  Shop The Edit <ArrowRight className="ml-2 h-4 w-4" />
-                </p>
-              </div>
-            </Link>
-            
-            {/* Accessories */}
-            <Link to="/shop?category=accessories" className="md:col-span-8 relative group overflow-hidden h-[300px] md:h-auto block">
-              <img 
-                alt="Accessories" 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwiqXJ0vfE0DzCtdR-qycKocgVm6HWixIkCtQ2tNOX8SQ1h6VYLNsY3O7C9WACQGo8-_iDHUwodXElsdeuG-6DJtHvSkgYkkC6-GUl7WKqduLf0v1aqpOmwTnEIujXDq2gStHPR5540wpst6FpK3vfuGjQxYKsye1U5t6g8GTMvBU27wPyyn-_HJlBx0-Rfulmm0DKBFUqhFDrKMPRvClCRXmrSoN_BwldowKGkFae_xzjdEGCxyuTna63EO9k-sQdj4mJXLSiC7c"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-500"></div>
-              <div className="absolute bottom-10 left-10 text-white">
-                <h3 className="text-3xl font-serif mb-2">Refined Accessories</h3>
-                <p className="text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center">
-                  Shop The Edit <ArrowRight className="ml-2 h-4 w-4" />
-                </p>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
+
+              {categoryLoading ? (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-pulse">
+                  <div className="lg:col-span-7 h-[480px] bg-slate-200 rounded-3xl" />
+                  <div className="lg:col-span-5 grid sm:grid-cols-2 gap-6">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                      <div key={index} className="h-[227px] bg-slate-200 rounded-2xl" />
+                    ))}
+                  </div>
+                </div>
+              ) : categoryLeadProduct ? (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <Link
+                    to={`/product/${categoryLeadProduct._id}`}
+                    className="lg:col-span-7 relative h-[460px] md:h-[520px] rounded-3xl overflow-hidden group"
+                  >
+                    <img
+                      alt={categoryLeadProduct.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      src={categoryLeadProduct.imageUrl}
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                    <div className="absolute top-6 left-6 text-[10px] uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-white/40 text-white/90 bg-black/20 backdrop-blur-sm">
+                      {activeCategoryName}
+                    </div>
+                    <div className="absolute left-7 right-7 bottom-7 text-white">
+                      <h3 className="text-3xl md:text-4xl font-serif leading-tight mb-3">{categoryLeadProduct.name}</h3>
+                      <p className="text-white/70 text-sm mb-4 line-clamp-2">{categoryLeadProduct.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xl font-semibold">${categoryLeadProduct.price.toFixed(2)}</span>
+                        <span className="inline-flex items-center text-xs uppercase tracking-[0.2em] font-bold">
+                          Mua Ngay <ArrowRight className="ml-2 h-4 w-4" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+
+                  <div className="lg:col-span-5 grid sm:grid-cols-2 gap-6">
+                    {categoryGridProducts.map((product) => (
+                      <Link
+                        key={product._id}
+                        to={`/product/${product._id}`}
+                        className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-slate-900/10 transition-all"
+                      >
+                        <div className="h-40 overflow-hidden">
+                          <img
+                            alt={product.name}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            src={product.imageUrl}
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                        <div className="p-5">
+                          <h4 className="font-semibold text-slate-900 mb-2 line-clamp-1">{product.name}</h4>
+                          <p className="text-xs text-slate-500 line-clamp-2 mb-4">{product.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-slate-900 font-semibold">${product.price.toFixed(2)}</span>
+                            <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-blue-600">Chi Tiết</span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-14 text-center">
+                  <h3 className="text-2xl font-serif text-slate-900 mb-3">Danh mục này chưa có sản phẩm hiển thị</h3>
+                  <p className="text-slate-500 mb-6">Hệ thống đã đọc đúng danh mục trong database nhưng chưa có dữ liệu sản phẩm hoạt động.</p>
+                  <Link
+                    to="/shop"
+                    className="inline-flex items-center bg-slate-900 text-white px-8 py-3 text-xs uppercase tracking-[0.2em] font-bold hover:bg-blue-600 transition-colors"
+                  >
+                    Đi Tới Cửa Hàng
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </div>
+              )}
+
+              {activeCategory && (
+                <div className="mt-8 text-right">
+                  <Link
+                    to={`/shop?category=${encodeURIComponent(activeCategory)}`}
+                    className="inline-flex items-center text-xs uppercase tracking-[0.2em] font-bold text-slate-700 hover:text-blue-600 transition-colors"
+                  >
+                    Xem thêm sản phẩm {activeCategoryName}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </div>
+              )}
+            </div>
+          </section>
 
       {/* Bestseller Carousel */}
       <section className="py-24 bg-gray-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 mb-12 flex items-end justify-between">
           <div>
-            <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-2 block">Our Finest</span>
-            <h2 className="text-4xl font-serif text-slate-900">The Season's Bestsellers</h2>
+            <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-2 block">Tinh Hoa Của Chúng Tôi</span>
+            <h2 className="text-4xl font-serif text-slate-900">Những Sản Phẩm Bán Chạy Nhất Mùa</h2>
           </div>
           <div className="hidden md:flex space-x-4">
             <button className="w-12 h-12 rounded-full border border-slate-900/20 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all">
@@ -244,13 +372,13 @@ export default function HomePage() {
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute top-4 left-4 bg-blue-600 text-white text-[10px] uppercase px-2 py-1 tracking-widest">
-                  New Entry
+                  Mới Nhập
                 </div>
                 <Link 
                   to={`/product/${product._id}`} 
                   className="absolute bottom-0 left-0 w-full bg-slate-900 text-white py-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs uppercase tracking-widest font-bold text-center block"
                 >
-                  Quick Add
+                  Thêm Nhanh
                 </Link>
               </div>
               <h4 className="text-sm font-bold uppercase tracking-widest text-slate-900">{product.name}</h4>
