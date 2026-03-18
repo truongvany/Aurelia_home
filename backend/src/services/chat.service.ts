@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import Groq from "groq-sdk";
 import { env } from "../config/env.js";
 import { ASSISTANT_KNOWLEDGE_BASE } from "../constants/assistantKnowledge.js";
 import { AiConversationModel } from "../models/aiConversation.model.js";
@@ -48,7 +49,14 @@ interface RetrievalOutput {
   suggestedProducts: SuggestedProduct[];
 }
 
-const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const getGroqClient = () => {
+  if (!env.GROQ_API_KEY) {
+    return null;
+  }
+  return new Groq({
+    apiKey: env.GROQ_API_KEY
+  });
+};
 
 const tokenize = (value: string): string[] =>
   value
@@ -202,59 +210,43 @@ ${query}
 `.trim();
 };
 
-const generateGeminiReply = async (
+const generateGroqReply = async (
   query: string,
   sources: ScoredKnowledgeSource[],
   suggestedProducts: SuggestedProduct[]
 ): Promise<string | null> => {
-  if (!env.GEMINI_API_KEY) {
-    console.warn('GEMINI_API_KEY is not set; falling back to non-AI response mode.');
+  const groq = getGroqClient();
+  if (!groq) {
+    console.warn('GROQ_API_KEY is not set; falling back to non-AI response mode.');
     return null;
   }
 
   const prompt = buildPrompt(query, sources, suggestedProducts);
 
   try {
-    const response = await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(env.GEMINI_API_KEY)}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.35,
-          maxOutputTokens: 200,
-          topP: 0.9
+    const message = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      max_tokens: 200,
+      temperature: 0.35,
+      top_p: 0.9,
+      messages: [
+        {
+          role: "user",
+          content: prompt
         }
-      })
+      ]
     });
 
-    if (!response.ok) {
-      const statusText = response.status === 429 ? "Quota exceeded" : response.statusText;
-      const errorText = await response.text();
-      console.error("Gemini API error:", response.status, statusText, errorText);
+    const text = message.choices[0]?.message?.content?.trim() || "";
+    return text || null;
+  } catch (error: any) {
+    const errorMessage = error?.message || String(error);
+    console.error("Groq API error:", errorMessage);
 
-      if (response.status === 429) {
-        // Quota exceeded / rate limited
-        return "Dịch vụ AI đang quá tải hoặc đã hết hạn mức (quota); vui lòng thử lại sau vài phút.";
-      }
-
-      return null;
+    if (errorMessage.includes("rate_limit") || errorMessage.includes("quota")) {
+      return "Dịch vụ AI đang quá tải hoặc đã hết hạn mức (quota); vui lòng thử lại sau vài phút.";
     }
 
-    const payload = (await response.json()) as {
-      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-    };
-
-    const text = payload.candidates?.[0]?.content?.parts
-      ?.map((part) => part.text ?? "")
-      .join("\n")
-      .trim();
-
-    return text || null;
-  } catch (error) {
-    console.error("Gemini request failed", error);
     return null;
   }
 };
@@ -334,7 +326,7 @@ export const sendChatMessage = async (input: SendMessageInput) => {
 
   const retrieval = await runRetrieval(input.message);
   const replyText =
-    (await generateGeminiReply(input.message, retrieval.sources, retrieval.suggestedProducts)) ??
+    (await generateGroqReply(input.message, retrieval.sources, retrieval.suggestedProducts)) ??
     buildFallbackReply(input.message, retrieval.sources, retrieval.suggestedProducts);
 
   const aiMessage = await AiMessageModel.create({
