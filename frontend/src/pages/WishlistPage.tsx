@@ -49,7 +49,9 @@ export default function WishlistPage() {
 
     return products
       .filter((product) => orderMap.has(product._id))
-      .sort((a, b) => (orderMap.get(a._id) ?? 0) - (orderMap.get(b._id) ?? 0));
+      .sort((a, b) =>
+        Number(orderMap.get(a._id) ?? 0) - Number(orderMap.get(b._id) ?? 0)
+      );
   }, [products, wishlistIds]);
 
   if (loading) {
