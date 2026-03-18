@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Product } from '../types';
-import { ChevronRight, Heart, Share2, Truck, RefreshCw, ArrowRight, X } from 'lucide-react';
+import { ChevronRight, Heart, Share2, Truck, RefreshCw, ArrowRight, X, Info, Package, Globe, Layers } from 'lucide-react';
 import { api } from '../lib/api';
 import { formatVND } from '../utils/currency';
 import { isProductWishlisted, toggleWishlistProduct } from '../utils/wishlist';
@@ -46,6 +46,7 @@ export default function PDP() {
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'details' | 'returns' | 'shipping' | 'materials'>('details');
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -155,7 +156,7 @@ export default function PDP() {
 
   const activeImage = selectedImage || toAbsoluteImageUrl(product.imageUrl);
 
-  const selectedVariant = product.variants.find(
+  const selectedVariant = (product.variants ?? []).find(
     (variant) => variant.size === selectedSize && variant.color === selectedColor
   );
   const sizeGuidePreviewUrl = product.sizeGuideImageUrl
@@ -432,6 +433,96 @@ export default function PDP() {
             </div>
           </div>
         </div>
+
+        {/* Full Width Product Details & Policies Section */}
+        <section className="mt-16 border-t border-slate-100 pt-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+            {/* Detailed Description */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-slate-50 rounded-lg">
+                  <Info className="h-5 w-5 text-slate-900" />
+                </div>
+                <h3 className="font-serif text-2xl text-slate-900">Chi tiết sản phẩm</h3>
+              </div>
+              <div className="prose prose-slate max-w-none">
+                <p className="text-slate-600 leading-relaxed italic mb-6">
+                  "{product.description}"
+                </p>
+                <div className="grid grid-cols-2 gap-y-4 gap-x-8 border-t border-slate-100 pt-6">
+                  <div>
+                    <span className="block text-[10px] uppercase tracking-widest text-slate-400 mb-1">SKU</span>
+                    <span className="text-sm font-medium text-slate-900">{selectedVariant?.sku ?? 'AURELIA-GEN'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] uppercase tracking-widest text-slate-400 mb-1">Phân loại</span>
+                    <span className="text-sm font-medium text-slate-900">{product.category}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] uppercase tracking-widest text-slate-400 mb-1">Chất liệu chính</span>
+                    <span className="text-sm font-medium text-slate-900">Premium Merino Wool</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] uppercase tracking-widest text-slate-400 mb-1">Xuất xứ</span>
+                    <span className="text-sm font-medium text-slate-900">Made in Italy</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Shipping & Delivery */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-slate-50 rounded-lg">
+                  <Package className="h-5 w-5 text-slate-900" />
+                </div>
+                <h3 className="font-serif text-xl text-slate-900">Vận chuyển</h3>
+              </div>
+              <ul className="space-y-4">
+                <li className="flex gap-3">
+                  <div className="h-1.5 w-1.5 rounded-full bg-gold mt-1.5 shrink-0" />
+                  <p className="text-sm text-slate-600">Giao hàng tiêu chuẩn miễn phí cho đơn hàng từ 500.000₫.</p>
+                </li>
+                <li className="flex gap-3">
+                  <div className="h-1.5 w-1.5 rounded-full bg-gold mt-1.5 shrink-0" />
+                  <p className="text-sm text-slate-600">Thời gian nhận hàng từ 2-5 ngày làm việc trên toàn quốc.</p>
+                </li>
+                <li className="flex gap-3">
+                  <div className="h-1.5 w-1.5 rounded-full bg-gold mt-1.5 shrink-0" />
+                  <p className="text-sm text-slate-600">Dịch vụ giao hàng hỏa tốc trong 2h tại khu vực nội thành.</p>
+                </li>
+              </ul>
+            </div>
+
+            {/* Returns & Materials */}
+            <div className="space-y-10">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-slate-50 rounded-lg">
+                    <Globe className="h-5 w-5 text-slate-900" />
+                  </div>
+                  <h3 className="font-serif text-xl text-slate-900">Chính sách đổi trả</h3>
+                </div>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Đổi trả dễ dàng trong vòng 30 ngày kể từ khi nhận hàng. 
+                  Sản phẩm phải còn nguyên nhãn mác và chưa qua sử dụng.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-slate-50 rounded-lg">
+                    <Layers className="h-5 w-5 text-slate-900" />
+                  </div>
+                  <h3 className="font-serif text-xl text-slate-900">Bảo quản</h3>
+                </div>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Giặt khô hoặc giặt tay nhẹ nhàng với nước lạnh. Tránh phơi trực tiếp dưới ánh nắng gay gắt.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section className="mt-12 border-t border-slate-200 pt-8">
           <div className="flex flex-wrap items-end justify-between gap-4 mb-5">
