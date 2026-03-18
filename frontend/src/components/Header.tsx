@@ -55,15 +55,13 @@ export default function Header() {
           </div>
           
           <nav className="hidden md:flex space-x-8">
+            <Link to="/" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Trang chủ</Link>  
             <Link to="/shop" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Thời trang mới</Link>
             <Link to="/about" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Giới thiệu</Link>
             <Link to="/contact" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Liên hệ</Link>
           </nav>
 
           <div className="flex items-center space-x-4">
-            <button className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors">
-              <Search className="h-5 w-5" />
-            </button>
             <Link to={profileTarget} className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors">
               <User className="h-5 w-5" />
             </Link>

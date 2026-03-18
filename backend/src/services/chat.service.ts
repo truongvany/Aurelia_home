@@ -184,20 +184,24 @@ const buildPrompt = (
     ? suggestedProducts
         .map(
           (product, index) =>
-            `${index + 1}. ${product.name} | Price: ${product.price} | In stock: ${product.inStock ? "yes" : "no"} | URL: ${product.url} | Notes: ${product.description}`
+            `${index + 1}. ${product.name} | Price: ${product.price} | In stock: ${product.inStock ? "yes" : "no"} | URL: ${product.url} | ImageUrl: ${product.imageUrl} | Notes: ${product.description}`
         )
         .join("\n")
     : "No specific product matched strongly. You may suggest browsing /shop.";
 
   return `
-You are the friendly Aurelia Home AI Stylist assistant. Respond in Vietnamese.
+You are Aurelia, the virtual assistant for Aurelia Home. Respond in Vietnamese.
 
 Rules:
-- VERY SHORT replies (2-3 sentences max). Be direct and natural, like texting a friend.
-- Use casual, friendly Vietnamese (có thể dùng từ thân thiết như "bạn", "mình").
+- VERY SHORT replies (2-3 sentences max). Be direct and polite.
+- Use professional, respectful Vietnamese (dùng danh xưng "Aurelia", gọi khách hàng là "Quý khách", dùng "dạ/vâng/ạ").
 - If you suggest products, show 2-3 max with prices and links only.
 - Reply naturally - don't be robotic. Skip unnecessary formatting.
-- For policies you don't know, just say "Mình không chắc, vào /contact nhé!" instead of long explanations.
+- IMPORTANT: ALWAYS format links as Markdown links with CONTEXTUAL and NATURAL text. DO NOT use generic words like "Tại đây" repeatedly. Ví dụ ĐÚNG: "truy cập [trang Cửa hàng](/shop)", "thực hiện [thanh toán](/checkout)", "[Tên sản phẩm](/url)". Ví dụ SAI: "truy cập [Tại đây](/shop)". KHÔNG ĐƯỢC để đường link trơn (raw URL) trong câu.
+- ALWAYS append the currency unit "VND" after prices. (Ví dụ: 3.920.000 VND).
+- If you suggest a product, ALWAYS include its image using Markdown image syntax BEFORE the product link. Example: "\n![Tên sản phẩm](imageUrl)\n[Tên sản phẩm](/url) - Giá VND".
+- ALWAYS end product recommendations with exactly this sentence: "Quý khách có thể tham khảo thêm nhiều mẫu tại [Cửa hàng](/shop) ạ!"
+- For policies you don't know, just say "Dạ Aurelia không chắc chắn về thông tin này, Quý khách vui lòng để lại lời nhắn tại [trang Liên hệ](/contact) để được hỗ trợ thêm ạ!" instead of long explanations.
 
 Knowledge context:
 ${sourceContext}
@@ -226,7 +230,7 @@ const generateGroqReply = async (
   try {
     const message = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
-      max_tokens: 200,
+      max_tokens: 800,
       temperature: 0.35,
       top_p: 0.9,
       messages: [
@@ -261,10 +265,10 @@ const buildFallbackReply = (
   // Add helpful info from knowledge base
   if (sources.length > 0) {
     parts.push(
-      "Bạn có thể tham khảo:\n" +
+      "Dạ Quý khách có thể tham khảo thêm thông tin chi tiết:\n" +
         sources
           .slice(0, 2)
-          .map((s) => `• ${s.title}: ${s.url}`)
+          .map((s) => `• [${s.title}](${s.url})`)
           .join("\n")
     );
   }
@@ -272,19 +276,19 @@ const buildFallbackReply = (
   // Add product suggestions if relevant
   if (suggestedProducts.length > 0) {
     parts.push(
-      "Sản phẩm đó:\n" +
+      "Dạ Aurelia xin gợi ý một số sản phẩm phù hợp:\n" +
         suggestedProducts
           .slice(0, 2)
-          .map((p) => `• ${p.name} (${p.price.toLocaleString()}) → ${p.url}`)
-          .join("\n")
+          .map((p) => `![${p.name}](${p.imageUrl})\n• [${p.name} (${p.price.toLocaleString()}đ)](${p.url})`)
+          .join("\n\n")
     );
   }
 
   // Default response
   if (parts.length === 0) {
-    parts.push("Mình không hiểu rõ. Vào /contact để được hỗ trợ nhé! 😊");
+    parts.push("Dạ bộ phận chăm sóc khách hàng sẽ hỗ trợ Quý khách chi tiết hơn. Quý khách có thể để lại lời nhắn tại [trang Liên hệ](/contact) ạ! 😊");
   } else {
-    parts.push("Có câu hỏi khác không?");
+    parts.push("Quý khách cần Aurelia hỗ trợ thêm vấn đề gì khác không ạ?");
   }
 
   return parts.join("\n\n");

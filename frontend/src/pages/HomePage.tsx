@@ -5,11 +5,12 @@ import { Product } from '../types';
 import { api } from '../lib/api';
 import { formatVND } from '../utils/currency';
 import fabricTexture from '../assets/images/pic-1.jpg';
-import hero1 from '../assets/images/hero-1.jpg';
-import hero2 from '../assets/images/hero-2.jpg';
-import hero3 from '../assets/images/hero-3.jpg';
+import hero1 from '../assets/images/hero_1.jpg';
+import hero2 from '../assets/images/hero_2.jpg';
+import hero3 from '../assets/images/hero_3.jpg';
+import hero4 from '../assets/images/hero_4.jpg';
 
-const heroImages = [hero1, hero2, hero3];
+const heroImages = [hero1, hero2, hero3, hero4];
 
 interface Category {
   _id: string;
@@ -126,31 +127,55 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased">
       {/* Hero Section */}
-      <section className="relative h-screen w-full overflow-hidden bg-slate-900">
+      <section className="relative w-full h-[60vh] md:h-[75vh] 2xl:h-[80vh] bg-white group">
         <img 
-          alt="Cinematic tailored suit detail" 
-          className="absolute inset-0 w-full h-full object-cover opacity-80 transition-opacity duration-1000"
+          alt="Aurelia SS25 Lookbook" 
+          className="absolute inset-0 w-full h-full object-cover md:object-contain bg-white transition-opacity duration-1000"
           src={heroImages[heroIndex]}
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-slate-900/60"></div>
-        <div className="relative h-full flex flex-col items-center justify-center text-center px-4">
-          <h1 className="text-white text-5xl md:text-7xl lg:text-8xl font-serif mb-8 max-w-4xl leading-tight">
-            Bộ Sưu Tập <br/> <span className="italic">Quý Ông</span> Hiện Đại
-          </h1>
-          <div className="flex flex-col items-center space-y-6">
-            <p className="text-white/80 text-lg font-light tracking-wide max-w-xl">
-              Định nghĩa lại sự xa xỉ qua độ chính xác kiến trúc và nghệ thuật thủ công bền vững.
-            </p>
-            <Link to="/shop" className="bg-blue-600 text-white px-12 py-4 text-sm uppercase tracking-[0.2em] font-medium hover:bg-blue-700 transition-all duration-500 shadow-xl">
-              Mua Ngay
-            </Link>
+        {/* Lớp phủ siêu mờ chỉ đủ để chữ có thể đọc được nhưng không làm mờ ảnh */}
+        <div className="absolute inset-0 bg-white/10"></div>
+        
+        {/* Nút Previous - Chỉ hiện khi hover vào banner */}
+        <button 
+          onClick={() => setHeroIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length)}
+          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:scale-110 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20"
+        >
+          <ChevronLeft className="w-6 h-6 text-red-500 hover:text-red-600" />
+        </button>
+
+        {/* Nút Next - Chỉ hiện khi hover vào banner */}
+        <button 
+          onClick={() => setHeroIndex((prev) => (prev + 1) % heroImages.length)}
+          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:scale-110 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20"
+        >
+          <ChevronRight className="w-6 h-6 text-red-500 hover:text-red-600" />
+        </button>
+
+
+
+        {/* Text caption ở gần dưới cùng */}
+        <div className="absolute bottom-12 left-0 right-0 z-20 flex justify-center">
+          <div className="text-black font-bold text-[10px] md:text-xs uppercase tracking-[0.3em] drop-shadow-sm">
+            LOOKBOOK <span className="font-medium text-slate-800">FOR MEN</span> 26
           </div>
         </div>
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
-          <svg className="h-6 w-6 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-          </svg>
+
+        {/* Nút phân trang (dots) định vị đè lên vạch biên dưới cùng */}
+        <div className="absolute -bottom-2 left-0 right-0 z-30 flex justify-center gap-3">
+          {heroImages.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setHeroIndex(idx)}
+              className={`transition-all duration-300 rounded-full ${
+                idx === heroIndex 
+                  ? 'w-4 h-4 bg-red-600 shadow-md scale-110' 
+                  : 'w-4 h-4 bg-black/20 hover:bg-black/40 backdrop-blur-sm'
+              }`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
         </div>
       </section>
 

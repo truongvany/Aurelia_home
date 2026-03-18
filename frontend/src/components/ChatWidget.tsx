@@ -17,7 +17,7 @@ export default function ChatWidget() {
     return saved ? JSON.parse(saved) : [{
       _id: 'msg-1',
       sender: 'ai',
-      text: 'Welcome to Aurelia Home. I am your personal AI Stylist. How may I assist you today?',
+      text: 'Xin chào, chúc Quý khách một ngày tốt lành! ❤ Đây là Aurelia, trợ lý ảo của Aurelia Home. Quý khách muốn Aurelia hỗ trợ về vấn đề gì ạ?',
       timestamp: new Date()
     }];
   });
@@ -46,12 +46,51 @@ export default function ChatWidget() {
     }
   }, [messages, isOpen]);
 
+  const renderMessageText = (text: string) => {
+    // Regular expression to match both image format (![alt](url)) and link format ([text](url))
+    const mdRegex = /(!?)\[([^\]]+)\]\(([^)]+)\)/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = mdRegex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+      
+      const isImage = match[1] === '!';
+      const altOrText = match[2];
+      const url = match[3];
+
+      if (isImage) {
+        parts.push(
+          <div key={match.index} className="my-2 rounded-xl overflow-hidden shadow-sm border border-gray-100 max-w-full">
+            <img src={url} alt={altOrText} className="w-full h-auto max-h-48 object-cover" />
+          </div>
+        );
+      } else {
+        parts.push(
+          <a key={match.index} href={url} className="font-semibold text-blue-600 hover:opacity-70 transition-opacity">
+            {altOrText}
+          </a>
+        );
+      }
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+
+    return parts;
+  };
+
   const handleClearChat = () => {
-    if (window.confirm("Are you sure you want to clear the chat history?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa lịch sử trò chuyện không?")) {
       const initialMessage = {
         _id: `msg-${Date.now()}`,
         sender: 'ai' as const,
-        text: 'Chat history cleared. How can I help you today?',
+        text: 'Lịch sử trò chuyện đã được xóa. Quý khách muốn Aurelia hỗ trợ về vấn đề gì ạ?',
         timestamp: new Date()
       };
       setMessages([initialMessage]);
@@ -98,7 +137,7 @@ export default function ChatWidget() {
       setMessages(prev => [...prev, {
         _id: `err-${Date.now()}`,
         sender: 'ai',
-        text: "I'm sorry, I'm having trouble connecting right now. Please try again later.",
+        text: "Xin lỗi, hiện tại mình đang gặp sự cố kết nối. Vui lòng thử lại sau.",
         timestamp: new Date()
       }]);
     } finally {
@@ -125,7 +164,7 @@ export default function ChatWidget() {
                 <span className="font-serif font-bold text-lg">A</span>
               </div>
               <div>
-                <h3 className="text-black font-semibold text-md tracking-tight">AI Stylist</h3>
+                <h3 className="text-black font-semibold text-md tracking-tight">Aurelia</h3>
                 <p className="text-gray-500 text-xs flex items-center">
                   <span className="w-2 h-2 rounded-full bg-green-500 mr-1.5 animate-pulse"></span>
                   Online
@@ -174,7 +213,7 @@ export default function ChatWidget() {
                     ? 'bg-black text-white rounded-2xl rounded-br-none' 
                     : 'bg-white text-gray-800 rounded-2xl rounded-bl-none border border-gray-100'
                 }`}>
-                  {msg.text}
+                  {renderMessageText(msg.text)}
                 </div>
               </div>
             ))}
@@ -204,7 +243,7 @@ export default function ChatWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Message AI Stylist..."
+                placeholder="Nhắn tin cho Aurelia..."
                 className="w-full bg-transparent py-3.5 pl-5 pr-12 text-black text-sm focus:outline-none placeholder:text-gray-400"
                 disabled={isTyping}
               />
@@ -231,7 +270,7 @@ export default function ChatWidget() {
           
           {/* Hover Tooltip */}
           <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap hidden sm:block">
-            Chat with AI Stylist
+            Trò chuyện với Aurelia
             <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 border-4 border-transparent border-l-black"></div>
           </div>
         </button>
