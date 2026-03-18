@@ -12,6 +12,137 @@ interface ApiEnvelope<T> {
   data: T;
 }
 
+interface AdminMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+interface AdminProductItem {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  categorySlug: string;
+  isActive: boolean;
+  stockQuantity: number;
+  stockStatus: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface AdminProductDetail {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  isActive: boolean;
+  category: { _id: string; name: string; slug: string } | null;
+  variants: Array<{
+    _id: string;
+    sku: string;
+    size: string;
+    color: string;
+    stockQuantity: number;
+    priceAdjustment: number;
+  }>;
+  images: Array<{ _id: string; url: string; alt: string; sortOrder: number }>;
+}
+
+interface AdminOrderItem {
+  _id: string;
+  orderCode: string;
+  customer: string;
+  customerEmail: string;
+  date: string;
+  totalAmount: number;
+  status: string;
+  paymentStatus: string;
+}
+
+interface AdminOrderDetail {
+  _id: string;
+  orderCode: string;
+  status: string;
+  totalAmount: number;
+  shippingAddress: string;
+  billingAddress: string;
+  trackingNumber: string;
+  createdAt: string;
+  customer: {
+    _id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+  } | null;
+  payment: {
+    _id: string;
+    status: string;
+    provider: string;
+    amount: number;
+    currency: string;
+    transactionRef: string;
+  } | null;
+  items: Array<{
+    productId: string;
+    productVariantId: string;
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    size: string;
+    color: string;
+  }>;
+}
+
+interface AdminCustomerItem {
+  _id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  fullName: string;
+  phone?: string;
+  createdAt: string;
+  orderCount: number;
+  totalSpent: number;
+}
+
+interface AdminCustomerDetail {
+  _id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  fullName: string;
+  phone?: string;
+  createdAt: string;
+  orderCount: number;
+  totalSpent: number;
+}
+
+interface AdminDashboardPayload {
+  summary: {
+    totalProducts: number;
+    totalCustomers: number;
+    totalOrders: number;
+    totalRevenue: number;
+    lowStockVariants: number;
+  };
+  recentOrders: Array<{
+    _id: string;
+    orderCode: string;
+    customer?: string;
+    totalAmount: number;
+    status: string;
+    createdAt: string;
+  }>;
+}
+
 const API_BASE_URL =
   ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) ??
   "http://localhost:5000/api/v1";
@@ -61,7 +192,7 @@ const request = async <T>(
 ): Promise<T> => {
   const headers = new Headers(options?.headers ?? {});
 
-  if (!headers.has("Content-Type") && options?.body) {
+  if (!headers.has("Content-Type") && options?.body && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -89,6 +220,22 @@ const request = async <T>(
   }
 
   return (payload as ApiEnvelope<T>).data;
+};
+
+const withQuery = (path: string, query?: Record<string, string | number | undefined>) => {
+  if (!query) {
+    return path;
+  }
+
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") {
+      params.set(key, String(value));
+    }
+  });
+
+  const qs = params.toString();
+  return qs ? `${path}?${qs}` : path;
 };
 
 export const api = {
@@ -157,5 +304,117 @@ export const api = {
         method: "POST",
         body: JSON.stringify(input)
       }
-    )
+    ),
+
+  getAdminDashboard: () => request<AdminDashboardPayload>("/admin/dashboard"),
+  getAdminProducts: (query?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    category?: string;
+    status?: "active" | "inactive";
+  }) => request<{ items: AdminProductItem[]; meta: AdminMeta }>(withQuery("/admin/products", query)),
+  getAdminProductById: (productId: string) => request<AdminProductDetail>(`/admin/products/${productId}`),
+  createAdminProduct: (input: {
+    name: string;
+    description?: string;
+    price: number;
+    categoryId?: string;
+    categorySlug?: string;
+    categoryName?: string;
+    imageUrl?: string;
+    imageUrls?: string[];
+    isActive?: boolean;
+    variant?: {
+      sku?: string;
+      size?: string;
+      color?: string;
+      stockQuantity?: number;
+      priceAdjustment?: number;
+    };
+  }) =>
+    request<AdminProductDetail>("/admin/products", {
+      method: "POST",
+      body: JSON.stringify(input)
+    }),
+  updateAdminProduct: (
+    productId: string,
+    input: {
+      name?: string;
+      description?: string;
+      price?: number;
+      categoryId?: string;
+      categorySlug?: string;
+      categoryName?: string;
+      imageUrl?: string;
+      isActive?: boolean;
+      variant?: {
+        sku?: string;
+        size?: string;
+        color?: string;
+        stockQuantity?: number;
+        priceAdjustment?: number;
+      };
+    }
+  ) =>
+    request<AdminProductDetail>(`/admin/products/${productId}`, {
+      method: "PATCH",
+      body: JSON.stringify(input)
+    }),
+  archiveAdminProduct: (productId: string) =>
+    request<{ _id: string; name: string; isActive: boolean }>(`/admin/products/${productId}`, {
+      method: "DELETE"
+    }),
+  uploadAdminProductImage: (productId: string, file: File, alt?: string) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    if (alt) {
+      formData.append("alt", alt);
+    }
+
+    return request<{ _id: string; url: string; alt: string; sortOrder: number }>(
+      `/admin/products/${productId}/images`,
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+  },
+
+  getAdminOrders: (query?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
+    paymentStatus?: "pending" | "paid" | "failed";
+  }) => request<{ items: AdminOrderItem[]; meta: AdminMeta }>(withQuery("/admin/orders", query)),
+  getAdminOrderById: (orderId: string) => request<AdminOrderDetail>(`/admin/orders/${orderId}`),
+  updateAdminOrderStatus: (
+    orderId: string,
+    status: "pending" | "paid" | "shipped" | "delivered" | "cancelled"
+  ) =>
+    request<OrderPayload>(`/admin/orders/${orderId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status })
+    }),
+  updateAdminPaymentStatus: (orderId: string, paymentStatus: "pending" | "paid" | "failed") =>
+    request<{ orderId: string; paymentStatus: string }>(`/admin/orders/${orderId}/payment-status`, {
+      method: "PATCH",
+      body: JSON.stringify({ paymentStatus })
+    }),
+
+  getAdminCustomers: (query?: { page?: number; limit?: number; search?: string }) =>
+    request<{ items: AdminCustomerItem[]; meta: AdminMeta }>(withQuery("/admin/customers", query)),
+  getAdminCustomerById: (customerId: string) => request<AdminCustomerDetail>(`/admin/customers/${customerId}`),
+  getAdminCustomerOrders: (customerId: string) =>
+    request<
+      Array<{
+        _id: string;
+        orderCode: string;
+        createdAt: string;
+        status: string;
+        totalAmount: number;
+        paymentStatus: string;
+      }>
+    >(`/admin/customers/${customerId}/orders`)
 };

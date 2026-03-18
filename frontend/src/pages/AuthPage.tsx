@@ -23,7 +23,8 @@ export default function AuthPage() {
       setIsSubmitting(true);
       const payload = await api.login(loginForm);
       setAuthSession(payload);
-      navigate('/profile');
+      // Redirect admins to the admin portal, customers to their profile
+      navigate(payload.user.role === 'admin' ? '/admin' : '/profile');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to login');
     } finally {

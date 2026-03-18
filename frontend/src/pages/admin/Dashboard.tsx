@@ -1,5 +1,6 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import { Search, Eye } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const mockCustomers = [
   { id: 'CUST-001', name: 'Julian Vance', email: 'julian.vance@example.com', orders: 12, spent: '$14,250.00', joined: '2024-01-15' },
@@ -34,16 +35,29 @@ export default function Customers() {
                 <th className="px-6 py-4 font-medium">Orders</th>
                 <th className="px-6 py-4 font-medium">Total Spent</th>
                 <th className="px-6 py-4 font-medium">Joined</th>
+                <th className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {mockCustomers.map((customer) => (
-                <tr key={customer.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-slate-900">{customer.name}</td>
+                <tr key={customer.id} className="hover:bg-slate-50 transition-colors group">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center">
+                      <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs">
+                        {customer.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <span className="ml-3 text-sm font-bold text-slate-900">{customer.name}</span>
+                    </div>
+                  </td>
                   <td className="px-6 py-4 text-sm text-slate-600">{customer.email}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{customer.orders}</td>
                   <td className="px-6 py-4 text-sm text-slate-900 font-medium">{customer.spent}</td>
                   <td className="px-6 py-4 text-sm text-slate-500">{customer.joined}</td>
+                  <td className="px-6 py-4 text-sm text-right">
+                    <Link to={`/admin/customers/${customer.id}`} className="inline-flex items-center p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors opacity-0 group-hover:opacity-100">
+                      <Eye className="h-4 w-4" />
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

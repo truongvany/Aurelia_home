@@ -7,6 +7,7 @@ import reviewRoutes from "./review.route.js";
 import profileRoutes from "./profile.route.js";
 import contactRoutes from "./contact.route.js";
 import chatRoutes from "./chat.route.js";
+import adminRoutes from "./admin.route.js";
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use("/reviews", reviewRoutes);
 router.use("/profile", profileRoutes);
 router.use("/contact", contactRoutes);
 router.use("/chat", chatRoutes);
+router.use("/admin", adminRoutes);
 
 export default router;

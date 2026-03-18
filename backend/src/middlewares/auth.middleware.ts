@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
+import { USER_ROLES } from "../constants/roles.js";
 import { ApiError } from "../utils/ApiError.js";
 
 export const requireAuth = (
@@ -26,3 +27,19 @@ export const requireAuth = (
     throw new ApiError(401, "Invalid or expired token");
   }
 };
+
+export const requireRole =
+  (roles: readonly string[]) =>
+  (req: Request, _res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      throw new ApiError(401, "Unauthorized");
+    }
+
+    if (!roles.includes(req.user.role)) {
+      throw new ApiError(403, "Forbidden");
+    }
+
+    next();
+  };
+
+export const requireAdmin = requireRole([USER_ROLES.ADMIN]);

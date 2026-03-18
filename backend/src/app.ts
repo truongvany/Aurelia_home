@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import morgan from "morgan";
+import path from "node:path";
 import { env } from "./config/env.js";
 import apiRoutes from "./routes/index.js";
 import { notFoundMiddleware } from "./middlewares/notFound.middleware.js";
@@ -15,6 +16,7 @@ app.use(
 );
 app.use(express.json());
 app.use(morgan("dev"));
+app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
 app.get("/health", (_req, res) => {
   res.status(200).json({
