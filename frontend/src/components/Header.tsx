@@ -149,7 +149,7 @@ export default function Header() {
                       </Link>
                     </div>
                   )}
-                </div>
+                </div> 
               </div>
             </div>
             <div className="group relative" data-cart-icon>

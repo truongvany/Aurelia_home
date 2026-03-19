@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Search, Filter, Eye, Check, X } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Search, Filter, Eye, Check, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../../lib/api';
 import { formatVND } from '../../utils/currency';
@@ -17,9 +17,11 @@ type AdminOrder = {
 
 const statusTone = (status: string) => {
   if (status === 'delivered') return 'bg-emerald-100 text-emerald-700';
-  if (status === 'paid' || status === 'pending') return 'bg-blue-100 text-blue-700';
+  if (status === 'paid') return 'bg-blue-100 text-blue-700';
+  if (status === 'pending') return 'bg-amber-100 text-amber-700';
   if (status === 'shipped') return 'bg-purple-100 text-purple-700';
-  return 'bg-red-100 text-red-700';
+  if (status === 'cancelled') return 'bg-red-100 text-red-700';
+  return 'bg-slate-100 text-slate-700';
 };
 
 const translateOrderStatus = (status: string) => {
@@ -54,19 +56,40 @@ const translatePaymentStatus = (status: string) => {
 
 export default function Orders() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [meta, setMeta] = useState<{ page: number; limit: number; total: number; totalPages: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [paymentFilter, setPaymentFilter] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+
+  const refreshOrders = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await api.getAdminOrders({
+        search: search || undefined,
+        status: statusFilter || undefined,
+        paymentStatus: paymentFilter || undefined,
+        limit: 100
+      });
+      setOrders(response.items);
+      setMeta(response.meta);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể tải danh sách đơn hàng');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleMarkPaid = async (orderId: string) => {
     setUpdatingOrderId(orderId);
     try {
       await api.updateAdminPaymentStatus(orderId, 'paid');
       await api.updateAdminOrderStatus(orderId, 'paid');
-      // refresh list
-      const refreshed = await api.getAdminOrders({ search: search || undefined, limit: 100 });
-      setOrders(refreshed.items);
+      await refreshOrders();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể xác nhận thanh toán');
     } finally {
@@ -78,8 +101,7 @@ export default function Orders() {
     setUpdatingOrderId(orderId);
     try {
       await api.updateAdminOrderStatus(orderId, 'cancelled');
-      const refreshed = await api.getAdminOrders({ search: search || undefined, limit: 100 });
-      setOrders(refreshed.items);
+      await refreshOrders();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể hủy đơn hàng');
     } finally {
@@ -89,42 +111,138 @@ export default function Orders() {
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
-      setIsLoading(true);
-      setError(null);
-
-      api
-        .getAdminOrders({ search: search || undefined, limit: 100 })
-        .then((payload) => setOrders(payload.items))
-        .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Unable to load orders'))
-        .finally(() => setIsLoading(false));
+      refreshOrders();
     }, 250);
 
     return () => window.clearTimeout(timeout);
-  }, [search]);
+  }, [search, statusFilter, paymentFilter]);
+
+  const stats = useMemo(() => {
+    const totalOrders = meta?.total ?? orders.length;
+    const paidOrders = orders.filter((o) => o.paymentStatus === 'paid').length;
+    const pendingOrders = orders.filter((o) => o.status === 'pending').length;
+    const deliveredOrders = orders.filter((o) => o.status === 'delivered').length;
+    const revenue = orders
+      .filter((o) => o.paymentStatus === 'paid')
+      .reduce((sum, o) => sum + o.totalAmount, 0);
+
+    return { totalOrders, paidOrders, pendingOrders, deliveredOrders, revenue };
+  }, [meta, orders]);
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-900">Đơn hàng</h2>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Đơn hàng</h2>
+          <p className="text-sm text-slate-500 mt-1">Quản lý đơn hàng và thanh toán</p>
+        </div>
       </div>
-      
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng đơn hàng</p>
+          <p className="text-3xl font-bold text-slate-900 mt-2">{stats.totalOrders}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Đã thanh toán</p>
+          <p className="text-3xl font-bold text-slate-900 mt-2">{stats.paidOrders}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Chờ xử lý</p>
+          <p className="text-3xl font-bold text-slate-900 mt-2">{stats.pendingOrders}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Đã giao</p>
+          <p className="text-3xl font-bold text-slate-900 mt-2">{stats.deliveredOrders}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Doanh thu (tạm)</p>
+          <p className="text-3xl font-bold text-slate-900 mt-2">{formatVND(stats.revenue)}</p>
+        </div>
+      </div>
+
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-200 flex gap-4">
+        <div className="p-4 border-b border-slate-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm kiếm theo mã đơn hoặc khách hàng..." 
+              placeholder="Tìm mã đơn, khách hàng..."
               className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          <button className="flex items-center px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 hover:bg-slate-50">
-            <Filter className="h-4 w-4 mr-2" />
-            Bộ lọc
-          </button>
+
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowFilters((prev) => !prev)}
+              className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+            >
+              <Filter className="h-4 w-4" />
+              Bộ lọc
+              {showFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+
+            <Link
+              to="/admin/orders"
+              className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+            >
+              <Eye className="h-4 w-4" />
+              Làm mới
+            </Link>
+          </div>
         </div>
+
+        {showFilters && (
+          <div className="p-4 border-b border-slate-200 bg-slate-50">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Trạng thái đơn hàng</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="pending">Chờ xử lý</option>
+                  <option value="paid">Đã thanh toán</option>
+                  <option value="shipped">Đang giao</option>
+                  <option value="delivered">Đã giao</option>
+                  <option value="cancelled">Đã hủy</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Trạng thái thanh toán</label>
+                <select
+                  value={paymentFilter}
+                  onChange={(e) => setPaymentFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="pending">Chờ thanh toán</option>
+                  <option value="paid">Đã thanh toán</option>
+                  <option value="failed">Thất bại</option>
+                </select>
+              </div>
+              <div className="flex items-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch('');
+                    setStatusFilter('');
+                    setPaymentFilter('');
+                  }}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+                >
+                  Xóa bộ lọc
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {error && <p className="px-4 pb-3 text-sm text-red-600">{error}</p>}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">

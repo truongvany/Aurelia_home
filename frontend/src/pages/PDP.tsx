@@ -49,6 +49,10 @@ export default function PDP() {
   const [activeTab, setActiveTab] = useState<'details' | 'returns' | 'shipping' | 'materials'>('details');
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
+  useEffect(() => {
     const fetchProduct = async () => {
       try {
         if (!id) {
@@ -407,7 +411,7 @@ export default function PDP() {
                 <button
                   type="button"
                   onClick={handleToggleWishlist}
-                  className={`h-11 rounded-full border px-4 transition-colors flex items-center justify-center gap-2 ${
+                  className={`h-11 w-11 rounded-full border transition-colors flex items-center justify-center ${
                     isWishlisted
                       ? 'border-rose-300 bg-rose-50 text-rose-600'
                       : 'border-slate-300 text-charcoal hover:border-charcoal hover:bg-white'
@@ -415,7 +419,6 @@ export default function PDP() {
                   aria-label={isWishlisted ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích'}
                 >
                   <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`} />
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">Yêu thích</span>
                 </button>
               </div>
             </div>

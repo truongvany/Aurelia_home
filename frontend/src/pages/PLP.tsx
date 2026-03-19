@@ -548,7 +548,7 @@ export default function PLP() {
                       <Link to={`/product/${product._id}`} className="block mb-1">
                         <h3 className="text-sm font-semibold text-slate-900 line-clamp-2 min-h-[2.4rem]">{product.name}</h3>
                       </Link>
-                      <p className="text-base font-semibold text-slate-900 mb-1">{formatVND(product.price)}</p>
+                      <p className="text-base font-bold text-red-600 mb-1">{formatVND(product.price)}</p>
                       <p className="text-[11px] text-slate-500 line-clamp-1">
                         {product.colors.length} màu • {product.sizes.length} size
                       </p>

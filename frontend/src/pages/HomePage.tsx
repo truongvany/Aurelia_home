@@ -24,9 +24,15 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('');
   const [categoryProducts, setCategoryProducts] = useState<Product[]>([]);
   const [categoryLoading, setCategoryLoading] = useState(true);
+  const [shirtProducts, setShirtProducts] = useState<Product[]>([]);
+  const [shirtLoading, setShirtLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
   const [isCarouselPaused, setIsCarouselPaused] = useState(false);
+  const [shirtIndex, setShirtIndex] = useState(0);
+  const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
+  const [isShirtsPaused, setIsShirtsPaused] = useState(false);
   const carouselRef = React.useRef<HTMLDivElement>(null);
+  const shirtsCarouselRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -126,6 +132,78 @@ export default function HomePage() {
 
     return () => cancelAnimationFrame(animationId);
   }, [bestsellers, isCarouselPaused]);
+
+  // Fetch shirt products
+  useEffect(() => {
+    const fetchShirts = async () => {
+      try {
+        setShirtLoading(true);
+        // Find shirt category from the categories list
+        const shirtCategory = categories.find(
+          (cat) => cat.name.toLowerCase().includes('shirt') || 
+                   cat.name.toLowerCase().includes('áo sơ mi') ||
+                   cat.slug.toLowerCase().includes('shirt') ||
+                   cat.slug.toLowerCase().includes('ao-so-mi')
+        );
+        
+        if (shirtCategory) {
+          const params = new URLSearchParams({ category: shirtCategory.slug });
+          const products = await api.getProducts(params);
+          setShirtProducts(products); // Fetch all shirt products
+        } else {
+          setShirtProducts([]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch shirt products', error);
+        setShirtProducts([]);
+      } finally {
+        setShirtLoading(false);
+      }
+    };
+
+    if (categories.length > 0) {
+      fetchShirts();
+    }
+  }, [categories]);
+
+  // Auto-scroll shirts carousel (step-by-step, uses cloned items for infinite loop)
+  useEffect(() => {
+    if (shirtProducts.length === 0) return;
+
+    const intervalId = window.setInterval(() => {
+      if (isShirtsPaused) return;
+      setShirtIndex((prev) => prev + 1);
+    }, 1400);
+
+    return () => window.clearInterval(intervalId);
+  }, [shirtProducts.length, isShirtsPaused]);
+
+  useEffect(() => {
+    const total = shirtProducts.length;
+    if (total === 0) return;
+
+    if (shirtIndex === total) {
+      const timeoutId = window.setTimeout(() => {
+        setIsTransitionEnabled(false);
+        setShirtIndex(0);
+      }, 600);
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    if (!isTransitionEnabled) {
+      const timeoutId = window.setTimeout(() => setIsTransitionEnabled(true), 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    return undefined;
+  }, [shirtIndex, shirtProducts.length, isTransitionEnabled]);
+
+  const slotWidth = 236; // card width + gap
+  const translateX = -shirtIndex * slotWidth;
+  const trackStyle: React.CSSProperties = {
+    transform: `translateX(${translateX}px)`,
+    transition: isTransitionEnabled ? 'transform 0.6s ease' : 'none'
+  };
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased">
@@ -229,7 +307,7 @@ export default function HomePage() {
             <div className="max-w-[1440px] mx-auto px-6">
               <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
                 <div>
-                  <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-3 block">Khám phá danh mục</span>
+                  <span                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-3 block">Khám phá danh mục</span>
                   <h2 className="text-4xl md:text-5xl font-serif text-slate-900">Khám Phá Theo Danh Mục</h2>
                 </div>
                 <Link
@@ -287,7 +365,7 @@ export default function HomePage() {
                       <h3 className="text-3xl md:text-4xl font-serif leading-tight mb-3">{categoryLeadProduct.name}</h3>
                       <p className="text-white/70 text-sm mb-4 line-clamp-2">{categoryLeadProduct.description}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-xl font-semibold">{formatVND(categoryLeadProduct.price)}</span>
+                        <span className="text-red-600 font-bold">{formatVND(categoryLeadProduct.price)}</span>
                         <span className="inline-flex items-center text-xs uppercase tracking-[0.2em] font-bold">
                           Mua Ngay <ArrowRight className="ml-2 h-4 w-4" />
                         </span>
@@ -314,7 +392,7 @@ export default function HomePage() {
                           <h4 className="font-semibold text-slate-900 mb-2 line-clamp-1">{product.name}</h4>
                           <p className="text-xs text-slate-500 line-clamp-2 mb-4">{product.description}</p>
                           <div className="flex items-center justify-between">
-                            <span className="text-slate-900 font-semibold">{formatVND(product.price)}</span>
+                            <span className="text-red-600 font-bold">{formatVND(product.price)}</span>
                             <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-blue-600">Chi Tiết</span>
                           </div>
                         </div>
@@ -386,10 +464,95 @@ export default function HomePage() {
               </div>
               <div className="px-1">
                 <h4 className="text-sm font-bold uppercase tracking-widest text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">{product.name}</h4>
-                <p className="text-slate-500 text-sm mt-1">{formatVND(product.price)}</p>
+                <p className="text-red-600 font-bold text-sm mt-1">{formatVND(product.price)}</p>
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Elegant Shirts Collection */}
+      <section className="py-24 bg-white">
+        <div className="max-w-[1440px] mx-auto px-6">
+          <div className="mb-16">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+              <div>
+                <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-3 block">Bộ Sưu Tập Tinh Tế</span>
+                <h2 className="text-4xl md:text-5xl font-serif text-slate-900">Áo Sơ Mi Lịch Lãm</h2>
+                <p className="text-slate-600 text-lg mt-4 max-w-2xl leading-relaxed">Những chiếc áo sơ mi được chọn lọc từ các nhà thiết kế hàng đầu, kết hợp giữa vải chất lượng cao và thiết kế tinh tế.</p>
+              </div>
+              <Link
+                to="/shop?category=shirts"
+                className="inline-flex items-center text-xs uppercase tracking-[0.2em] font-bold text-slate-900 hover:text-blue-600 transition-colors shrink-0"
+              >
+                Xem Tất Cả
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+
+          {shirtLoading ? (
+            <div
+              className="flex items-stretch gap-4 overflow-x-auto pb-4 animate-pulse no-scrollbar"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="min-w-[220px] flex-shrink-0 bg-slate-200 rounded-tl-[32px] rounded-br-[32px] h-[340px]"
+                />
+              ))}
+            </div>
+          ) : shirtProducts.length > 0 ? (
+            <div
+              className="shirt-carousel-wrapper overflow-hidden"
+              onMouseEnter={() => setIsShirtsPaused(true)}
+              onMouseLeave={() => setIsShirtsPaused(false)}
+            >
+              <div className="shirt-carousel-track flex items-stretch gap-4" style={trackStyle}>
+              {[...shirtProducts, ...shirtProducts].map((product, index) => (
+                <Link
+                  key={`${product._id}-${index}`}
+                  to={`/product/${product._id}`}
+                  className="w-[220px] flex-shrink-0 group bg-white border border-slate-200 rounded-tl-[32px] rounded-br-[32px] overflow-hidden hover:shadow-2xl hover:shadow-slate-900/15 hover:-translate-y-2 transition-all duration-500"
+                >
+                  <div className="relative overflow-hidden">
+                    <img
+                      alt={product.name}
+                      className="w-full h-[240px] object-cover transition-transform duration-700 group-hover:scale-110"
+                      src={product.imageUrl}
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm text-slate-900 text-[10px] font-bold uppercase px-2.5 py-1 tracking-widest rounded-tl-lg rounded-br-lg shadow-sm border border-slate-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      Mới
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <div className="p-4">
+                    <h4 className="font-serif text-sm text-slate-900 mb-1.5 group-hover:text-blue-600 transition-colors line-clamp-2">{product.name}</h4>
+                    <p className="text-xs text-slate-500 mb-3 line-clamp-2">{product.description}</p>
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+                      <span className="text-red-600 font-bold text-sm">{formatVND(product.price)}</span>
+                      <span className="text-[9px] uppercase tracking-[0.15em] font-bold text-blue-600 group-hover:text-blue-700">Khám Phá</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-tl-[40px] rounded-br-[40px] border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
+              <h3 className="text-xl font-serif text-slate-900 mb-2">Áo Sơ Mi Chưa Có Hàng</h3>
+              <p className="text-slate-500 mb-5 text-sm">Các sản phẩm áo sơ mi đang được cập nhật. Vui lòng quay lại sau.</p>
+              <Link
+                to="/shop"
+                className="inline-flex items-center bg-slate-900 text-white px-6 py-2 text-xs uppercase tracking-[0.2em] font-bold hover:bg-blue-600 transition-colors rounded-tl-xl rounded-br-xl"
+              >
+                Đi Tới Cửa Hàng
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
