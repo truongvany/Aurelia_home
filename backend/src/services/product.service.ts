@@ -12,16 +12,186 @@ interface ProductQuery {
   q?: string;
 }
 
-export const listCategories = async () => CategoryModel.find().sort({ name: 1 });
+interface MegaMenuItem {
+  name: string;
+  slug: string;
+  isHighlight?: boolean;
+  description?: string;
+  productCount?: number;
+}
+
+interface MegaMenuColumn {
+  title: string;
+  items: MegaMenuItem[];
+}
+
+const MENU_TITLE_ORDER = ["SẢN PHẨM ƯU ĐÃI", "ÁO", "QUẦN", "PHỤ KIỆN", "DANH MỤC KHÁC"];
+
+const normalizeText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+const toMenuTitle = (name: string, slug: string): string => {
+  const normalizedName = normalizeText(name);
+  const normalizedSlug = normalizeText(slug);
+
+  if (
+    normalizedName.includes("uu dai") ||
+    normalizedName.includes("sale") ||
+    normalizedSlug.includes("uu-dai") ||
+    normalizedSlug.includes("sale")
+  ) {
+    return "SẢN PHẨM ƯU ĐÃI";
+  }
+
+  if (
+    normalizedName.includes("ao") ||
+    normalizedSlug.includes("shirt") ||
+    normalizedSlug.includes("wear")
+  ) {
+    return "ÁO";
+  }
+
+  if (normalizedName.includes("quan") || normalizedSlug.includes("trouser") || normalizedSlug.includes("jean")) {
+    return "QUẦN";
+  }
+
+  if (
+    normalizedName.includes("phu kien") ||
+    normalizedName.includes("giay") ||
+    normalizedSlug.includes("accessor") ||
+    normalizedSlug.includes("footwear")
+  ) {
+    return "PHỤ KIỆN";
+  }
+
+  return "DANH MỤC KHÁC";
+};
+
+export const listCategories = async () => {
+  const childCategories = await CategoryModel.find({ parentId: { $ne: null } }).sort({ name: 1 });
+  if (childCategories.length > 0) {
+    return childCategories;
+  }
+
+  return CategoryModel.find().sort({ name: 1 });
+};
+
+export const getMegaMenu = async () => {
+  const [categories, categoryCounts] = await Promise.all([
+    CategoryModel.find().sort({ name: 1 }).lean(),
+    ProductModel.aggregate<{ _id: Types.ObjectId; count: number }>([
+      { $match: { isActive: true } },
+      { $group: { _id: "$categoryId", count: { $sum: 1 } } }
+    ])
+  ]);
+
+  const countMap = new Map(categoryCounts.map((entry) => [entry._id.toString(), entry.count]));
+  type CategoryNode = (typeof categories)[number];
+
+  const childrenByParent = new Map<string, CategoryNode[]>();
+  const roots = categories.filter((category) => !category.parentId);
+
+  for (const category of categories) {
+    if (!category.parentId) {
+      continue;
+    }
+
+    const parentKey = category.parentId.toString();
+    const current = childrenByParent.get(parentKey) ?? [];
+    current.push(category);
+    childrenByParent.set(parentKey, current);
+  }
+
+  const hasHierarchy = roots.some((root) => (childrenByParent.get(root._id.toString()) ?? []).length > 0);
+
+  if (hasHierarchy) {
+    const hierarchyColumns: MegaMenuColumn[] = roots
+      .map((root) => {
+        const title = toMenuTitle(root.name, root.slug);
+        const children = (childrenByParent.get(root._id.toString()) ?? []).sort((a, b) => a.name.localeCompare(b.name));
+
+        const items = children.map((child) => {
+          const productCount = countMap.get(child._id.toString()) ?? 0;
+          return {
+            name: child.name,
+            slug: child.slug,
+            description: child.description,
+            productCount,
+            isHighlight: productCount > 0
+          };
+        });
+
+        return {
+          title,
+          items
+        };
+      })
+      .filter((column) => column.items.length > 0)
+      .sort((a, b) => MENU_TITLE_ORDER.indexOf(a.title) - MENU_TITLE_ORDER.indexOf(b.title));
+
+    return hierarchyColumns;
+  }
+
+  const groupedColumns = new Map<string, MegaMenuItem[]>();
+
+  for (const category of categories) {
+    const productCount = countMap.get(category._id.toString()) ?? 0;
+    const groupTitle = toMenuTitle(category.name, category.slug);
+    const current = groupedColumns.get(groupTitle) ?? [];
+
+    current.push({
+      name: category.name,
+      slug: category.slug,
+      description: category.description,
+      isHighlight: productCount > 0,
+      productCount
+    });
+
+    groupedColumns.set(groupTitle, current);
+  }
+
+  const featuredItems = categories
+    .map((category) => ({
+      name: category.name,
+      slug: category.slug,
+      productCount: countMap.get(category._id.toString()) ?? 0
+    }))
+    .sort((a, b) => b.productCount - a.productCount)
+    .slice(0, 4)
+    .map((item, index) => ({
+      name: index === 0 ? `Top danh mục: ${item.name}` : item.name,
+      slug: item.slug,
+      productCount: item.productCount,
+      isHighlight: index < 2,
+      description: `${item.productCount} sản phẩm`
+    }));
+
+  const columns: MegaMenuColumn[] = [
+    { title: "SẢN PHẨM ƯU ĐÃI", items: featuredItems },
+    { title: "ÁO", items: groupedColumns.get("ÁO") ?? [] },
+    { title: "QUẦN", items: groupedColumns.get("QUẦN") ?? [] },
+    {
+      title: "PHỤ KIỆN",
+      items: [...(groupedColumns.get("PHỤ KIỆN") ?? []), ...(groupedColumns.get("DANH MỤC KHÁC") ?? [])]
+    }
+  ];
+
+  return columns.filter((column) => column.items.length > 0);
+};
 
 export const listProducts = async (query: ProductQuery) => {
   const filters: Record<string, unknown> = { isActive: true };
 
   if (query.category) {
     const category = await CategoryModel.findOne({ slug: query.category });
-    if (category) {
-      filters.categoryId = category._id;
+    if (!category) {
+      return [];
     }
+
+    filters.categoryId = category._id;
   }
 
   if (query.q) {
@@ -59,6 +229,12 @@ export const listProducts = async (query: ProductQuery) => {
       }
 
       const inStock = productVariants.some((v) => v.stockQuantity > 0);
+      const colorImages = productVariants.reduce((acc, v) => {
+        if (v.color && v.imageUrl) {
+          acc[v.color] = v.imageUrl;
+        }
+        return acc;
+      }, {} as Record<string, string>);
 
       return {
         _id: product._id,
@@ -69,6 +245,7 @@ export const listProducts = async (query: ProductQuery) => {
         imageUrl: product.imageUrl,
         sizes,
         colors,
+        colorImages,
         inStock,
         slug: product.slug
       };
@@ -93,6 +270,12 @@ export const getProductById = async (id: string) => {
   ]);
   const sizes = [...new Set(variants.map((v) => v.size).filter(Boolean))];
   const colors = [...new Set(variants.map((v) => v.color).filter(Boolean))];
+  const colorImages = variants.reduce((acc, v) => {
+    if (v.color && v.imageUrl) {
+      acc[v.color] = v.imageUrl;
+    }
+    return acc;
+  }, {} as Record<string, string>);
   const imageGallery = images.map((image) => ({
     _id: image._id,
     url: image.url,
@@ -112,6 +295,7 @@ export const getProductById = async (id: string) => {
     images: imageGallery,
     sizes,
     colors,
+    colorImages,
     inStock: variants.some((v) => v.stockQuantity > 0),
     slug: product.slug,
     variants

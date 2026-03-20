@@ -144,15 +144,31 @@ export default function About() {
       </section>
 
       {/* 2. Introduction */}
-      <section className="py-24 px-6 md:px-12 max-w-5xl mx-auto text-center animate-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out">
-        <Award className="h-10 w-10 text-[#C5A059] mx-auto mb-6" />
-        <h2 className="text-3xl md:text-4xl font-serif text-slate-900 mb-8 leading-tight">
-          "Sự sang trọng thực sự không cần phô trương. Nó thì thầm qua chất liệu thượng hạng và sự chỉn chu đến từng chi tiết."
-        </h2>
-        <div className="flex items-center justify-center space-x-4">
-          <div className="h-px w-12 bg-slate-300"></div>
-          <span className="text-sm font-bold tracking-widest uppercase text-slate-500">Giám Đốc Sáng Tạo</span>
-          <div className="h-px w-12 bg-slate-300"></div>
+      <section className="py-24 px-6 md:px-12 max-w-5xl mx-auto animate-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+          <div className="w-full h-96 overflow-hidden rounded-2xl shadow-xl">
+            <img
+              src="https://images.unsplash.com/photo-1520975698513-c1aaeca1264e?q=80&w=2000&auto=format&fit=crop"
+              alt="King Man thương hiệu thời trang nam"
+              className="h-full w-full object-cover"
+            />
+          </div>
+
+          <div className="text-center lg:text-left">
+            <h2 className="text-3xl md:text-4xl font-serif text-slate-900 mb-6">Về King Man</h2>
+            <p className="text-slate-600 text-base md:text-lg leading-relaxed mb-4">
+              King Man là cửa hàng chuyên cung cấp thời trang nam cao cấp, mang đến phong cách hiện đại, nam tính và dễ ứng dụng trong cuộc sống hằng ngày.
+            </p>
+            <p className="text-slate-600 text-base md:text-lg leading-relaxed mb-4">
+              Chúng tôi tập trung vào chất lượng sản phẩm, từ chất liệu đến form dáng, giúp khách hàng luôn tự tin và thoải mái khi mặc.
+            </p>
+            <p className="text-slate-600 text-base md:text-lg leading-relaxed mb-4">
+              Với đa dạng sản phẩm như áo, quần, phụ kiện và giày dép, King Man hướng đến việc xây dựng phong cách riêng cho mỗi khách hàng.
+            </p>
+            <p className="text-slate-600 text-base md:text-lg leading-relaxed">
+              Chúng tôi cam kết mang đến trải nghiệm mua sắm tốt nhất với dịch vụ tận tâm và sản phẩm chất lượng.
+            </p>
+          </div>
         </div>
       </section>
 

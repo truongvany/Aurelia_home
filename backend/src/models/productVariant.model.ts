@@ -6,6 +6,7 @@ const productVariantSchema = new Schema(
     sku: { type: String, required: true, unique: true, trim: true },
     size: { type: String, default: "" },
     color: { type: String, default: "" },
+    imageUrl: { type: String, default: "" },
     stockQuantity: { type: Number, default: 0, min: 0 },
     priceAdjustment: { type: Number, default: 0 }
   },

@@ -14,6 +14,11 @@ interface ApiEnvelope<T> {
   data: T;
 }
 
+export interface MegaMenuCategory {
+  title: string;
+  items: Array<{ name: string; slug: string; isHighlight?: boolean; description?: string; productCount?: number }>;
+}
+
 interface AdminMeta {
   page: number;
   limit: number;
@@ -52,6 +57,7 @@ interface AdminProductDetail {
     sku: string;
     size: string;
     color: string;
+    imageUrl?: string;
     stockQuantity: number;
     priceAdjustment: number;
   }>;
@@ -247,6 +253,7 @@ const withQuery = (path: string, query?: Record<string, string | number | undefi
 };
 
 export const api = {
+  getMegaMenu: () => request<MegaMenuCategory[]>("/catalog/megamenu"),
   getCategories: () => request<Array<{ _id: string; name: string; slug: string }>>("/catalog/categories"),
   getProducts: (params?: URLSearchParams) =>
     request<Product[]>(`/catalog/products${params ? `?${params.toString()}` : ""}`),
@@ -368,6 +375,7 @@ export const api = {
       sku?: string;
       size?: string;
       color?: string;
+      imageUrl?: string;
       stockQuantity?: number;
       priceAdjustment?: number;
     };
@@ -375,6 +383,7 @@ export const api = {
       sku?: string;
       size?: string;
       color?: string;
+      imageUrl?: string;
       stockQuantity?: number;
       priceAdjustment?: number;
     }>;
@@ -400,6 +409,7 @@ export const api = {
         sku?: string;
         size?: string;
         color?: string;
+        imageUrl?: string;
         stockQuantity?: number;
         priceAdjustment?: number;
       };
@@ -407,6 +417,7 @@ export const api = {
         sku?: string;
         size?: string;
         color?: string;
+        imageUrl?: string;
         stockQuantity?: number;
         priceAdjustment?: number;
       }>;

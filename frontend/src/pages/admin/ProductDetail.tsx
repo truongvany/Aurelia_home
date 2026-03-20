@@ -36,6 +36,7 @@ type VariantForm = {
   sku: string;
   size: string;
   color: string;
+  imageUrl: string;
   stockQuantity: string;
   priceAdjustment: string;
 };
@@ -44,6 +45,7 @@ const createEmptyVariant = (): VariantForm => ({
   sku: '',
   size: 'M',
   color: '#1e293b',
+  imageUrl: '',
   stockQuantity: '0',
   priceAdjustment: '0'
 });
@@ -103,6 +105,7 @@ export default function ProductDetail() {
           sku: variant.sku ?? '',
           size: variant.size || 'M',
           color: variant.color || '#1e293b',
+          imageUrl: variant.imageUrl || '',
           stockQuantity: String(variant.stockQuantity ?? 0),
           priceAdjustment: String(variant.priceAdjustment ?? 0)
         }));
@@ -161,6 +164,7 @@ export default function ProductDetail() {
         sku: variant.sku.trim(),
         size: variant.size.trim(),
         color: variant.color.trim(),
+        imageUrl: variant.imageUrl.trim(),
         stockQuantity: Number(variant.stockQuantity),
         priceAdjustment: Number(variant.priceAdjustment || 0)
       }))
@@ -374,6 +378,16 @@ export default function ProductDetail() {
                         min="0"
                         value={variant.stockQuantity}
                         onChange={(e) => handleVariantChange(index, 'stockQuantity', e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-medium text-slate-700 mb-1.5">Image URL (Optional)</label>
+                      <input
+                        type="text"
+                        value={variant.imageUrl}
+                        onChange={(e) => handleVariantChange(index, 'imageUrl', e.target.value)}
+                        placeholder="VD: https://example.com/red.jpg"
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       />
                     </div>

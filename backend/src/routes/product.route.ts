@@ -3,11 +3,13 @@ import {
   getCategories,
   getFeatured,
   getProduct,
-  getProducts
+  getProducts,
+  getMegaMenu
 } from "../controllers/product.controller.js";
 
 const router = Router();
 
+router.get("/megamenu", getMegaMenu);
 router.get("/categories", getCategories);
 router.get("/products/featured", getFeatured);
 router.get("/products", getProducts);

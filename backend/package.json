@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "lint": "tsc --noEmit",
     "seed": "tsx src/seed/seed.ts",
+    "seed:fashion-menu": "tsx src/seed/seed-fashion-menu.ts",
     "seed:shirts": "tsx src/seed/seed-shirts.ts",
     "seed:users": "tsx src/seed/seed-users.ts"
   },

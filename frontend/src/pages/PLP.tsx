@@ -1,10 +1,109 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, Filter, ShoppingBag } from 'lucide-react';
 import { Product } from '../types';
 import { api } from '../lib/api';
 import { formatVND } from '../utils/currency';
 import PriceRangeSlider from '../components/PriceRangeSlider';
+
+const ProductCardItem: React.FC<{ 
+  product: Product; 
+  onAddToCart: (id: string) => void; 
+  addingToCartProductId: string | null;
+  imageRef: (el: HTMLImageElement | null) => void;
+}> = ({ 
+  product, 
+  onAddToCart, 
+  addingToCartProductId, 
+  imageRef 
+}) => {
+  const [selectedColor, setSelectedColor] = useState<string | null>(product.colors[0] ?? null);
+
+  const getColorImage = (color?: string) => {
+    if (!color || !product.colorImages) return undefined;
+
+    // exact key match first
+    if (product.colorImages[color]) return product.colorImages[color];
+
+    const normalized = color.trim().toLowerCase();
+
+    // case-insensitive fallback
+    const matchedEntry = Object.entries(product.colorImages).find(
+      ([key]) => key.trim().toLowerCase() === normalized
+    );
+
+    if (matchedEntry) return matchedEntry[1];
+
+    return undefined;
+  };
+
+  const displayImage = getColorImage(selectedColor) || product.imageUrl;
+
+  return (
+    <article className="group transition-transform duration-300 relative flex flex-col">
+      <div className="relative overflow-hidden bg-[#ece8e2] mb-4 rounded-xl">
+        <Link to={`/product/${product._id}`} className="block">
+          <img
+            ref={imageRef}
+            alt={product.name}
+            className="aspect-[4/5] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            src={displayImage}
+            referrerPolicy="no-referrer"
+          />
+        </Link>
+        <div className="absolute left-0 right-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+          <div className="flex items-stretch">
+            <button
+              type="button"
+              onClick={() => onAddToCart(product._id)}
+              disabled={!product.inStock || addingToCartProductId === product._id}
+              className={`flex-1 py-3 px-3 text-[11px] uppercase tracking-[0.14em] font-semibold flex items-center justify-center gap-2 ${
+                product.inStock
+                  ? 'bg-white/90 text-slate-900 hover:bg-white backdrop-blur-sm'
+                  : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+              } ${addingToCartProductId === product._id ? 'cursor-wait opacity-70' : ''}`}
+            >
+              <ShoppingBag className="h-4 w-4" /> {addingToCartProductId === product._id ? 'Đang thêm...' : 'Thêm vào giỏ'}
+            </button>
+            <Link
+              to={`/product/${product._id}`}
+              className="w-12 bg-[#2f2f2f]/90 backdrop-blur-sm text-white hover:bg-black flex items-center justify-center"
+              aria-label={`Xem nhanh ${product.name}`}
+            >
+              <Eye className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {product.colors.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          {product.colors.map(color => {
+            const isWhite = color.toLowerCase() === '#ffffff' || color.toLowerCase() === 'white';
+            return (
+              <button 
+                key={color}
+                onClick={(e) => { e.preventDefault(); setSelectedColor(color); }}
+                className={`w-[26px] h-[26px] rounded-full border transition-all ${
+                  selectedColor === color 
+                    ? 'ring-1 ring-[#1e3a8a] ring-offset-2 border-transparent' 
+                    : isWhite ? 'border-slate-300 hover:border-slate-400' : 'border-slate-200/40 hover:scale-110'
+                }`}
+                style={{ backgroundColor: color }}
+                title={color}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      <Link to={`/product/${product._id}`} className="block mb-1.5">
+        <h3 className="text-[15px] font-medium text-slate-800 line-clamp-2 leading-relaxed hover:text-[#1e3a8a] transition-colors">{product.name}</h3>
+      </Link>
+      <p className="text-[15px] font-bold text-slate-900 mt-auto">{formatVND(product.price)}</p>
+    </article>
+  );
+}
 
 export default function PLP() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -27,8 +126,10 @@ export default function PLP() {
   // Accordion state
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     category: true,
-    size: true,
-    color: true
+    size: false,
+    color: false,
+    price: false,
+    sort: false
   });
 
   const toggleSection = (section: string) => {
@@ -262,6 +363,9 @@ export default function PLP() {
   };
 
   const priceSpan = Math.max(1, priceBounds[1] - priceBounds[0]);
+  const activeCategoryLabel = selectedCategory === 'all'
+    ? 'Sản phẩm mới'
+    : categories.find((cat) => cat.slug === selectedCategory)?.name ?? selectedCategory.replace(/[-_]/g, ' ');
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
@@ -276,15 +380,25 @@ export default function PLP() {
         .cart-shake {
           animation: cartShake 0.45s ease-out !important;
         }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background-color: #cbd5e1;
+          border-radius: 20px;
+        }
       `}</style>
       <div className="max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14">
         <section className="mb-10 px-2">
           <p className="text-[11px] uppercase tracking-[0.3em] text-slate-500 mb-3">Aurelia Shop</p>
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
             <div>
-              <h1 className="font-serif text-4xl lg:text-6xl leading-[0.95]">Sản phẩm mới</h1>
-              <p className="mt-4 text-sm lg:text-base text-slate-600 max-w-3xl">
-                Trình bày tinh gọn, dữ liệu rõ ràng, trải nghiệm mua sắm cao cấp với hiển thị 4 sản phẩm mỗi hàng.
+              <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight tracking-tight text-slate-900">{activeCategoryLabel}</h1>
+              <p className="mt-3 text-sm md:text-base text-slate-500 max-w-3xl">
+                Trình bày tinh gọn, dữ liệu rõ nét và phong cách sang trọng theo danh mục đã chọn.
               </p>
             </div>
             <p className="text-sm uppercase tracking-[0.24em] text-slate-700">{filteredProducts.length} sản phẩm</p>
@@ -300,21 +414,19 @@ export default function PLP() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-9">
           <aside className={`lg:col-span-3 ${isFilterOpen ? 'block' : 'hidden lg:block'}`}>
-            <div className="sticky top-24">
-              <div className="mb-8">
-                <h2 className="font-semibold uppercase tracking-[0.16em] text-xs mb-4">Danh mục</h2>
+            <div className="sticky top-24 pr-4">
+              <div className="mb-6 pb-6 border-b border-slate-200">
                 <button
-                  className="w-full flex items-center justify-between text-left text-xs uppercase tracking-[0.16em] text-slate-700 mb-3"
+                  className="w-full flex items-center justify-between text-left text-[15px] font-semibold text-slate-800"
                   onClick={() => toggleSection('category')}
                 >
-                  Chọn danh mục
-                  {openSections.category ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  Danh mục
+                  {openSections.category ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
                 </button>
                 {openSections.category && (
-                  <div className="space-y-1">
+                  <div className="mt-4 space-y-3 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
                     {[{ slug: 'all', name: 'Tất cả' }, ...categories].map((cat) => {
                       const isSelected = selectedCategory === cat.slug;
-
                       return (
                         <button
                           key={cat.slug}
@@ -322,20 +434,12 @@ export default function PLP() {
                           role="radio"
                           aria-checked={isSelected}
                           onClick={() => updateCategory(cat.slug)}
-                          className={`group flex items-center gap-3 w-full py-2 text-left text-sm uppercase tracking-[0.12em] transition-colors rounded-md ${
-                            isSelected
-                              ? 'text-slate-950 font-semibold bg-slate-200/70'
-                              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                          }`}
+                          className="group flex items-center gap-3 w-full text-left text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
                         >
-                          <span
-                            className={`flex items-center justify-center w-4 h-4 rounded-full border transition-colors ${
-                              isSelected ? 'border-slate-900 bg-slate-900' : 'border-slate-400 bg-white group-hover:border-slate-900'
-                            }`}
-                          >
-                            {isSelected && <span className="w-2 h-2 rounded-full bg-white" />}
+                          <span className={`flex items-center justify-center w-[18px] h-[18px] rounded-full border transition-colors shrink-0 ${isSelected ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                            {isSelected && <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />}
                           </span>
-                          <span>{cat.name}</span>
+                          <span className={isSelected ? "font-medium text-slate-900" : ""}>{cat.name}</span>
                         </button>
                       );
                     })}
@@ -343,127 +447,153 @@ export default function PLP() {
                 )}
               </div>
 
-              <div className="mb-8">
+              <div className="mb-6 pb-6 border-b border-slate-200">
                 <button
-                  className="w-full flex items-center justify-between text-left text-xs uppercase tracking-[0.16em] text-slate-700 mb-3"
+                  className="w-full flex items-center justify-between text-left text-[15px] font-semibold text-slate-800"
                   onClick={() => toggleSection('size')}
                 >
-                  Kích cỡ
-                  {openSections.size ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  Kích thước
+                  {openSections.size ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
                 </button>
                 {openSections.size && (
-                  <div className="flex flex-wrap gap-1">
+                  <div className="mt-4 space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
                     <button
                       type="button"
                       onClick={() => setSelectedSize('all')}
-                      className={`px-3 py-2 text-xs uppercase tracking-[0.16em] transition-colors ${
-                        selectedSize === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-200/70 text-slate-700 hover:bg-slate-300/80'
-                      }`}
+                      className="group flex items-center gap-3 w-full text-left text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
                     >
-                      Tất cả
+                      <span className={`flex items-center justify-center w-[18px] h-[18px] rounded-full border transition-colors shrink-0 ${selectedSize === 'all' ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                        {selectedSize === 'all' && <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />}
+                      </span>
+                      <span className={selectedSize === 'all' ? "font-medium text-slate-900" : ""}>Tất cả</span>
                     </button>
                     {sizeOptions.map((size) => (
                       <button
                         key={size}
                         type="button"
                         onClick={() => setSelectedSize(size)}
-                        className={`px-3 py-2 text-xs uppercase tracking-[0.16em] transition-colors ${
-                          selectedSize === size ? 'bg-slate-900 text-white' : 'bg-slate-200/70 text-slate-700 hover:bg-slate-300/80'
-                        }`}
+                        className="group flex items-center gap-3 w-full text-left text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
                       >
-                        {size}
+                        <span className={`flex items-center justify-center w-[18px] h-[18px] rounded-full border transition-colors shrink-0 ${selectedSize === size ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                          {selectedSize === size && <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />}
+                        </span>
+                        <span className={selectedSize === size ? "font-medium text-slate-900" : ""}>{size}</span>
                       </button>
                     ))}
                   </div>
                 )}
               </div>
 
-              <div className="mb-8">
+              <div className="mb-6 pb-6 border-b border-slate-200">
                 <button
-                  className="w-full flex items-center justify-between text-left text-xs uppercase tracking-[0.16em] text-slate-700 mb-3"
+                  className="w-full flex items-center justify-between text-left text-[15px] font-semibold text-slate-800"
                   onClick={() => toggleSection('color')}
                 >
                   Màu sắc
-                  {openSections.color ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  {openSections.color ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
                 </button>
                 {openSections.color && (
-                  <div className="flex flex-wrap gap-1">
+                  <div className="mt-4 space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
                     <button
                       type="button"
                       onClick={() => setSelectedColor('all')}
-                      className={`px-3 py-2 text-xs uppercase tracking-[0.16em] transition-colors ${
-                        selectedColor === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-200/70 text-slate-700 hover:bg-slate-300/80'
-                      }`}
+                      className="group flex items-center gap-3 w-full text-left text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
                     >
-                      Tất cả
+                      <span className={`flex items-center justify-center w-[18px] h-[18px] rounded-full border transition-colors shrink-0 ${selectedColor === 'all' ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                        {selectedColor === 'all' && <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />}
+                      </span>
+                      <span className={selectedColor === 'all' ? "font-medium text-slate-900" : ""}>Tất cả</span>
                     </button>
                     {colorOptions.map((color) => (
                       <button
                         key={color}
                         type="button"
                         onClick={() => setSelectedColor(color)}
-                        className={`px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors ${
-                          selectedColor === color ? 'bg-slate-900 text-white' : 'bg-slate-200/70 text-slate-700 hover:bg-slate-300/80'
-                        }`}
+                        className="group flex items-center gap-3 w-full text-left text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
                       >
-                        {color}
+                        <span className={`flex items-center justify-center w-[18px] h-[18px] rounded-full border transition-colors shrink-0 ${selectedColor === color ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                          {selectedColor === color && <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />}
+                        </span>
+                        <span className={selectedColor === color ? "font-medium text-slate-900" : ""}>{color}</span>
                       </button>
                     ))}
                   </div>
                 )}
               </div>
 
-              <div className="mb-8">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-700 mb-3">Khoảng giá</p>
-                <div className="text-sm text-slate-600 mb-4 flex items-center justify-between">
-                  <span className="font-semibold">{formatVND(priceRange[0])}</span>
-                  <span className="font-semibold">{formatVND(priceRange[1])}</span>
-                </div>
-                <PriceRangeSlider
-                  min={priceBounds[0]}
-                  max={priceBounds[1]}
-                  step={Math.max(1000, Math.round(priceSpan / 40))}
-                  currentRange={priceRange}
-                  onRangeChange={setPriceRange}
-                />
+              <div className="mb-6 pb-6 border-b border-slate-200">
+                <button
+                  className="w-full flex items-center justify-between text-left text-[15px] font-semibold text-slate-800 mb-4"
+                  onClick={() => toggleSection('price')}
+                >
+                  Giá
+                  {openSections.price ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
+                </button>
+                {openSections.price && (
+                  <>
+                  <div className="text-[14px] text-slate-600 mb-4 flex items-center justify-between">
+                    <span className="font-semibold">{formatVND(priceRange[0])}</span>
+                    <span className="font-semibold">{formatVND(priceRange[1])}</span>
+                  </div>
+                  <PriceRangeSlider
+                    min={priceBounds[0]}
+                    max={priceBounds[1]}
+                    step={Math.max(1000, Math.round(priceSpan / 40))}
+                    currentRange={priceRange}
+                    onRangeChange={setPriceRange}
+                  />
+                  </>
+                )}
               </div>
 
-              <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-700 mb-3">Sắp xếp</p>
-                <div className="flex flex-wrap gap-1 mb-5">
-                  {[
-                    { id: 'newest', label: 'Mới nhất' },
-                    { id: 'price-asc', label: 'Giá tăng' },
-                    { id: 'price-desc', label: 'Giá giảm' },
-                    { id: 'name-asc', label: 'Tên A-Z' }
-                  ].map((option) => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => setSortBy(option.id)}
-                      className={`px-3 py-2 text-xs uppercase tracking-[0.14em] transition-colors ${
-                        sortBy === option.id ? 'bg-slate-900 text-white' : 'bg-slate-200/70 text-slate-700 hover:bg-slate-300/80'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
+              <div className="mb-6 pb-6">
                 <button
-                  type="button"
-                  onClick={() => {
-                    updateCategory('all');
-                    setSelectedSize('all');
-                    setSelectedColor('all');
-                    setPriceRange(priceBounds);
-                    setSortBy('newest');
-                    setCurrentPage(1);
-                  }}
-                  className="w-full bg-slate-900 text-white py-3 text-xs uppercase tracking-[0.2em] font-semibold hover:bg-slate-700 transition-colors"
+                  className="w-full flex items-center justify-between text-left text-[15px] font-semibold text-slate-800 mb-4"
+                  onClick={() => toggleSection('sort')}
                 >
-                  Xóa bộ lọc
+                  Sắp xếp
+                  {openSections.sort ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
                 </button>
+                {openSections.sort && (
+                  <div className="mt-2 space-y-3">
+                    {[
+                      { id: 'newest', label: 'Mới nhất' },
+                      { id: 'price-asc', label: 'Giá tăng' },
+                      { id: 'price-desc', label: 'Giá giảm' },
+                      { id: 'name-asc', label: 'Tên A-Z' }
+                    ].map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={sortBy === option.id}
+                        onClick={() => setSortBy(option.id)}
+                        className="group flex items-center gap-3 w-full text-left text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
+                      >
+                        <span className={`flex items-center justify-center w-[18px] h-[18px] rounded-full border transition-colors shrink-0 ${sortBy === option.id ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                          {sortBy === option.id && <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />}
+                        </span>
+                        <span className={sortBy === option.id ? "font-medium text-slate-900" : ""}>{option.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  updateCategory('all');
+                  setSelectedSize('all');
+                  setSelectedColor('all');
+                  setPriceRange(priceBounds);
+                  setSortBy('newest');
+                  setCurrentPage(1);
+                }}
+                className="w-full border border-slate-300 text-slate-700 rounded-md py-2.5 text-[14px] font-medium hover:bg-slate-50 hover:text-slate-900 transition-colors"
+              >
+                Xóa bộ lọc
+              </button>
             </div>
           </aside>
 
@@ -506,57 +636,19 @@ export default function PLP() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
                   {paginatedProducts.map((product) => (
-                    <article key={product._id} className="group bg-white p-3 transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_18px_35px_rgba(15,23,42,0.18)]">
-                      <div className="relative overflow-hidden bg-[#ece8e2] mb-3">
-                        <Link to={`/product/${product._id}`} className="block">
-                          <img
-                            ref={(el) => (itemImageRefs.current[product._id] = el)}
-                            alt={product.name}
-                            className="aspect-[4/5] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            src={product.imageUrl}
-                            referrerPolicy="no-referrer"
-                          />
-                        </Link>
-                        <div className="absolute left-0 right-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                          <div className="flex items-stretch">
-                            <button
-                            type="button"
-                            onClick={() => handleAddToCart(product._id)}
-                            disabled={!product.inStock || addingToCartProductId === product._id}
-                            className={`flex-1 py-3 px-3 text-[11px] uppercase tracking-[0.14em] font-semibold flex items-center justify-center gap-2 ${
-                              product.inStock
-                                ? 'bg-[#f2efe9] text-slate-900 hover:bg-[#dfd9ce]'
-                                : 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                            } ${addingToCartProductId === product._id ? 'cursor-wait opacity-70' : ''}`}
-                          >
-                            <ShoppingBag className="h-4 w-4" /> {addingToCartProductId === product._id ? 'Đang thêm...' : 'Thêm vào giỏ'}
-                          </button>
-                            <Link
-                              to={`/product/${product._id}`}
-                              className="w-12 bg-[#2f2f2f] text-white hover:bg-black flex items-center justify-center"
-                              aria-label={`Xem nhanh ${product.name}`}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-1">{product.category}</p>
-                      <Link to={`/product/${product._id}`} className="block mb-1">
-                        <h3 className="text-sm font-semibold text-slate-900 line-clamp-2 min-h-[2.4rem]">{product.name}</h3>
-                      </Link>
-                      <p className="text-base font-bold text-red-600 mb-1">{formatVND(product.price)}</p>
-                      <p className="text-[11px] text-slate-500 line-clamp-1">
-                        {product.colors.length} màu • {product.sizes.length} size
-                      </p>
-                    </article>
+                    <ProductCardItem
+                      key={product._id}
+                      product={product}
+                      onAddToCart={handleAddToCart}
+                      addingToCartProductId={addingToCartProductId}
+                      imageRef={(el) => { itemImageRefs.current[product._id] = el; }}
+                    />
                   ))}
                 </div>
 
-                <div className="mt-10 bg-white/80 px-3 py-3 flex items-center justify-between">
+                <div className="mt-14 bg-white/80 px-3 py-3 flex items-center justify-between border-t border-slate-100">
                   <button
                     type="button"
                     onClick={handlePrevPage}

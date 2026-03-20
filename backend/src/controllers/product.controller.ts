@@ -5,12 +5,18 @@ import {
   getProductById,
   listCategories,
   listFeaturedProducts,
-  listProducts
+  listProducts,
+  getMegaMenu as fetchMegaMenu
 } from "../services/product.service.js";
 
 export const getCategories = asyncHandler(async (_req: Request, res: Response) => {
   const categories = await listCategories();
   sendSuccess(res, categories, "Categories fetched");
+});
+
+export const getMegaMenu = asyncHandler(async (_req: Request, res: Response) => {
+  const menu = await fetchMegaMenu();
+  sendSuccess(res, menu, "Mega menu fetched");
 });
 
 export const getProducts = asyncHandler(async (req: Request, res: Response) => {

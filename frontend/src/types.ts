@@ -7,6 +7,7 @@ export interface Product {
   imageUrl: string;
   sizes: string[];
   colors: string[];
+  colorImages?: Record<string, string>;
   inStock: boolean;
 }
 

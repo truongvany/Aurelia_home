@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ShoppingBag, User, Menu, Heart } from 'lucide-react';
 import { api } from '../lib/api';
+import type { MegaMenuCategory } from '../lib/api';
 import { formatVND } from '../utils/currency';
 import { useAuth } from '../contexts/AuthContext';
 import type { CartItemApi } from '../types';
@@ -16,6 +17,7 @@ export default function Header() {
   const [cartItems, setCartItems] = useState<CartItemApi[]>([]);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [wishlistPreviewItems, setWishlistPreviewItems] = useState<Product[]>([]);
+  const [megaMenu, setMegaMenu] = useState<MegaMenuCategory[]>([]);
   const { user, isAuthenticated, signOut } = useAuth();
 
   useEffect(() => {
@@ -53,6 +55,13 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
+    // Fetch mega menu categories only once
+    api.getMegaMenu()
+      .then(setMegaMenu)
+      .catch(() => console.error("Could not fetch mega menu"));
+  }, []);
+
+  useEffect(() => {
     const loadCart = async () => {
       if (!isAuthenticated || user?.role !== 'customer') {
         setCartCount(0);
@@ -83,7 +92,11 @@ export default function Header() {
     };
   }, [isAuthenticated, user?.role]);
 
+  const location = useLocation();
+  const queryCategory = new URLSearchParams(location.search).get('category') ?? '';
   const profileTarget = !isAuthenticated ? '/auth' : user?.role === 'admin' ? '/admin' : '/profile';
+  const featuredColumn = megaMenu.find((column) => column.title === 'SẢN PHẨM ƯU ĐÃI');
+  const quickLinks = featuredColumn?.items.slice(0, 3) ?? [];
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
@@ -98,11 +111,98 @@ export default function Header() {
             </Link>
           </div>
           
-          <nav className="hidden md:flex space-x-8">
-            <Link to="/" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Trang chủ</Link>  
-            <Link to="/shop" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Thời trang mới</Link>
-            <Link to="/about" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Giới thiệu</Link>
-            <Link to="/contact" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Liên hệ</Link>
+          <nav className="hidden md:flex space-x-8 h-full items-center">
+            <Link to="/" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider h-full flex items-center">Trang chủ</Link>  
+            
+            <div className="group flex items-center h-full">
+              <Link to="/shop" className="text-sm font-medium text-[#0a192f] group-hover:text-[#1e3a8a] transition-colors uppercase tracking-wider h-full flex items-center relative z-10">
+                Thời trang
+                {/* invisible bridge to prevent popover gap flicker */}
+                <div className="absolute left-0 right-0 top-full h-4"></div>
+              </Link>
+
+              <div className="absolute left-0 top-full w-full bg-white opacity-0 invisible translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 shadow-[0_20px_40px_rgba(0,0,0,0.1)] border-t border-slate-100 pb-0 flex flex-col z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                  <div className="flex pt-8 pb-10">
+                    {/* Left categories */}
+                    <div
+                      className="flex-1 grid gap-6"
+                      style={{ gridTemplateColumns: `repeat(${Math.max(1, megaMenu.length)}, minmax(0, 1fr))` }}
+                    >
+                      {megaMenu.map((column, idx) => (
+                        <div key={idx} className="flex flex-col space-y-4">
+                          <h3 className="text-[13px] font-bold uppercase tracking-[0.1em] text-[#0a192f] mb-1 flex items-center hover:text-[#1e3a8a] cursor-pointer group/title transition-colors">
+                            {column.title} <span className="ml-1 text-[#1e3a8a] transition-transform group-hover/title:translate-x-1">→</span>
+                          </h3>
+                          <ul className="space-y-3">
+                            {column.items.map((item, itemIdx) => {
+                              const active = queryCategory === item.slug;
+                              return (
+                                <li key={itemIdx}>
+                                  <Link
+                                    to={`/shop?category=${encodeURIComponent(item.slug)}`}
+                                    className={`text-sm font-medium transition-colors block ${
+                                      active
+                                        ? 'text-[#0f286d] hover:text-[#0b1d5c]'
+                                        : 'text-slate-500 hover:text-[#0f286d]'
+                                    }`}
+                                  >
+                                    {item.name}
+                                  </Link>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Right banners */}
+                    <div className="w-[260px] ml-8 flex flex-col gap-4 border-l border-slate-100 pl-8">
+                      <Link
+                        to={quickLinks[0] ? `/shop?category=${encodeURIComponent(quickLinks[0].slug)}` : '/shop'}
+                        className="relative group/img overflow-hidden rounded-xl aspect-[4/3] block"
+                      >
+                        <img src="https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&q=80&w=400" alt="Đồ Thu Đông" className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <p className="text-white font-bold text-[15px] tracking-wide">{quickLinks[0]?.name ?? 'Khám phá danh mục'}</p>
+                        </div>
+                      </Link>
+                      <Link
+                        to={quickLinks[1] ? `/shop?category=${encodeURIComponent(quickLinks[1].slug)}` : '/shop'}
+                        className="relative group/img overflow-hidden rounded-xl aspect-[4/3] block"
+                      >
+                        <img src="https://images.unsplash.com/photo-1622329661664-811c75908a73?auto=format&fit=crop&q=80&w=400" alt="Pickleball Nam" className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <p className="text-white font-bold text-[15px] tracking-wide">{quickLinks[1]?.name ?? 'Bộ sưu tập mới'}</p>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Bottom tabs bar */}
+                <div className="bg-slate-50 border-t border-slate-100 py-3 mt-auto">
+                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center space-x-8">
+                    <span className="text-[11px] text-slate-400 font-medium uppercase tracking-[0.2em]">DANH MỤC NỔI BẬT</span>
+                    {(quickLinks.length > 0 ? quickLinks : megaMenu.flatMap((column) => column.items).slice(0, 3)).map((item) => (
+                      <Link
+                        key={item.slug}
+                        to={`/shop?category=${encodeURIComponent(item.slug)}`}
+                        className="text-[13px] font-bold uppercase tracking-[0.1em] text-[#0a192f] hover:text-[#1e3a8a] transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-[#1e3a8a] hover:after:w-full after:transition-all after:duration-300"
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Link to="/about" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider h-full flex items-center">Giới thiệu</Link>
+            <Link to="/contact" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider h-full flex items-center">Liên hệ</Link>
           </nav>
 
           <div className="flex items-center space-x-4">
