@@ -15,7 +15,8 @@ const cartItemSchema = new Schema(
 const cartSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
-    items: { type: [cartItemSchema], default: [] }
+    items: { type: [cartItemSchema], default: [] },
+    appliedCouponCode: { type: String, default: "" }
   },
   {
     timestamps: true,

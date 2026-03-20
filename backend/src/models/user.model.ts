@@ -11,7 +11,17 @@ const userSchema = new Schema(
       type: String,
       enum: ["customer", "admin"],
       default: "customer"
-    }
+    },
+    isMember: { type: Boolean, default: false },
+    memberStatus: {
+      type: String,
+      enum: ["inactive", "pending", "active"],
+      default: "inactive"
+    },
+    memberSince: { type: Date, default: null },
+    membershipRequestedAt: { type: Date, default: null },
+    membershipReviewedAt: { type: Date, default: null },
+    membershipReviewNote: { type: String, default: "" }
   },
   {
     timestamps: true,

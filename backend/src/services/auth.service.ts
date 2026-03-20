@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { UserModel } from "../models/user.model.js";
 import { UserProfileModel } from "../models/userProfile.model.js";
 import { RefreshTokenModel } from "../models/refreshToken.model.js";
+import { CouponModel } from "../models/coupon.model.js";
 import { signAccessToken, signRefreshToken, verifyToken } from "../utils/token.js";
 
 interface RegisterInput {
@@ -41,7 +42,29 @@ export const registerUser = async (input: RegisterInput) => {
 
   await UserProfileModel.create({ userId: user._id });
 
-  return createAuthPayload(user._id.toString(), user.email, user.role);
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 30);
+  const shortId = user._id.toString().slice(-6).toUpperCase();
+
+  await CouponModel.create({
+    code: `WELCOME-${shortId}`,
+    discountType: "percent",
+    discountValue: 10,
+    minOrderAmount: 0,
+    source: "welcome",
+    assignedUserId: user._id,
+    maxUsesPerUser: 1,
+    expiresAt,
+    isActive: true
+  });
+
+  return createAuthPayload(
+    user._id.toString(),
+    user.email,
+    user.role,
+    user.isMember,
+    user.memberStatus
+  );
 };
 
 export const loginUser = async (input: LoginInput) => {
@@ -55,7 +78,13 @@ export const loginUser = async (input: LoginInput) => {
     throw new ApiError(401, "Invalid credentials");
   }
 
-  return createAuthPayload(user._id.toString(), user.email, user.role);
+  return createAuthPayload(
+    user._id.toString(),
+    user.email,
+    user.role,
+    user.isMember,
+    user.memberStatus
+  );
 };
 
 export const refreshAuthToken = async (refreshToken: string) => {
@@ -66,7 +95,13 @@ export const refreshAuthToken = async (refreshToken: string) => {
   }
 
   await RefreshTokenModel.deleteOne({ _id: tokenDoc._id });
-  return createAuthPayload(payload.userId, payload.email, payload.role);
+  return createAuthPayload(
+    payload.userId,
+    payload.email,
+    payload.role,
+    payload.isMember,
+    payload.memberStatus
+  );
 };
 
 export const getCurrentUser = async (userId: string) => {
@@ -82,8 +117,14 @@ export const getCurrentUser = async (userId: string) => {
   return user;
 };
 
-const createAuthPayload = async (userId: string, email: string, role: "customer" | "admin") => {
-  const payload = { userId, email, role };
+const createAuthPayload = async (
+  userId: string,
+  email: string,
+  role: "customer" | "admin",
+  isMember?: boolean,
+  memberStatus?: "inactive" | "pending" | "active"
+) => {
+  const payload = { userId, email, role, isMember, memberStatus };
   const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken(payload);
 

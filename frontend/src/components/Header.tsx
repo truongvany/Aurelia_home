@@ -101,11 +101,18 @@ export default function Header() {
           <nav className="hidden md:flex space-x-8">
             <Link to="/" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Trang chủ</Link>  
             <Link to="/shop" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Thời trang mới</Link>
+            <Link to="/membership" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Membership</Link>
             <Link to="/about" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Giới thiệu</Link>
             <Link to="/contact" className="text-sm font-medium text-[#0a192f] hover:text-[#1e3a8a] transition-colors uppercase tracking-wider">Liên hệ</Link>
           </nav>
 
           <div className="flex items-center space-x-4">
+            <Link
+              to="/membership"
+              className="md:hidden text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0a192f] hover:text-[#1e3a8a]"
+            >
+              Member
+            </Link>
             <Link to={profileTarget} className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors">
               <User className="h-5 w-5" />
             </Link>

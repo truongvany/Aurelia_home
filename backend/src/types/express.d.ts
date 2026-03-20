@@ -4,6 +4,8 @@ export interface AuthUser extends JwtPayload {
   userId: string;
   email: string;
   role: "customer" | "admin";
+  isMember?: boolean;
+  memberStatus?: "inactive" | "pending" | "active";
 }
 
 declare global {

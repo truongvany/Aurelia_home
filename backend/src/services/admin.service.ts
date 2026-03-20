@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 import { USER_ROLES } from "../constants/roles.js";
 import { AuditLogModel } from "../models/auditLog.model.js";
 import { CategoryModel } from "../models/category.model.js";
+import { CouponModel } from "../models/coupon.model.js";
 import { OrderModel } from "../models/order.model.js";
 import { PaymentModel } from "../models/payment.model.js";
 import { ProductImageModel } from "../models/productImage.model.js";
@@ -33,6 +34,26 @@ interface AdminProductListQuery extends AdminListQuery {
 interface AdminOrderListQuery extends AdminListQuery {
   status?: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
   paymentStatus?: "pending" | "paid" | "failed";
+}
+
+interface AdminMembershipListQuery extends AdminListQuery {
+  status?: "inactive" | "pending" | "active";
+}
+
+interface AdminVoucherListQuery extends AdminListQuery {
+  source?: "generic" | "welcome" | "membership";
+  isActive?: boolean;
+}
+
+interface CreateAdminVoucherInput {
+  code: string;
+  discountType: "percent" | "fixed";
+  discountValue: number;
+  minOrderAmount?: number;
+  expiresAt: string;
+  source?: "generic" | "welcome" | "membership";
+  assignedUserId?: string;
+  maxUsesPerUser?: number;
 }
 
 interface ProductVariantInput {
@@ -828,6 +849,8 @@ export const updateAdminPaymentStatus = async (
       orderId: order._id,
       userId: order.userId,
       amount: order.totalAmount,
+      discountAmount: 0,
+      finalAmount: order.totalAmount,
       status: paymentStatus,
       provider: "manual"
     });
@@ -962,9 +985,315 @@ export const listAdminCustomerOrders = async (customerId: string) => {
   }));
 };
 
+export const listAdminMembershipRequests = async (query: AdminMembershipListQuery) => {
+  const { page, limit, skip } = toPagination(query);
+  const filter: Record<string, unknown> = { role: USER_ROLES.CUSTOMER };
+
+  if (query.status) {
+    filter.memberStatus = query.status;
+  } else {
+    filter.memberStatus = "pending";
+  }
+
+  if (query.search?.trim()) {
+    const regex = new RegExp(query.search.trim(), "i");
+    filter.$or = [{ email: regex }, { firstName: regex }, { lastName: regex }, { phone: regex }];
+  }
+
+  const [total, users] = await Promise.all([
+    UserModel.countDocuments(filter),
+    UserModel.find(filter)
+      .sort({ membershipRequestedAt: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .select(
+        "_id email firstName lastName phone isMember memberStatus memberSince membershipRequestedAt membershipReviewedAt membershipReviewNote createdAt"
+      )
+      .lean()
+  ]);
+
+  return {
+    items: users.map((user) => ({
+      _id: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email,
+      phone: user.phone,
+      isMember: user.isMember,
+      memberStatus: user.memberStatus,
+      memberSince: user.memberSince,
+      membershipRequestedAt: user.membershipRequestedAt,
+      membershipReviewedAt: user.membershipReviewedAt,
+      membershipReviewNote: user.membershipReviewNote,
+      createdAt: user.createdAt
+    })),
+    meta: toPaginationMeta(page, limit, total)
+  };
+};
+
+const createMembershipVoucherOnApprove = async (userId: string) => {
+  const user = await UserModel.findById(userId).select("_id");
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const existing = await CouponModel.findOne({
+    assignedUserId: user._id,
+    source: "membership",
+    isActive: true,
+    expiresAt: { $gt: new Date() }
+  })
+    .select("_id")
+    .lean();
+
+  if (existing) {
+    return;
+  }
+
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 45);
+  const shortId = user._id.toString().slice(-6).toUpperCase();
+  const code = `MEMBER-${shortId}-${Date.now().toString().slice(-4)}`;
+
+  await CouponModel.create({
+    code,
+    discountType: "percent",
+    discountValue: 12,
+    minOrderAmount: 0,
+    source: "membership",
+    assignedUserId: user._id,
+    maxUsesPerUser: 1,
+    expiresAt,
+    isActive: true
+  });
+};
+
+export const reviewAdminMembershipRequest = async (
+  actorUserId: string,
+  userId: string,
+  action: "approve" | "reject",
+  note?: string
+) => {
+  ensureObjectId(userId, "user id");
+
+  const user = await UserModel.findOne({ _id: userId, role: USER_ROLES.CUSTOMER });
+  if (!user) {
+    throw new ApiError(404, "Customer not found");
+  }
+
+  if (action === "approve") {
+    if (user.memberStatus === "active") {
+      const safeUser = await UserModel.findById(user._id)
+        .select(
+          "_id email firstName lastName phone isMember memberStatus memberSince membershipRequestedAt membershipReviewedAt membershipReviewNote createdAt"
+        )
+        .lean();
+      if (!safeUser) {
+        throw new ApiError(404, "Customer not found");
+      }
+      return {
+        ...safeUser,
+        fullName: `${safeUser.firstName ?? ""} ${safeUser.lastName ?? ""}`.trim() || safeUser.email
+      };
+    }
+
+    if (user.memberStatus !== "pending") {
+      throw new ApiError(422, "Only pending membership requests can be approved");
+    }
+
+    user.isMember = true;
+    user.memberStatus = "active";
+    user.memberSince = new Date();
+    user.membershipReviewedAt = new Date();
+    user.membershipReviewNote = note?.trim() ?? "";
+    await user.save();
+    await createMembershipVoucherOnApprove(user._id.toString());
+
+    await writeAudit(actorUserId, "admin.membership.approve", "user", user._id.toString(), {
+      note: user.membershipReviewNote
+    });
+
+    const safeUser = await UserModel.findById(user._id)
+      .select(
+        "_id email firstName lastName phone isMember memberStatus memberSince membershipRequestedAt membershipReviewedAt membershipReviewNote createdAt"
+      )
+      .lean();
+    if (!safeUser) {
+      throw new ApiError(404, "Customer not found");
+    }
+
+    return {
+      ...safeUser,
+      fullName: `${safeUser.firstName ?? ""} ${safeUser.lastName ?? ""}`.trim() || safeUser.email
+    };
+  }
+
+  if (user.memberStatus !== "pending") {
+    throw new ApiError(422, "Only pending membership requests can be rejected");
+  }
+
+  user.isMember = false;
+  user.memberStatus = "inactive";
+  user.memberSince = null;
+  user.membershipReviewedAt = new Date();
+  user.membershipReviewNote = note?.trim() ?? "";
+  await user.save();
+
+  await writeAudit(actorUserId, "admin.membership.reject", "user", user._id.toString(), {
+    note: user.membershipReviewNote
+  });
+
+  const safeUser = await UserModel.findById(user._id)
+    .select(
+      "_id email firstName lastName phone isMember memberStatus memberSince membershipRequestedAt membershipReviewedAt membershipReviewNote createdAt"
+    )
+    .lean();
+  if (!safeUser) {
+    throw new ApiError(404, "Customer not found");
+  }
+
+  return {
+    ...safeUser,
+    fullName: `${safeUser.firstName ?? ""} ${safeUser.lastName ?? ""}`.trim() || safeUser.email
+  };
+};
+
+export const listAdminVouchers = async (query: AdminVoucherListQuery) => {
+  const { page, limit, skip } = toPagination(query);
+  const filter: Record<string, unknown> = {};
+
+  if (query.search?.trim()) {
+    const regex = new RegExp(query.search.trim(), "i");
+    filter.code = regex;
+  }
+
+  if (query.source) {
+    filter.source = query.source;
+  }
+
+  if (typeof query.isActive === "boolean") {
+    filter.isActive = query.isActive;
+  }
+
+  const [total, vouchers] = await Promise.all([
+    CouponModel.countDocuments(filter),
+    CouponModel.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean()
+  ]);
+
+  return {
+    items: vouchers.map((voucher) => ({
+      _id: voucher._id,
+      code: voucher.code,
+      discountType: voucher.discountType,
+      discountValue: voucher.discountValue,
+      minOrderAmount: voucher.minOrderAmount,
+      source: voucher.source ?? "generic",
+      assignedUserId: voucher.assignedUserId,
+      maxUsesPerUser:
+        typeof voucher.maxUsesPerUser === "number" && voucher.maxUsesPerUser > 0
+          ? voucher.maxUsesPerUser
+          : 1,
+      usedCount: Array.isArray(voucher.usedByUserIds) ? voucher.usedByUserIds.length : 0,
+      expiresAt: voucher.expiresAt,
+      isActive: voucher.isActive,
+      createdAt: voucher.createdAt
+    })),
+    meta: toPaginationMeta(page, limit, total)
+  };
+};
+
+export const createAdminVoucher = async (actorUserId: string, input: CreateAdminVoucherInput) => {
+  const code = input.code.trim().toUpperCase();
+  if (!code) {
+    throw new ApiError(400, "Voucher code is required");
+  }
+
+  const existing = await CouponModel.findOne({ code }).select("_id").lean();
+  if (existing) {
+    throw new ApiError(409, "Voucher code already exists");
+  }
+
+  const expiresAt = new Date(input.expiresAt);
+  if (Number.isNaN(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) {
+    throw new ApiError(400, "expiresAt must be a valid future date");
+  }
+
+  if (!Number.isFinite(input.discountValue) || input.discountValue <= 0) {
+    throw new ApiError(400, "discountValue must be a positive number");
+  }
+
+  const maxUsesPerUser =
+    typeof input.maxUsesPerUser === "number" && Number.isInteger(input.maxUsesPerUser)
+      ? input.maxUsesPerUser
+      : 1;
+  if (maxUsesPerUser < 1) {
+    throw new ApiError(400, "maxUsesPerUser must be greater than or equal to 1");
+  }
+
+  if (input.assignedUserId) {
+    ensureObjectId(input.assignedUserId, "assigned user id");
+  }
+
+  const voucher = await CouponModel.create({
+    code,
+    discountType: input.discountType,
+    discountValue: input.discountValue,
+    minOrderAmount: input.minOrderAmount ?? 0,
+    source: input.source ?? "generic",
+    assignedUserId: input.assignedUserId ?? null,
+    maxUsesPerUser,
+    expiresAt,
+    isActive: true
+  });
+
+  await writeAudit(actorUserId, "admin.voucher.create", "coupon", voucher._id.toString(), {
+    code: voucher.code,
+    source: voucher.source
+  });
+
+  return voucher;
+};
+
+export const deactivateAdminVoucher = async (actorUserId: string, voucherId: string) => {
+  ensureObjectId(voucherId, "voucher id");
+
+  const voucher = await CouponModel.findById(voucherId);
+  if (!voucher) {
+    throw new ApiError(404, "Voucher not found");
+  }
+
+  if (!voucher.isActive) {
+    return voucher;
+  }
+
+  voucher.isActive = false;
+  await voucher.save();
+
+  await writeAudit(actorUserId, "admin.voucher.deactivate", "coupon", voucher._id.toString(), {
+    code: voucher.code
+  });
+
+  return voucher;
+};
+
 export const getAdminDashboardStats = async () => {
-  const [totalProducts, totalCustomers, totalOrders, paidPayments, lowStockCount, recentOrders] =
-    await Promise.all([
+  const [
+    totalProducts,
+    totalCustomers,
+    totalOrders,
+    paidPayments,
+    lowStockCount,
+    recentOrders,
+    pendingMembershipRequests,
+    activeMembers,
+    activeVouchers,
+    usedMembershipVouchers
+  ] = await Promise.all([
       ProductModel.countDocuments({ isActive: true }),
       UserModel.countDocuments({ role: USER_ROLES.CUSTOMER }),
       OrderModel.countDocuments(),
@@ -973,7 +1302,15 @@ export const getAdminDashboardStats = async () => {
         { $group: { _id: null, totalRevenue: { $sum: "$amount" } } }
       ]),
       ProductVariantModel.countDocuments({ stockQuantity: { $gt: 0, $lte: LOW_STOCK_THRESHOLD } }),
-      OrderModel.find().sort({ createdAt: -1 }).limit(5).lean()
+      OrderModel.find().sort({ createdAt: -1 }).limit(5).lean(),
+      UserModel.countDocuments({ role: USER_ROLES.CUSTOMER, memberStatus: "pending" }),
+      UserModel.countDocuments({ role: USER_ROLES.CUSTOMER, memberStatus: "active" }),
+      CouponModel.countDocuments({ isActive: true }),
+      CouponModel.aggregate<{ total: number }>([
+        { $match: { source: "membership" } },
+        { $project: { usedCount: { $size: "$usedByUserIds" } } },
+        { $group: { _id: null, total: { $sum: "$usedCount" } } }
+      ])
     ]);
 
   const recentUsers = await UserModel.find({
@@ -990,7 +1327,11 @@ export const getAdminDashboardStats = async () => {
       totalCustomers,
       totalOrders,
       totalRevenue: paidPayments[0]?.totalRevenue ?? 0,
-      lowStockVariants: lowStockCount
+      lowStockVariants: lowStockCount,
+      pendingMembershipRequests,
+      activeMembers,
+      activeVouchers,
+      usedMembershipVouchers: usedMembershipVouchers[0]?.total ?? 0
     },
     recentOrders: recentOrders.map((order) => {
       const user = userMap.get(order.userId.toString());

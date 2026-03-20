@@ -2,7 +2,9 @@ import { Types } from "mongoose";
 import { CartModel } from "../models/cart.model.js";
 import { ProductModel } from "../models/product.model.js";
 import { ProductVariantModel } from "../models/productVariant.model.js";
+import { UserModel } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
+import { calculateDiscount, validateCoupon } from "./coupon.service.js";
 
 interface AddCartItemInput {
   userId: string;
@@ -23,7 +25,16 @@ export const getCart = async (userId: string) => {
   ensureObjectIds([userId]);
   const cart = await CartModel.findOne({ userId });
   if (!cart) {
-    return { userId, items: [], total: 0 };
+    return {
+      userId,
+      items: [],
+      total: 0,
+      appliedCouponCode: "",
+      discountAmount: 0,
+      finalAmount: 0,
+      shippingFee: 0,
+      freeShippingApplied: false
+    };
   }
 
   const productIds = [...new Set(cart.items.map((item) => item.productId.toString()))];
@@ -41,7 +52,33 @@ export const getCart = async (userId: string) => {
   });
 
   const total = cart.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
-  return { ...cart.toObject(), items, total };
+
+  const user = await UserModel.findById(userId).select("isMember memberStatus").lean();
+  const isActiveMember = Boolean(user?.isMember && user.memberStatus === "active");
+  const shippingFee = isActiveMember ? 0 : total > 0 ? 30000 : 0;
+
+  let discountAmount = 0;
+  if (cart.appliedCouponCode) {
+    try {
+      const coupon = await validateCoupon(cart.appliedCouponCode, total, userId);
+      discountAmount = calculateDiscount(total, coupon);
+    } catch {
+      cart.appliedCouponCode = "";
+      await cart.save();
+    }
+  }
+
+  const finalAmount = Math.max(0, total - discountAmount) + shippingFee;
+
+  return {
+    ...cart.toObject(),
+    items,
+    total,
+    discountAmount,
+    finalAmount,
+    shippingFee,
+    freeShippingApplied: shippingFee === 0 && total > 0
+  };
 };
 
 export const addCartItem = async (input: AddCartItemInput) => {
@@ -143,6 +180,39 @@ export const removeCartItem = async (userId: string, itemId: string) => {
 
 export const clearCart = async (userId: string) => {
   ensureObjectIds([userId]);
-  await CartModel.findOneAndUpdate({ userId }, { items: [] }, { upsert: true, new: true });
+  await CartModel.findOneAndUpdate(
+    { userId },
+    { items: [], appliedCouponCode: "" },
+    { upsert: true, new: true }
+  );
+  return getCart(userId);
+};
+
+export const applyCouponToCart = async (userId: string, code: string) => {
+  ensureObjectIds([userId]);
+
+  const cart = await CartModel.findOne({ userId });
+  if (!cart || cart.items.length === 0) {
+    throw new ApiError(422, "Cart is empty");
+  }
+
+  const total = cart.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  const coupon = await validateCoupon(code, total, userId);
+
+  cart.appliedCouponCode = coupon.code;
+  await cart.save();
+  return getCart(userId);
+};
+
+export const removeCouponFromCart = async (userId: string) => {
+  ensureObjectIds([userId]);
+
+  const cart = await CartModel.findOne({ userId });
+  if (!cart) {
+    throw new ApiError(404, "Cart not found");
+  }
+
+  cart.appliedCouponCode = "";
+  await cart.save();
   return getCart(userId);
 };

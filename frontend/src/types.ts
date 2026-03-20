@@ -17,6 +17,35 @@ export interface User {
   lastName: string;
   phone?: string;
   role: 'customer' | 'admin';
+  isMember?: boolean;
+  memberStatus?: 'inactive' | 'pending' | 'active';
+  memberSince?: string | null;
+}
+
+export interface MembershipPayload {
+  user: User;
+  benefits: {
+    freeShipping: boolean;
+    flexibleSizeExchange: boolean;
+    priorityContact: boolean;
+    freeAlteration: boolean;
+    fashionWarranty: boolean;
+    bespokeDesignSupport: boolean;
+  };
+}
+
+export interface VoucherPayload {
+  _id: string;
+  code: string;
+  discountType: 'percent' | 'fixed';
+  discountValue: number;
+  minOrderAmount: number;
+  source: 'generic' | 'welcome' | 'membership';
+  expiresAt: string;
+  isActive: boolean;
+  isExpired: boolean;
+  usedCount: number;
+  maxUsesPerUser: number;
 }
 
 export interface CartItem {
@@ -92,12 +121,24 @@ export interface CartPayload {
   userId: string;
   items: CartItemApi[];
   total: number;
+  appliedCouponCode?: string;
+  discountAmount?: number;
+  finalAmount?: number;
+  shippingFee?: number;
+  freeShippingApplied?: boolean;
 }
 
 export interface OrderPayload {
   _id: string;
   status: string;
   totalAmount: number;
+  discountAmount?: number;
+  finalAmount?: number;
+  appliedCouponCode?: string;
+  shippingFee?: number;
+  freeShippingApplied?: boolean;
+  flexibleSizeExchangeEligible?: boolean;
+  prioritySupportEligible?: boolean;
   shippingAddress: string;
   billingAddress: string;
   items: Array<{

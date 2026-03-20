@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Package, Users, ShoppingCart, DollarSign, AlertCircle, TrendingUp, Eye, ArrowRight, Plus, Settings, BarChart3, Clock } from 'lucide-react';
+import { Package, Users, ShoppingCart, DollarSign, AlertCircle, TrendingUp, Eye, ArrowRight, Plus, Settings, BarChart3, Clock, UserCheck, Ticket } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../../lib/api';
 import { formatVND } from '../../utils/currency';
@@ -11,6 +11,10 @@ interface DashboardData {
     totalOrders: number;
     totalRevenue: number;
     lowStockVariants: number;
+    pendingMembershipRequests: number;
+    activeMembers: number;
+    activeVouchers: number;
+    usedMembershipVouchers: number;
   };
   recentOrders: Array<{
     _id: string;
@@ -218,6 +222,29 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Link to="/admin/membership-requests" className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow">
+          <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Pending Membership</p>
+          <p className="text-3xl font-bold text-slate-900 mt-2">{summary?.pendingMembershipRequests ?? 0}</p>
+          <p className="text-xs text-slate-500 mt-1">Yêu cầu chờ duyệt</p>
+        </Link>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Active Members</p>
+          <p className="text-3xl font-bold text-slate-900 mt-2">{summary?.activeMembers ?? 0}</p>
+          <p className="text-xs text-slate-500 mt-1">Khách hàng thành viên</p>
+        </div>
+        <Link to="/admin/vouchers" className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow">
+          <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Active Vouchers</p>
+          <p className="text-3xl font-bold text-slate-900 mt-2">{summary?.activeVouchers ?? 0}</p>
+          <p className="text-xs text-slate-500 mt-1">Voucher đang hoạt động</p>
+        </Link>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Used Membership Vouchers</p>
+          <p className="text-3xl font-bold text-slate-900 mt-2">{summary?.usedMembershipVouchers ?? 0}</p>
+          <p className="text-xs text-slate-500 mt-1">Lượt dùng voucher member</p>
+        </div>
+      </div>
+
       {/* Quick Shortcuts & Actions */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-xl shadow-xl text-white p-8">
         <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
@@ -255,6 +282,22 @@ export default function Dashboard() {
             </div>
             <p className="font-semibold text-sm">Cài Đặt</p>
             <p className="text-xs text-white/70 mt-1">Cấu hình cửa hàng</p>
+          </Link>
+
+          <Link to="/admin/membership-requests" className="group bg-white/10 hover:bg-purple-600 transition-all rounded-xl p-5 text-center border border-white/20 hover:border-purple-400">
+            <div className="bg-white/20 group-hover:bg-white/30 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3 transition-colors">
+              <UserCheck className="h-6 w-6" />
+            </div>
+            <p className="font-semibold text-sm">Duyệt Membership</p>
+            <p className="text-xs text-white/70 mt-1">Xử lý yêu cầu tham gia</p>
+          </Link>
+
+          <Link to="/admin/vouchers" className="group bg-white/10 hover:bg-rose-600 transition-all rounded-xl p-5 text-center border border-white/20 hover:border-rose-400">
+            <div className="bg-white/20 group-hover:bg-white/30 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3 transition-colors">
+              <Ticket className="h-6 w-6" />
+            </div>
+            <p className="font-semibold text-sm">Quản lý Voucher</p>
+            <p className="text-xs text-white/70 mt-1">Tạo và khóa voucher</p>
           </Link>
         </div>
       </div>

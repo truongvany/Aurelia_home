@@ -5,6 +5,8 @@ interface TokenPayload {
   userId: string;
   email: string;
   role: "customer" | "admin";
+  isMember?: boolean;
+  memberStatus?: "inactive" | "pending" | "active";
 }
 
 export const signAccessToken = (payload: TokenPayload): string =>

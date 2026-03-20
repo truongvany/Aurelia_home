@@ -13,12 +13,17 @@ const getUserId = (req: Request): string => {
 };
 
 export const createOrder = asyncHandler(async (req: Request, res: Response) => {
-  const { shippingAddress, billingAddress } = req.body;
+  const { shippingAddress, billingAddress, couponCode } = req.body;
   if (!shippingAddress) {
     throw new ApiError(400, "shippingAddress is required");
   }
 
-  const order = await placeOrder({ userId: getUserId(req), shippingAddress, billingAddress });
+  const order = await placeOrder({
+    userId: getUserId(req),
+    shippingAddress,
+    billingAddress,
+    couponCode
+  });
   sendSuccess(res, order, "Order placed", 201);
 });
 

@@ -4,8 +4,10 @@ import { sendSuccess } from "../utils/apiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import {
   addCartItem,
+  applyCouponToCart,
   clearCart,
   getCart,
+  removeCouponFromCart,
   removeCartItem,
   updateCartItemQuantity
 } from "../services/cart.service.js";
@@ -64,4 +66,19 @@ export const removeItem = asyncHandler(async (req: Request, res: Response) => {
 export const clear = asyncHandler(async (req: Request, res: Response) => {
   const cart = await clearCart(getUserId(req));
   sendSuccess(res, cart, "Cart cleared");
+});
+
+export const applyCoupon = asyncHandler(async (req: Request, res: Response) => {
+  const code = String(req.body.code ?? "").trim();
+  if (!code) {
+    throw new ApiError(400, "Coupon code is required");
+  }
+
+  const cart = await applyCouponToCart(getUserId(req), code);
+  sendSuccess(res, cart, "Coupon applied");
+});
+
+export const removeCoupon = asyncHandler(async (req: Request, res: Response) => {
+  const cart = await removeCouponFromCart(getUserId(req));
+  sendSuccess(res, cart, "Coupon removed");
 });

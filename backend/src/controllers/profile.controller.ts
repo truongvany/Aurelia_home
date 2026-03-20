@@ -2,7 +2,14 @@ import type { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/apiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import { getProfile, updateProfile, upsertStyleProfile } from "../services/profile.service.js";
+import {
+  enrollMembership,
+  getMembershipProfile,
+  getMyVouchers,
+  getProfile,
+  updateProfile,
+  upsertStyleProfile
+} from "../services/profile.service.js";
 
 const getUserId = (req: Request): string => {
   const userId = req.user?.userId;
@@ -35,4 +42,19 @@ export const patchStyleProfile = asyncHandler(async (req: Request, res: Response
     skinTone: req.body.skinTone
   });
   sendSuccess(res, profile, "Style profile updated");
+});
+
+export const getMyMembership = asyncHandler(async (req: Request, res: Response) => {
+  const membership = await getMembershipProfile(getUserId(req));
+  sendSuccess(res, membership, "Membership fetched");
+});
+
+export const joinMembership = asyncHandler(async (req: Request, res: Response) => {
+  const membership = await enrollMembership(getUserId(req));
+  sendSuccess(res, membership, "Membership activated");
+});
+
+export const getVouchers = asyncHandler(async (req: Request, res: Response) => {
+  const vouchers = await getMyVouchers(getUserId(req));
+  sendSuccess(res, vouchers, "Vouchers fetched");
 });

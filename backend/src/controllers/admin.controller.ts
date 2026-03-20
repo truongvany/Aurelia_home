@@ -4,16 +4,21 @@ import { sendSuccess } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {
   archiveAdminProduct,
+  createAdminVoucher,
   createAdminProduct,
   createAdminProductImage,
+  deactivateAdminVoucher,
   getAdminCustomerDetail,
   getAdminDashboardStats,
   getAdminOrderDetail,
   getAdminProductDetail,
+  listAdminMembershipRequests,
+  listAdminVouchers,
   listAdminCustomerOrders,
   listAdminCustomers,
   listAdminOrders,
   listAdminProducts,
+  reviewAdminMembershipRequest,
   setAdminProductSizeGuideImage,
   updateAdminOrderStatus,
   updateAdminPaymentStatus,
@@ -286,4 +291,93 @@ export const getAdminCustomer = asyncHandler(async (req: Request, res: Response)
 export const getAdminCustomerOrderList = asyncHandler(async (req: Request, res: Response) => {
   const orders = await listAdminCustomerOrders(req.params.customerId);
   sendSuccess(res, orders, "Admin customer orders fetched");
+});
+
+export const getAdminMembershipRequests = asyncHandler(async (req: Request, res: Response) => {
+  const data = await listAdminMembershipRequests({
+    page: req.query.page ? Number(req.query.page) : undefined,
+    limit: req.query.limit ? Number(req.query.limit) : undefined,
+    search: req.query.search?.toString(),
+    status: req.query.status as "inactive" | "pending" | "active" | undefined
+  });
+
+  sendSuccess(res, data, "Admin membership requests fetched");
+});
+
+export const patchAdminMembershipRequest = asyncHandler(async (req: Request, res: Response) => {
+  const action = req.params.action;
+  if (action !== "approve" && action !== "reject") {
+    throw new ApiError(400, "action must be approve or reject");
+  }
+
+  const updated = await reviewAdminMembershipRequest(
+    getActorUserId(req),
+    req.params.userId,
+    action,
+    typeof req.body.note === "string" ? req.body.note : undefined
+  );
+
+  sendSuccess(res, updated, `Membership request ${action}d`);
+});
+
+export const getAdminVouchers = asyncHandler(async (req: Request, res: Response) => {
+  const isActiveQuery = req.query.isActive?.toString();
+  const isActive =
+    isActiveQuery === undefined
+      ? undefined
+      : isActiveQuery === "true"
+        ? true
+        : isActiveQuery === "false"
+          ? false
+          : undefined;
+
+  const data = await listAdminVouchers({
+    page: req.query.page ? Number(req.query.page) : undefined,
+    limit: req.query.limit ? Number(req.query.limit) : undefined,
+    search: req.query.search?.toString(),
+    source: req.query.source as "generic" | "welcome" | "membership" | undefined,
+    isActive
+  });
+
+  sendSuccess(res, data, "Admin vouchers fetched");
+});
+
+export const postAdminVoucher = asyncHandler(async (req: Request, res: Response) => {
+  const { code, discountType, discountValue, minOrderAmount, expiresAt, source, assignedUserId, maxUsesPerUser } =
+    req.body;
+
+  if (!code || typeof code !== "string") {
+    throw new ApiError(400, "code is required");
+  }
+
+  if (discountType !== "percent" && discountType !== "fixed") {
+    throw new ApiError(400, "discountType must be percent or fixed");
+  }
+
+  const numericDiscountValue = Number(discountValue);
+  if (!Number.isFinite(numericDiscountValue) || numericDiscountValue <= 0) {
+    throw new ApiError(400, "discountValue must be a positive number");
+  }
+
+  if (!expiresAt || typeof expiresAt !== "string") {
+    throw new ApiError(400, "expiresAt is required");
+  }
+
+  const voucher = await createAdminVoucher(getActorUserId(req), {
+    code,
+    discountType,
+    discountValue: numericDiscountValue,
+    minOrderAmount: Number(minOrderAmount ?? 0),
+    expiresAt,
+    source,
+    assignedUserId: typeof assignedUserId === "string" ? assignedUserId : undefined,
+    maxUsesPerUser: Number(maxUsesPerUser ?? 1)
+  });
+
+  sendSuccess(res, voucher, "Voucher created", 201);
+});
+
+export const patchAdminVoucherDeactivate = asyncHandler(async (req: Request, res: Response) => {
+  const voucher = await deactivateAdminVoucher(getActorUserId(req), req.params.voucherId);
+  sendSuccess(res, voucher, "Voucher deactivated");
 });
