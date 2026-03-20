@@ -1,14 +1,13 @@
-/* Contact.css - Digital Concierge Service Lounge */
+/* Contact.css - Editorial Careers Page */
 
-.concierge-bg {
-  background: linear-gradient(135deg, #FFFFF0 0%, #F8F9FA 50%, #E2E8F0 100%);
+.careers-page {
+  background: #f9f9f9;
 }
 
-.hero-macro-bg {
-  background-image: url('https://images.unsplash.com/photo-1614252339460-54058b456671?q=80&w=2000&auto=format&fit=crop');
+.hero-careers-bg {
+  background-image: url('https://images.unsplash.com/photo-1618886614638-80e3c103d31a?q=80&w=2070&auto=format&fit=crop');
   background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  background-position: center 22%;
 }
 
 .marquee-contact-container {
@@ -16,7 +15,7 @@
   white-space: nowrap;
   width: 100%;
   display: flex;
-  background: rgba(15, 23, 42, 0.85); /* Deep Charcoal */
+  background: rgba(8, 10, 14, 0.88);
   border-top: 1px solid rgba(197, 160, 89, 0.5);
   border-bottom: 1px solid rgba(197, 160, 89, 0.5);
   backdrop-filter: blur(8px);
@@ -32,66 +31,65 @@
   100% { transform: translateX(-50%); }
 }
 
-.dark-glass-portal {
-  background: rgba(15, 23, 42, 0.72); /* softer slate */
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(197, 160, 89, 0.25); /* Champagne Gold */
-  box-shadow: 0 4px 20px -8px rgba(0, 0, 0, 0.25);
+.job-card {
+  background: #151515;
+  border-left: 2px solid transparent;
+  box-shadow: none;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
 }
 
-.dark-glass-portal:hover {
-  border-color: rgba(197, 160, 89, 0.7);
+.job-card:hover {
+  border-left-color: #c5a059;
   transform: translateY(-2px);
-  box-shadow: 0 14px 35px -12px rgba(197, 160, 89, 0.18);
+  box-shadow: 0 16px 30px -18px rgba(0, 0, 0, 0.45);
 }
 
-.light-glass-form {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.08);
+.job-status {
+  display: inline-block;
+  color: #c5a059;
+  border: 1px solid rgba(197, 160, 89, 0.45);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 4px 10px;
 }
 
-.gold-leaf-icon {
-  color: #C5A059;
-  filter: drop-shadow(0 0 8px rgba(197, 160, 89, 0.6));
-  animation: gold-sparkle 3s infinite alternate;
+.application-panel {
+  background: #f1f1f1;
+  box-shadow: 0 20px 45px -35px rgba(0, 0, 0, 0.35);
+  border: 1px solid #e3e3e3;
 }
 
-@keyframes gold-sparkle {
-  0% { filter: drop-shadow(0 0 4px rgba(197, 160, 89, 0.4)) brightness(1); }
-  100% { filter: drop-shadow(0 0 12px rgba(197, 160, 89, 0.8)) brightness(1.2); }
+.recruitment-label {
+  display: block;
+  color: #b08a3d;
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
-.status-dot {
-  width: 8px;
-  height: 8px;
-  background-color: #10B981; /* Emerald 500 */
-  border-radius: 50%;
-  box-shadow: 0 0 8px #10B981;
-  animation: blink 2s infinite;
+.application-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #dadada;
+  padding: 10px 0;
+  color: #101010;
+  font-size: 14px;
+  transition: border-color 0.25s ease;
 }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.8); }
+.application-input::placeholder {
+  color: #a0a0a0;
+  font-size: 13px;
 }
 
-.input-deep {
-  background: rgba(15, 23, 42, 0.03);
-  border: 1px solid transparent;
-  border-radius: 12px;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s ease;
-}
-
-.input-deep:focus, .input-deep:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(197, 160, 89, 0.4);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.01), 0 0 0 4px rgba(197, 160, 89, 0.1);
+.application-input:focus {
+  outline: none;
+  border-bottom-color: #b8963e;
 }
 
 .input-deep-wrapper {
@@ -101,13 +99,12 @@
 .input-deep-wrapper::after {
   content: '';
   position: absolute;
-  right: 16px;
-  top: 50%;
+  right: 0;
+  top: 34px;
   transform: translateY(-50%);
   width: 6px;
   height: 6px;
-  border-radius: 50%;
-  background-color: #C5A059;
+  background-color: #b8963e;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -115,7 +112,65 @@
 .input-deep-wrapper:hover::after,
 .input-deep-wrapper:focus-within::after {
   opacity: 1;
-  animation: blink 1s infinite;
+  animation: pulse-dot 1.2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-50%) scale(0.8);
+    opacity: 0.45;
+  }
+}
+
+.radio-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.radio-inline span {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 10px;
+  color: #2f2a22;
+  font-weight: 600;
+}
+
+.radio-inline input {
+  accent-color: #b8963e;
+}
+
+.recruitment-submit {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px 24px;
+  border: none;
+  background: #111111;
+  color: #f2ede3;
+  text-transform: uppercase;
+  letter-spacing: 0.34em;
+  font-size: 10px;
+  font-weight: 700;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.recruitment-submit:hover {
+  background: #222222;
+  color: #f2ede3;
+}
+
+.recruitment-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .fade-in-up {
@@ -131,4 +186,22 @@
 
 .animate-spin-slow {
   animation: spin 4s linear infinite;
+}
+
+@media (max-width: 768px) {
+  .hero-careers-bg {
+    background-position: center 25%;
+  }
+
+  .job-card {
+    padding: 22px;
+  }
+
+  .application-panel {
+    padding: 24px;
+  }
+
+  .recruitment-submit {
+    letter-spacing: 0.2em;
+  }
 }
