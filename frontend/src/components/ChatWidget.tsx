@@ -13,18 +13,50 @@ export default function ChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const fallback = [
+      {
+        _id: 'msg-1',
+        sender: 'ai' as const,
+        text: 'Xin chào, chúc Quý khách một ngày tốt lành! ❤ Đây là Aurelia, trợ lý ảo của Aurelia Home. Quý khách muốn Aurelia hỗ trợ về vấn đề gì ạ?',
+        timestamp: new Date()
+      }
+    ];
+
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [{
-      _id: 'msg-1',
-      sender: 'ai',
-      text: 'Xin chào, chúc Quý khách một ngày tốt lành! ❤ Đây là Aurelia, trợ lý ảo của Aurelia Home. Quý khách muốn Aurelia hỗ trợ về vấn đề gì ạ?',
-      timestamp: new Date()
-    }];
+    if (!saved || saved === 'undefined' || saved === 'null') {
+      return fallback;
+    }
+
+    try {
+      const parsed = JSON.parse(saved) as unknown;
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        return fallback;
+      }
+
+      return parsed
+        .filter((item) => item && typeof item === 'object')
+        .map((item, index) => {
+          const msg = item as Partial<ChatMessage>;
+          return {
+            _id: typeof msg._id === 'string' ? msg._id : `msg-restored-${index}`,
+            sender: msg.sender === 'user' ? 'user' : 'ai',
+            text: typeof msg.text === 'string' ? msg.text : '',
+            timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date()
+          };
+        });
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+      return fallback;
+    }
   });
 
   const [input, setInput] = useState('');
   const [conversationId, setConversationId] = useState<string | undefined>(() => {
-    return localStorage.getItem(CONVERSATION_KEY) || undefined;
+    const saved = localStorage.getItem(CONVERSATION_KEY);
+    if (!saved || saved === 'undefined' || saved === 'null') {
+      return undefined;
+    }
+    return saved;
   });
 
   useEffect(() => {

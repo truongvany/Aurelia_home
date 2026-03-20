@@ -15,6 +15,7 @@ import CheckoutPage from './pages/CheckoutPage';
 import CartPage from './pages/CartPage';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Membership from './pages/Membership';
 import Profile from './pages/Profile';
 import OrderDetail from './pages/OrderDetail';
 import WishlistPage from './pages/WishlistPage';
@@ -28,6 +29,8 @@ import AdminSettings from './pages/admin/Settings';
 import ProductDetail from './pages/admin/ProductDetail';
 import AdminOrderDetail from './pages/admin/OrderDetail';
 import CustomerDetail from './pages/admin/CustomerDetail';
+import AdminMembershipRequests from './pages/admin/MembershipRequests';
+import AdminVouchers from './pages/admin/Vouchers';
 
 function AppRoutes() {
   const location = useLocation();
@@ -51,6 +54,7 @@ function AppRoutes() {
           </Route>
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/membership" element={<Membership />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/profile" element={<ProtectedRoute roles={['customer']} />}>
             <Route index element={<Profile />} />
@@ -70,6 +74,8 @@ function AppRoutes() {
               <Route path="orders/:id" element={<AdminOrderDetail />} />
               <Route path="customers" element={<AdminCustomers />} />
               <Route path="customers/:id" element={<CustomerDetail />} />
+              <Route path="membership-requests" element={<AdminMembershipRequests />} />
+              <Route path="vouchers" element={<AdminVouchers />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
           </Route>

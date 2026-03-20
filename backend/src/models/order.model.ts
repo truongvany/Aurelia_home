@@ -23,6 +23,13 @@ const orderSchema = new Schema(
       default: "pending"
     },
     totalAmount: { type: Number, required: true, min: 0 },
+    discountAmount: { type: Number, default: 0, min: 0 },
+    finalAmount: { type: Number, required: true, min: 0 },
+    appliedCouponCode: { type: String, default: "" },
+    shippingFee: { type: Number, default: 0, min: 0 },
+    freeShippingApplied: { type: Boolean, default: false },
+    flexibleSizeExchangeEligible: { type: Boolean, default: false },
+    prioritySupportEligible: { type: Boolean, default: false },
     shippingAddress: { type: String, required: true },
     billingAddress: { type: String, default: "" },
     trackingNumber: { type: String, default: "" },

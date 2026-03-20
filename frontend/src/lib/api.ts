@@ -3,9 +3,11 @@ import type {
   CartPayload,
   ChatSource,
   ChatSuggestedProduct,
+  MembershipPayload,
   OrderPayload,
   Product,
-  ProfilePayload
+  ProfilePayload,
+  VoucherPayload
 } from "../types";
 
 interface ApiEnvelope<T> {
@@ -134,6 +136,37 @@ interface AdminCustomerDetail {
   totalSpent: number;
 }
 
+interface AdminMembershipRequestItem {
+  _id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  fullName: string;
+  phone?: string;
+  isMember: boolean;
+  memberStatus: "inactive" | "pending" | "active";
+  memberSince?: string | null;
+  membershipRequestedAt?: string | null;
+  membershipReviewedAt?: string | null;
+  membershipReviewNote?: string;
+  createdAt: string;
+}
+
+interface AdminVoucherItem {
+  _id: string;
+  code: string;
+  discountType: "percent" | "fixed";
+  discountValue: number;
+  minOrderAmount: number;
+  source: "generic" | "welcome" | "membership";
+  assignedUserId?: string | null;
+  maxUsesPerUser: number;
+  usedCount: number;
+  expiresAt: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
 interface AdminDashboardPayload {
   summary: {
     totalProducts: number;
@@ -141,6 +174,10 @@ interface AdminDashboardPayload {
     totalOrders: number;
     totalRevenue: number;
     lowStockVariants: number;
+    pendingMembershipRequests: number;
+    activeMembers: number;
+    activeVouchers: number;
+    usedMembershipVouchers: number;
   };
   recentOrders: Array<{
     _id: string;
@@ -236,7 +273,7 @@ const request = async <T>(
   return (payload as ApiEnvelope<T>).data;
 };
 
-const withQuery = (path: string, query?: Record<string, string | number | undefined>) => {
+const withQuery = (path: string, query?: Record<string, string | number | boolean | undefined>) => {
   if (!query) {
     return path;
   }
@@ -278,9 +315,22 @@ export const api = {
       method: "POST",
       body: JSON.stringify(input)
     }),
-  me: () => request<{ _id: string; email: string; firstName: string; lastName: string; role: "customer" | "admin" }>("/auth/me"),
+  me: () =>
+    request<{
+      _id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: "customer" | "admin";
+      isMember?: boolean;
+      memberStatus?: "inactive" | "pending" | "active";
+      memberSince?: string | null;
+    }>("/auth/me"),
 
   getProfile: () => request<ProfilePayload>("/profile"),
+  getMembership: () => request<MembershipPayload>("/profile/membership"),
+  enrollMembership: () => request<MembershipPayload>("/profile/membership/enroll", { method: "POST" }),
+  getVouchers: () => request<VoucherPayload[]>("/profile/vouchers"),
   updateProfile: (input: { firstName?: string; lastName?: string; phone?: string }) =>
     request<ProfilePayload["user"]>("/profile", {
       method: "PATCH",
@@ -318,8 +368,23 @@ export const api = {
       emitCartUpdated();
       return payload;
     }),
+  applyCartCoupon: (code: string) =>
+    request<CartPayload>("/cart/apply-coupon", {
+      method: "POST",
+      body: JSON.stringify({ code })
+    }).then((payload) => {
+      emitCartUpdated();
+      return payload;
+    }),
+  removeCartCoupon: () =>
+    request<CartPayload>("/cart/remove-coupon", {
+      method: "POST"
+    }).then((payload) => {
+      emitCartUpdated();
+      return payload;
+    }),
 
-  placeOrder: (input: { shippingAddress: string; billingAddress?: string }) =>
+  placeOrder: (input: { shippingAddress: string; billingAddress?: string; couponCode?: string }) =>
     request<OrderPayload>("/orders", {
       method: "POST",
       body: JSON.stringify(input)
@@ -494,5 +559,48 @@ export const api = {
         totalAmount: number;
         paymentStatus: string;
       }>
-    >(`/admin/customers/${customerId}/orders`)
+    >(`/admin/customers/${customerId}/orders`),
+  getAdminMembershipRequests: (query?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: "inactive" | "pending" | "active";
+  }) =>
+    request<{ items: AdminMembershipRequestItem[]; meta: AdminMeta }>(
+      withQuery("/admin/membership-requests", query)
+    ),
+  reviewAdminMembershipRequest: (
+    userId: string,
+    action: "approve" | "reject",
+    note?: string
+  ) =>
+    request<AdminMembershipRequestItem>(`/admin/membership-requests/${userId}/${action}`, {
+      method: "PATCH",
+      body: JSON.stringify({ note })
+    }),
+  getAdminVouchers: (query?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    source?: "generic" | "welcome" | "membership";
+    isActive?: boolean;
+  }) => request<{ items: AdminVoucherItem[]; meta: AdminMeta }>(withQuery("/admin/vouchers", query)),
+  createAdminVoucher: (input: {
+    code: string;
+    discountType: "percent" | "fixed";
+    discountValue: number;
+    minOrderAmount?: number;
+    expiresAt: string;
+    source?: "generic" | "welcome" | "membership";
+    assignedUserId?: string;
+    maxUsesPerUser?: number;
+  }) =>
+    request<AdminVoucherItem>("/admin/vouchers", {
+      method: "POST",
+      body: JSON.stringify(input)
+    }),
+  deactivateAdminVoucher: (voucherId: string) =>
+    request<AdminVoucherItem>(`/admin/vouchers/${voucherId}/deactivate`, {
+      method: "PATCH"
+    })
 };

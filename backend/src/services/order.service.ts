@@ -4,12 +4,15 @@ import { OrderModel } from "../models/order.model.js";
 import { PaymentModel } from "../models/payment.model.js";
 import { ProductModel } from "../models/product.model.js";
 import { ProductVariantModel } from "../models/productVariant.model.js";
+import { UserModel } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
+import { calculateDiscount, markCouponUsedByUser, validateCoupon } from "./coupon.service.js";
 
 interface PlaceOrderInput {
   userId: string;
   shippingAddress: string;
   billingAddress?: string;
+  couponCode?: string;
 }
 
 export const placeOrder = async (input: PlaceOrderInput) => {
@@ -56,10 +59,36 @@ export const placeOrder = async (input: PlaceOrderInput) => {
     totalAmount += item.unitPrice * item.quantity;
   }
 
+  const user = await UserModel.findById(input.userId).select("isMember memberStatus");
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const isActiveMember = Boolean(user.isMember && user.memberStatus === "active");
+  const shippingFee = isActiveMember ? 0 : 30000;
+  let discountAmount = 0;
+  let appliedCouponCode = "";
+
+  if (input.couponCode) {
+    const coupon = await validateCoupon(input.couponCode, totalAmount, input.userId);
+    discountAmount = calculateDiscount(totalAmount, coupon);
+    appliedCouponCode = coupon.code;
+    await markCouponUsedByUser(coupon._id.toString(), input.userId);
+  }
+
+  const finalAmount = Math.max(0, totalAmount - discountAmount) + shippingFee;
+
   const order = await OrderModel.create({
     userId: input.userId,
     status: "pending",
     totalAmount,
+    discountAmount,
+    finalAmount,
+    appliedCouponCode,
+    shippingFee,
+    freeShippingApplied: shippingFee === 0,
+    flexibleSizeExchangeEligible: isActiveMember,
+    prioritySupportEligible: isActiveMember,
     shippingAddress: input.shippingAddress,
     billingAddress: input.billingAddress ?? input.shippingAddress,
     items: snapshots
@@ -69,11 +98,14 @@ export const placeOrder = async (input: PlaceOrderInput) => {
     orderId: order._id,
     userId: input.userId,
     amount: totalAmount,
+    discountAmount,
+    finalAmount,
     status: "paid", // demo flow: luôn thành công
     provider: "mock"
   });
 
   cart.items.splice(0, cart.items.length);
+  cart.appliedCouponCode = "";
   await cart.save();
 
   return order;

@@ -17,6 +17,7 @@ export const env = {
   JWT_SECRET: getRequired("JWT_SECRET"),
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN ?? "1d",
   REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN ?? "7d",
-  CORS_ORIGIN: process.env.CORS_ORIGIN ?? "http://localhost:3000",
+  CORS_ORIGIN:
+    process.env.CORS_ORIGIN ?? "http://localhost:3000,http://localhost:3001,http://localhost:5173",
   GROQ_API_KEY: process.env.GROQ_API_KEY ?? ""
 };

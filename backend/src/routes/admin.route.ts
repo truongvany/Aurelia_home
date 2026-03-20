@@ -8,13 +8,18 @@ import {
   getAdminCustomerOrderList,
   getAdminCustomers,
   getAdminDashboard,
+  getAdminMembershipRequests,
   getAdminOrder,
   getAdminOrders,
   getAdminProduct,
   getAdminProducts,
+  getAdminVouchers,
+  patchAdminMembershipRequest,
   patchAdminOrderStatus,
   patchAdminPaymentStatus,
   patchAdminProduct,
+  patchAdminVoucherDeactivate,
+  postAdminVoucher,
   postAdminProduct,
   uploadAdminProductImage,
   uploadAdminProductSizeGuideImage
@@ -69,5 +74,12 @@ router.patch("/orders/:orderId/payment-status", patchAdminPaymentStatus);
 router.get("/customers", getAdminCustomers);
 router.get("/customers/:customerId", getAdminCustomer);
 router.get("/customers/:customerId/orders", getAdminCustomerOrderList);
+
+router.get("/membership-requests", getAdminMembershipRequests);
+router.patch("/membership-requests/:userId/:action", patchAdminMembershipRequest);
+
+router.get("/vouchers", getAdminVouchers);
+router.post("/vouchers", postAdminVoucher);
+router.patch("/vouchers/:voucherId/deactivate", patchAdminVoucherDeactivate);
 
 export default router;

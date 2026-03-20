@@ -4,12 +4,14 @@ import { motion } from 'motion/react';
 import { Package, ShoppingBag, User, Pencil, Check, X } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
-import { OrderPayload, ProfilePayload } from '../types';
+import { MembershipPayload, OrderPayload, ProfilePayload, VoucherPayload } from '../types';
 import { formatVND } from '../utils/currency';
 
 export default function Profile() {
   const { signOut } = useAuth();
   const [profile, setProfile] = useState<ProfilePayload | null>(null);
+  const [membership, setMembership] = useState<MembershipPayload | null>(null);
+  const [vouchers, setVouchers] = useState<VoucherPayload[]>([]);
   const [orders, setOrders] = useState<OrderPayload[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
@@ -38,10 +40,17 @@ export default function Profile() {
     const loadData = async () => {
       try {
         setError(null);
-        const [profileData, ordersData] = await Promise.all([api.getProfile(), api.getMyOrders()]);
+        const [profileData, ordersData, membershipData, vouchersData] = await Promise.all([
+          api.getProfile(),
+          api.getMyOrders(),
+          api.getMembership(),
+          api.getVouchers()
+        ]);
         setProfile(profileData);
         setEditedPhone(profileData.user.phone ?? '');
         setOrders(ordersData);
+        setMembership(membershipData);
+        setVouchers(vouchersData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Không thể tải thông tin tài khoản');
       } finally {
@@ -90,6 +99,21 @@ export default function Profile() {
                 <User className="h-4 w-4" />
                 Thông tin tài khoản
               </h2>
+
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                <p className="text-xs uppercase tracking-wider text-amber-800">Membership</p>
+                <p className="mt-1 text-sm font-semibold text-charcoal">
+                  {membership?.user.memberStatus === 'active'
+                    ? 'Đang hoạt động'
+                    : membership?.user.memberStatus === 'pending'
+                      ? 'Đang chờ duyệt'
+                      : 'Chưa kích hoạt'}
+                </p>
+                <p className="text-xs text-slate-600 mt-1">Voucher khả dụng: {vouchers.filter((voucher) => !voucher.isExpired && voucher.usedCount < voucher.maxUsesPerUser).length}</p>
+                <Link to="/membership" className="inline-flex mt-3 text-xs uppercase tracking-wider text-amber-800 hover:text-amber-900">
+                  Mở trang Membership
+                </Link>
+              </div>
 
               <div className="space-y-2 text-sm">
                 <p>
