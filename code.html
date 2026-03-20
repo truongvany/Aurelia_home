@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#B8963E", // Aurelian Gold
+                        "on-primary": "#FFFFFF",
+                        "background": "#F9F9F9",
+                        "surface": "#FFFFFF",
+                        "surface-variant": "#EAE9E6",
+                        "on-background": "#0F0F0F", // Deep Charcoal
+                        "on-surface": "#2A2A2A",
+                        "outline": "#D1CFC9",
+                        "outline-variant": "#E0E0E0",
+                        "primary-container": "#F5EFE1",
+                        "surface-container-low": "#FFFFFF",
+                        "surface-container": "#F9F9F9",
+                    },
+                    fontFamily: {
+                        "headline": ["Cormorant Garamond", "serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+                    boxShadow: {
+                        'sharp': '0 10px 40px -10px rgba(0, 0, 0, 0.1)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+        }
+        body {
+            background-color: #F9F9F9;
+            color: #2A2A2A;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .serif-italic {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-weight: 500;
+        }
+        input, select, textarea {
+            background-color: transparent !important;
+            border: none !important;
+            border-bottom: 1px solid #E0E0E0 !important;
+            border-radius: 0px !important;
+            color: #0F0F0F !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-bottom: 1px solid #B8963E !important;
+            box-shadow: none !important;
+            ring: 0 !important;
+            outline: none !important;
+        }
+        ::placeholder {
+            color: #A3A3A3 !important;
+            font-size: 13px;
+            letter-spacing: 0.05em;
+        }
+        .label-style {
+            font-size: 10px;
+            letter-spacing: 0.25em;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="selection:bg-primary selection:text-on-primary">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full flex justify-between items-center px-10 py-6 max-w-none bg-white/90 backdrop-blur-md border-b border-on-background/5 z-50">
+<div class="text-2xl font-bold tracking-[0.2em] text-on-background">
+        MONOLITH
+    </div>
+<div class="hidden md:flex gap-16 items-center">
+<a class="text-on-surface hover:text-primary transition-colors duration-300 text-[10px] font-bold tracking-[0.3em]" href="#">COLLECTIONS</a>
+<a class="text-on-surface hover:text-primary transition-colors duration-300 text-[10px] font-bold tracking-[0.3em]" href="#">EDITORIAL</a>
+<a class="text-on-surface hover:text-primary transition-colors duration-300 text-[10px] font-bold tracking-[0.3em]" href="#">RECRUITMENT</a>
+<a class="text-primary border-b-2 border-primary pb-1 text-[10px] font-bold tracking-[0.3em]" href="#">CONTACT</a>
+</div>
+<div class="flex gap-8 items-center">
+<span class="material-symbols-outlined text-on-background cursor-pointer hover:text-primary transition-colors">shopping_bag</span>
+<span class="material-symbols-outlined text-on-background cursor-pointer hover:text-primary transition-colors">menu</span>
+</div>
+</nav>
+<!-- Hero Section -->
+<header class="relative h-[800px] w-full flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover grayscale-[20%] brightness-[0.7]" data-alt="Moody menswear editorial of a man in a sharp tailored suit" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNBL9Qll-5VVvb5hRzIWSi1C4P8n12treoSFhqROGRGa4q0XSXsGqwbAmq4mfIkx2wD6D7DkSTI6RkM8dTD4Le-YlQq_C9sxrTRLigy4JrxnSOx1PPmv7MD2u-SrfjfHMlb_l-mRDN0qfHXgBNnVi26KLCEWNxr66e-iZ4ncuoWy76OShcIXrCSodreDaayR_g_Ds4KYJrhbNk2AV-S6mOkBOE028aIvA6Edovc9ur6Gy1zeS3AHUj3HOweLj8mAO0GalOxu2xtMQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-black/30"></div>
+</div>
+<div class="relative z-10 text-center px-4 max-w-5xl">
+<span class="text-primary tracking-[0.6em] font-bold text-[10px] mb-8 block uppercase">ENQUIRIES &amp; PARTNERSHIPS</span>
+<h1 class="font-headline text-7xl md:text-9xl text-white mb-10 leading-none tracking-tight">ELEGANCE <br/><span class="serif-italic">Redefined.</span></h1>
+<p class="text-white/80 max-w-xl mx-auto font-light leading-relaxed text-lg tracking-wide">Crafting the future of masculine luxury. Join our network of excellence in tailoring and high-end design.</p>
+</div>
+</header>
+<!-- Contact Info Row -->
+<section class="bg-white py-24 px-10 border-b border-outline-variant">
+<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-20">
+<div class="flex flex-col gap-6">
+<span class="text-primary label-style">Flagship Store</span>
+<p class="text-on-background font-medium leading-relaxed">123 Sartorial District, Ward 1,<br/>Ho Chi Minh City, Vietnam</p>
+<div class="w-16 h-[2px] bg-primary"></div>
+</div>
+<div class="flex flex-col gap-6">
+<span class="text-primary label-style">Direct Line</span>
+<p class="text-on-background font-headline text-3xl font-bold tracking-tight">0901 234 567</p>
+<p class="text-on-surface/50 text-[10px] tracking-widest font-bold uppercase">Concierge 24/7</p>
+</div>
+<div class="flex flex-col gap-6">
+<span class="text-primary label-style">Social Presence</span>
+<div class="flex gap-12 mt-2">
+<a class="text-on-background hover:text-primary transition-colors text-[11px] font-bold tracking-[0.3em] uppercase" href="#">Instagram</a>
+<a class="text-on-background hover:text-primary transition-colors text-[11px] font-bold tracking-[0.3em] uppercase" href="#">LinkedIn</a>
+<a class="text-on-background hover:text-primary transition-colors text-[11px] font-bold tracking-[0.3em] uppercase" href="#">Facebook</a>
+</div>
+</div>
+</div>
+</section>
+<!-- Two Column Contact Section -->
+<section class="py-32 px-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-32 items-start">
+<div class="space-y-16">
+<div class="space-y-6">
+<h2 class="font-headline text-5xl text-on-background font-bold tracking-tight uppercase">Submit Inquiry</h2>
+<div class="w-24 h-[3px] bg-on-background"></div>
+</div>
+<form class="space-y-12">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<div class="flex flex-col gap-3">
+<label class="label-style text-primary">Full Name</label>
+<input class="py-4" placeholder="Alexander Nguyen" type="text"/>
+</div>
+<div class="flex flex-col gap-3">
+<label class="label-style text-primary">Email Address</label>
+<input class="py-4" placeholder="concierge@monolith.vn" type="email"/>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<div class="flex flex-col gap-3">
+<label class="label-style text-primary">Contact Number</label>
+<input class="py-4" placeholder="+84 ..." type="tel"/>
+</div>
+<div class="flex flex-col gap-3 relative">
+<label class="label-style text-primary">Subject</label>
+<select class="py-4 appearance-none">
+<option>Brand Collaboration</option>
+<option>Bespoke Tailoring Inquiry</option>
+<option>Wholesale Partnerships</option>
+<option>Media Relations</option>
+</select>
+<span class="material-symbols-outlined absolute right-0 bottom-4 text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<label class="label-style text-primary">Message Content</label>
+<textarea class="py-4 resize-none" placeholder="Describe your request in detail..." rows="5"></textarea>
+</div>
+<button class="w-full md:w-auto bg-on-background text-white px-20 py-6 font-bold tracking-[0.4em] text-[10px] hover:bg-primary transition-all duration-500 shadow-sharp" type="submit">
+                SEND REQUEST
+            </button>
+</form>
+</div>
+<div class="h-[700px] relative group">
+<div class="absolute inset-0 border-[12px] border-surface-variant z-0 pointer-events-none transition-all duration-700 group-hover:border-primary/10"></div>
+<img class="w-full h-full object-cover relative z-10 brightness-90 contrast-110" data-alt="Brutalist architectural interior of a menswear flagship store" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBbK673KMeenZXrn2tXJQu9iE5aNhnEmF8J4LsWesLesqbGL1ENWa_KDm5Rg-bSuICDMdD7WxsnWIOYNDrzOSuFry1coajLaqh56yLMnlqWlUukZT36VW_Pgvcdp4Ev3IcHnvosmr2s82ewB28NaLg-uWnNI8uA677mUXpnA6VQajWcbcTdTP1Nlsd9-wR6CAXqrGvh7wr73ocL3pQM2W9YGuhRxfosl45ogO0zq7vqa8TgP_7-q7RVs3-ftJnzKH0R5SJZa7PzFI"/>
+<div class="absolute bottom-12 left-12 right-12 bg-on-background p-10 z-20 shadow-2xl">
+<p class="text-primary label-style mb-4">The Flagship</p>
+<p class="text-white text-2xl font-headline italic leading-relaxed">Experience our architectural universe and bespoke heritage in person.</p>
+</div>
+</div>
+</section>
+<!-- Recruitment Section -->
+<section class="py-32 px-10 bg-on-background">
+<div class="max-w-7xl mx-auto">
+<div class="mb-24 space-y-6 text-center md:text-left">
+<span class="text-primary tracking-[0.5em] font-bold text-[10px] uppercase">Careers at Monolith</span>
+<h2 class="font-headline text-6xl text-white uppercase tracking-tight">Join the <span class="serif-italic">Master Artisans</span></h2>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-20">
+<!-- Job Cards -->
+<div class="lg:col-span-5 space-y-10">
+<div class="bg-[#1A1A1A] p-10 border-l-4 border-transparent hover:border-primary transition-all duration-300 cursor-pointer group">
+<div class="flex justify-between items-start mb-6">
+<h3 class="font-headline text-3xl text-white group-hover:text-primary transition-colors tracking-tight">Tailoring Expert</h3>
+<span class="text-primary text-[9px] tracking-[0.2em] font-bold uppercase px-4 py-1.5 border border-primary/30">Immediate</span>
+</div>
+<p class="text-white/60 text-sm mb-8 leading-relaxed font-light">Lead our bespoke atelier with precision, ensuring every garment meets the Monolith standard of excellence.</p>
+<div class="flex gap-6 text-[9px] tracking-[0.3em] text-white/40 font-bold uppercase">
+<span>TP. HCM</span>
+<span>•</span>
+<span>Full-time</span>
+</div>
+</div>
+<div class="bg-[#1A1A1A] p-10 border-l-4 border-transparent hover:border-primary transition-all duration-300 cursor-pointer group">
+<div class="flex justify-between items-start mb-6">
+<h3 class="font-headline text-3xl text-white group-hover:text-primary transition-colors tracking-tight">Menswear Consultant</h3>
+<span class="text-primary text-[9px] tracking-[0.2em] font-bold uppercase px-4 py-1.5 border border-primary/30">Open</span>
+</div>
+<p class="text-white/60 text-sm mb-8 leading-relaxed font-light">Provide elite wardrobe curation and personalized style advice to our discerning global clientele.</p>
+<div class="flex gap-6 text-[9px] tracking-[0.3em] text-white/40 font-bold uppercase">
+<span>Remote / HQ</span>
+<span>•</span>
+<span>Contract</span>
+</div>
+</div>
+<div class="bg-[#1A1A1A] p-10 border-l-4 border-transparent hover:border-primary transition-all duration-300 cursor-pointer group">
+<div class="flex justify-between items-start mb-6">
+<h3 class="font-headline text-3xl text-white group-hover:text-primary transition-colors tracking-tight">Showroom Manager</h3>
+<span class="text-primary text-[9px] tracking-[0.2em] font-bold uppercase px-4 py-1.5 border border-primary/30">Open</span>
+</div>
+<p class="text-white/60 text-sm mb-8 leading-relaxed font-light">Direct the daily operations of our flagship space, maintaining visual excellence and service standards.</p>
+<div class="flex gap-6 text-[9px] tracking-[0.3em] text-white/40 font-bold uppercase">
+<span>TP. HCM</span>
+<span>•</span>
+<span>Full-time</span>
+</div>
+</div>
+</div>
+<!-- Application Form Card -->
+<div class="lg:col-span-7 bg-white p-16 shadow-2xl relative">
+<h3 class="font-headline text-4xl text-on-background mb-14 tracking-tight font-bold uppercase">Official Application</h3>
+<form class="space-y-10">
+<div class="flex flex-col gap-3">
+<label class="label-style text-primary">Full Legal Name</label>
+<input class="py-4" type="text"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<div class="flex flex-col gap-3">
+<label class="label-style text-primary">Date of Birth</label>
+<input class="py-4" type="date"/>
+</div>
+<div class="flex flex-col gap-3 relative">
+<label class="label-style text-primary">Gender Identity</label>
+<select class="py-4 appearance-none">
+<option>Male</option>
+<option>Female</option>
+<option>Non-binary</option>
+<option>Prefer not to say</option>
+</select>
+<span class="material-symbols-outlined absolute right-0 bottom-4 text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<div class="flex flex-col gap-3 relative">
+<label class="label-style text-primary">Desired Role</label>
+<select class="py-4 appearance-none">
+<option>Tailoring Expert</option>
+<option>Menswear Consultant</option>
+<option>Showroom Manager</option>
+<option>Other</option>
+</select>
+<span class="material-symbols-outlined absolute right-0 bottom-4 text-outline pointer-events-none">expand_more</span>
+</div>
+<div class="flex flex-col gap-3">
+<label class="label-style text-primary">Employment Type</label>
+<div class="flex gap-12 py-4">
+<label class="flex items-center gap-4 cursor-pointer">
+<input class="w-4 h-4 text-primary bg-white border-on-background/20 focus:ring-0 rounded-none" name="job-type" type="radio"/>
+<span class="text-[11px] font-bold tracking-widest text-on-surface uppercase">Full-time</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer">
+<input class="w-4 h-4 text-primary bg-white border-on-background/20 focus:ring-0 rounded-none" name="job-type" type="radio"/>
+<span class="text-[11px] font-bold tracking-widest text-on-surface uppercase">Contract</span>
+</label>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<label class="label-style text-primary">Preferred Communication</label>
+<div class="flex flex-wrap gap-12">
+<label class="flex items-center gap-4 cursor-pointer group">
+<input class="w-4 h-4 rounded-none text-on-background border-on-background/20 focus:ring-0" type="checkbox"/>
+<span class="text-[11px] font-bold tracking-widest text-on-surface group-hover:text-primary transition-colors uppercase">Direct Call</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input class="w-4 h-4 rounded-none text-on-background border-on-background/20 focus:ring-0" type="checkbox"/>
+<span class="text-[11px] font-bold tracking-widest text-on-surface group-hover:text-primary transition-colors uppercase">WhatsApp / Zalo</span>
+</label>
+</div>
+<input class="w-full py-4 bg-transparent border-b border-outline-variant text-sm mt-6 italic" placeholder="Enter Contact Handle" type="text"/>
+</div>
+<div class="pt-12">
+<button class="w-full bg-on-background text-white px-12 py-6 font-bold tracking-[0.5em] text-[10px] hover:bg-primary transition-all duration-500 shadow-xl" type="submit">
+                            SUBMIT DOSSIER
+                        </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer CTA -->
+<section class="w-full py-24 px-10 bg-surface-variant border-y border-on-background/5 flex flex-col md:flex-row items-center justify-center gap-16">
+<h4 class="font-headline text-4xl text-on-background text-center md:text-left tracking-tight">Immediate Concierge via <span class="serif-italic">WhatsApp</span></h4>
+<button class="bg-on-background text-white px-16 py-6 font-bold tracking-[0.4em] text-[10px] flex items-center gap-5 hover:bg-primary transition-all shadow-xl">
+<span class="material-symbols-outlined">chat</span>
+        CONNECT NOW
+    </button>
+</section>
+<!-- Footer -->
+<footer class="w-full py-24 px-12 flex flex-col md:flex-row justify-between items-center gap-16 bg-white border-t border-outline-variant">
+<div class="flex flex-col items-center md:items-start gap-6">
+<span class="text-3xl font-bold text-on-background tracking-[0.3em]">MONOLITH</span>
+<p class="text-[9px] tracking-[0.5em] text-on-surface/40 font-bold uppercase">© 2024 MONOLITH SARTORIAL EDITIONS</p>
+</div>
+<div class="flex gap-20 text-[10px] tracking-[0.4em] font-bold">
+<a class="text-on-surface/50 hover:text-primary transition-all uppercase" href="#">Legal</a>
+<a class="text-on-surface/50 hover:text-primary transition-all uppercase" href="#">Governance</a>
+<a class="text-on-surface/50 hover:text-primary transition-all uppercase" href="#">Careers</a>
+<a class="text-on-surface/50 hover:text-primary transition-all uppercase" href="#">Archive</a>
+</div>
+</footer>
+</body></html>
