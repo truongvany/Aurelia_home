@@ -358,14 +358,28 @@ export default function HomePage() {
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-                    <div className="absolute top-6 left-6 text-[10px] uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-white/40 text-white/90 bg-black/20 backdrop-blur-sm">
-                      {activeCategoryName}
+                    <div className="absolute top-6 left-6 flex items-center gap-2 z-10">
+                      <div className="text-[10px] uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-white/40 text-white/90 bg-black/20 backdrop-blur-sm">
+                        {activeCategoryName}
+                      </div>
+                      {!!categoryLeadProduct.discountPercent && categoryLeadProduct.discountPercent > 0 && (
+                        <div className="bg-[#e53935] text-white text-[11px] font-bold px-2 py-1 rounded shadow-sm tracking-widest">
+                          -{categoryLeadProduct.discountPercent}%
+                        </div>
+                      )}
                     </div>
                     <div className="absolute left-7 right-7 bottom-7 text-white">
                       <h3 className="text-3xl md:text-4xl font-serif leading-tight mb-3">{categoryLeadProduct.name}</h3>
                       <p className="text-white/70 text-sm mb-4 line-clamp-2">{categoryLeadProduct.description}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-red-600 font-bold">{formatVND(categoryLeadProduct.price)}</span>
+                        {!!categoryLeadProduct.discountPercent && categoryLeadProduct.discountPercent > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-[#e53935] font-bold text-lg">{formatVND(categoryLeadProduct.price * (1 - categoryLeadProduct.discountPercent / 100))}</span>
+                            <span className="text-white/60 line-through text-sm">{formatVND(categoryLeadProduct.price)}</span>
+                          </div>
+                        ) : (
+                          <span className="text-red-600 font-bold">{formatVND(categoryLeadProduct.price)}</span>
+                        )}
                         <span className="inline-flex items-center text-xs uppercase tracking-[0.2em] font-bold">
                           Mua Ngay <ArrowRight className="ml-2 h-4 w-4" />
                         </span>
@@ -380,7 +394,12 @@ export default function HomePage() {
                         to={`/product/${product._id}`}
                         className="group bg-white border border-slate-200 rounded-tl-[24px] rounded-br-[24px] overflow-hidden hover:shadow-xl hover:shadow-slate-900/10 transition-all"
                       >
-                        <div className="h-40 overflow-hidden">
+                        <div className="relative h-40 overflow-hidden">
+                          {!!product.discountPercent && product.discountPercent > 0 && (
+                            <div className="absolute top-2 left-2 z-10 bg-[#e53935] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-widest">
+                              -{product.discountPercent}%
+                            </div>
+                          )}
                           <img
                             alt={product.name}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -391,8 +410,15 @@ export default function HomePage() {
                         <div className="p-5">
                           <h4 className="font-semibold text-slate-900 mb-2 line-clamp-1">{product.name}</h4>
                           <p className="text-xs text-slate-500 line-clamp-2 mb-4">{product.description}</p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-red-600 font-bold">{formatVND(product.price)}</span>
+                          <div className="flex items-center justify-between mt-auto">
+                            {!!product.discountPercent && product.discountPercent > 0 ? (
+                              <div className="flex flex-col">
+                                <span className="text-[#e53935] font-bold">{formatVND(product.price * (1 - product.discountPercent / 100))}</span>
+                                <span className="text-slate-400 line-through text-[11px] font-medium">{formatVND(product.price)}</span>
+                              </div>
+                            ) : (
+                              <span className="text-red-600 font-bold">{formatVND(product.price)}</span>
+                            )}
                             <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-blue-600">Chi Tiết</span>
                           </div>
                         </div>
@@ -452,8 +478,15 @@ export default function HomePage() {
                   src={product.imageUrl}
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-slate-900 text-[10px] font-bold uppercase px-3 py-1.5 tracking-widest rounded-tl-xl rounded-br-xl shadow-sm border border-slate-200">
-                  Mới Nhập
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  <div className="bg-white/90 backdrop-blur-sm text-slate-900 text-[10px] font-bold uppercase px-3 py-1.5 tracking-widest rounded-tl-xl rounded-br-xl shadow-sm border border-slate-200">
+                    Mới Nhập
+                  </div>
+                  {!!product.discountPercent && product.discountPercent > 0 && (
+                    <div className="self-start bg-[#e53935] text-white text-[11px] font-bold px-2 py-1 rounded shadow-sm tracking-widest">
+                      -{product.discountPercent}%
+                    </div>
+                  )}
                 </div>
                 <Link 
                   to={`/product/${product._id}`} 
@@ -464,7 +497,14 @@ export default function HomePage() {
               </div>
               <div className="px-1">
                 <h4 className="text-sm font-bold uppercase tracking-widest text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">{product.name}</h4>
-                <p className="text-red-600 font-bold text-sm mt-1">{formatVND(product.price)}</p>
+                {!!product.discountPercent && product.discountPercent > 0 ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-[#e53935] font-bold text-sm">{formatVND(product.price * (1 - product.discountPercent / 100))}</p>
+                    <p className="text-slate-400 font-medium text-[11px] line-through">{formatVND(product.price)}</p>
+                  </div>
+                ) : (
+                  <p className="text-red-600 font-bold text-sm mt-1">{formatVND(product.price)}</p>
+                )}
               </div>
             </div>
           ))}
@@ -523,8 +563,15 @@ export default function HomePage() {
                       src={product.imageUrl}
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm text-slate-900 text-[10px] font-bold uppercase px-2.5 py-1 tracking-widest rounded-tl-lg rounded-br-lg shadow-sm border border-slate-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      Mới
+                    <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+                      <div className="self-start bg-white/95 backdrop-blur-sm text-slate-900 text-[10px] font-bold uppercase px-2.5 py-1 tracking-widest rounded-tl-lg rounded-br-lg shadow-sm border border-slate-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        Mới
+                      </div>
+                      {!!product.discountPercent && product.discountPercent > 0 && (
+                        <div className="self-start bg-[#e53935] text-white text-[10px] font-bold uppercase px-2 py-1 tracking-widest rounded shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          -{product.discountPercent}%
+                        </div>
+                      )}
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
@@ -532,7 +579,14 @@ export default function HomePage() {
                     <h4 className="font-serif text-sm text-slate-900 mb-1.5 group-hover:text-blue-600 transition-colors line-clamp-2">{product.name}</h4>
                     <p className="text-xs text-slate-500 mb-3 line-clamp-2">{product.description}</p>
                     <div className="flex items-center justify-between pt-3 border-t border-slate-200">
-                      <span className="text-red-600 font-bold text-sm">{formatVND(product.price)}</span>
+                      {!!product.discountPercent && product.discountPercent > 0 ? (
+                        <div className="flex flex-col">
+                          <span className="text-[#e53935] font-bold text-sm">{formatVND(product.price * (1 - product.discountPercent / 100))}</span>
+                          <span className="text-slate-400 font-medium text-[11px] line-through">{formatVND(product.price)}</span>
+                        </div>
+                      ) : (
+                        <span className="text-red-600 font-bold text-sm">{formatVND(product.price)}</span>
+                      )}
                       <span className="text-[9px] uppercase tracking-[0.15em] font-bold text-blue-600 group-hover:text-blue-700">Khám Phá</span>
                     </div>
                   </div>

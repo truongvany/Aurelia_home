@@ -34,6 +34,7 @@ interface AdminProductItem {
   slug: string;
   description: string;
   price: number;
+  discountPercent?: number;
   imageUrl: string;
   category: string;
   categorySlug: string;
@@ -50,6 +51,7 @@ interface AdminProductDetail {
   slug: string;
   description: string;
   price: number;
+  discountPercent?: number;
   imageUrl: string;
   sizeGuideImageUrl: string;
   isActive: boolean;
@@ -437,6 +439,7 @@ export const api = {
     name: string;
     description?: string;
     price: number;
+    discountPercent?: number;
     categoryId?: string;
     categorySlug?: string;
     categoryName?: string;
@@ -471,6 +474,7 @@ export const api = {
       name?: string;
       description?: string;
       price?: number;
+      discountPercent?: number;
       categoryId?: string;
       categorySlug?: string;
       categoryName?: string;

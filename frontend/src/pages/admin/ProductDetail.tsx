@@ -81,6 +81,7 @@ export default function ProductDetail() {
     description: '',
     categoryId: '',
     price: '',
+    discountPercent: '',
     imageUrl: ''
   });
   const [variants, setVariants] = useState<VariantForm[]>([createEmptyVariant()]);
@@ -146,6 +147,7 @@ export default function ProductDetail() {
           description: detail.description,
           categoryId: detail.category?._id ?? '',
           price: String(detail.price),
+          discountPercent: String(detail.discountPercent ?? 0),
           imageUrl: detail.imageUrl ?? ''
         });
       })
@@ -284,6 +286,7 @@ export default function ProductDetail() {
         description: form.description,
         categoryId: form.categoryId,
         price,
+        discountPercent: Number(form.discountPercent) || 0,
         imageUrl: mainImageFile ? undefined : (form.imageUrl || undefined),
         imageUrls: galleryUrls,
         variants: normalizedVariants.map((variant) => ({
@@ -412,7 +415,7 @@ export default function ProductDetail() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-900 mb-2">Danh Mục *</label>
                 <select
@@ -441,6 +444,18 @@ export default function ProductDetail() {
                 {form.price && Number(form.price) > 0 && (
                   <p className="text-xs text-slate-500 mt-2">Hiển thị: {formatVND(form.price)}</p>
                 )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-900 mb-2">Giảm Giá (%)</label>
+                <input
+                  type="number"
+                  value={form.discountPercent}
+                  onChange={(e) => setForm({ ...form, discountPercent: e.target.value })}
+                  placeholder="VD: 20"
+                  min="0"
+                  max="100"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                />
               </div>
             </div>
           </div>

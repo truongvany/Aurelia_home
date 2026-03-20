@@ -374,9 +374,21 @@ export default function PDP() {
               >
                 {product.inStock ? 'In stock' : 'Out of stock'}
               </span>
+              {!!product.discountPercent && product.discountPercent > 0 && (
+                <span className="inline-flex items-center px-2 py-1 text-[11px] uppercase tracking-[0.18em] bg-[#e53935] text-white font-bold rounded-sm shadow-sm">
+                  -{product.discountPercent}% OFF
+                </span>
+              )}
             </div>
             
-            <p className="text-2xl text-slate-700 font-medium mb-6">{formatVND(product.price)}</p>
+            {!!product.discountPercent && product.discountPercent > 0 ? (
+              <div className="flex items-center gap-3 mb-6">
+                <p className="text-3xl text-[#e53935] font-bold">{formatVND(product.price * (1 - product.discountPercent / 100))}</p>
+                <p className="text-xl text-slate-400 font-medium line-through mt-1">{formatVND(product.price)}</p>
+              </div>
+            ) : (
+              <p className="text-2xl text-slate-700 font-medium mb-6">{formatVND(product.price)}</p>
+            )}
             
             <div className="mb-6">
               <p className="text-slate-600 leading-relaxed text-sm md:text-[15px]">{product.description}</p>

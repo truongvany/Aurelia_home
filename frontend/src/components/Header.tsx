@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, User, Menu, Heart } from 'lucide-react';
+import { ShoppingBag, User, Menu, Heart, Bell } from 'lucide-react';
 import { api } from '../lib/api';
 import type { MegaMenuCategory } from '../lib/api';
 import { formatVND } from '../utils/currency';
@@ -110,9 +110,40 @@ export default function Header() {
   const quickLinks = featuredColumn?.items.slice(0, 3) ?? [];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+    <div className="sticky top-0 z-50 w-full flex flex-col">
+      {/* Top Bar Announcement / Contact Info */}
+      <div className="bg-[#1d1d1f] text-[#f5f5f7] text-[12px] font-medium hidden md:block">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-[36px]">
+            {/* Left side: Notifications */}
+            <div className="flex items-center cursor-pointer hover:text-white transition-colors group">
+              <div className="relative flex items-center mr-2 pt-0.5">
+                <Bell className="h-3.5 w-3.5 text-slate-300 group-hover:text-white transition-colors" />
+                <span className="absolute -top-1.5 -right-2 min-w-[14px] h-[14px] px-1 bg-red-600 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-sm ring-1 ring-[#1d1d1f]">
+                  0
+                </span>
+              </div>
+              <span className="tracking-wide">Thông báo của tôi</span>
+            </div>
+
+            {/* Right side: Contact */}
+            <div className="flex items-center space-x-3.5 tracking-wide">
+              <div className="flex items-center font-medium">
+                <span className="text-slate-300 mr-1.5">Hotline mua hàng:</span>
+                <a href="tel:0964942121" className="font-bold text-white hover:text-blue-400 transition-colors">0964942121</a>
+                <span className="ml-1.5 text-slate-400">(8:30-21:30, Tất cả các ngày trong tuần)</span>
+              </div>
+              <span className="text-[#424245]">|</span>
+              <Link to="/contact" className="hover:text-white transition-colors text-slate-300">Liên hệ</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Navigation Header */}
+      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm relative z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
           <div className="flex items-center">
             <button className="p-2 -ml-2 mr-2 md:hidden text-[#0a192f] hover:text-[#1e3a8a] transition-colors">
               <Menu className="h-6 w-6" />
@@ -316,5 +347,6 @@ export default function Header() {
         </div>
       </div>
     </header>
+    </div>
   );
 }

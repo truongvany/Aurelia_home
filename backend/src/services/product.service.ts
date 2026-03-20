@@ -124,6 +124,16 @@ export const getMegaMenu = async () => {
           };
         });
 
+        if (title === "SẢN PHẨM ƯU ĐÃI") {
+          items.unshift({
+            name: "Sản Phẩm Giảm Giá",
+            slug: "sale",
+            description: "Sản phẩm ưu đãi giảm giá",
+            productCount: 99,
+            isHighlight: true
+          });
+        }
+
         return {
           title,
           items
@@ -169,8 +179,16 @@ export const getMegaMenu = async () => {
       description: `${item.productCount} sản phẩm`
     }));
 
+  const saleItem = {
+    name: "Sản Phẩm Giảm Giá",
+    slug: "sale",
+    description: "Các sản phẩm đang có mức giá ưu đãi",
+    productCount: 99,
+    isHighlight: true
+  };
+
   const columns: MegaMenuColumn[] = [
-    { title: "SẢN PHẨM ƯU ĐÃI", items: featuredItems },
+    { title: "SẢN PHẨM ƯU ĐÃI", items: [saleItem, ...featuredItems] },
     { title: "ÁO", items: groupedColumns.get("ÁO") ?? [] },
     { title: "QUẦN", items: groupedColumns.get("QUẦN") ?? [] },
     {
@@ -186,12 +204,15 @@ export const listProducts = async (query: ProductQuery) => {
   const filters: Record<string, unknown> = { isActive: true };
 
   if (query.category) {
-    const category = await CategoryModel.findOne({ slug: query.category });
-    if (!category) {
-      return [];
+    if (query.category === "sale") {
+      filters.discountPercent = { $gt: 0 };
+    } else {
+      const category = await CategoryModel.findOne({ slug: query.category });
+      if (!category) {
+        return [];
+      }
+      filters.categoryId = category._id;
     }
-
-    filters.categoryId = category._id;
   }
 
   if (query.q) {
@@ -241,6 +262,7 @@ export const listProducts = async (query: ProductQuery) => {
         name: product.name,
         description: product.description,
         price: product.price,
+        discountPercent: product.discountPercent,
         category: categoryMap.get(product.categoryId.toString()) ?? "Uncategorized",
         imageUrl: product.imageUrl,
         sizes,
@@ -288,6 +310,7 @@ export const getProductById = async (id: string) => {
     name: product.name,
     description: product.description,
     price: product.price,
+    discountPercent: product.discountPercent,
     category: category?.name ?? "Uncategorized",
     categorySlug: category?.slug ?? "",
     imageUrl: product.imageUrl,

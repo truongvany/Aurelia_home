@@ -3,12 +3,14 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  discountPercent?: number;
   category: string;
   imageUrl: string;
   sizes: string[];
   colors: string[];
   colorImages?: Record<string, string>;
   inStock: boolean;
+  slug?: string;
 }
 
 export interface User {

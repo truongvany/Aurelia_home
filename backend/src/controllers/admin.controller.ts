@@ -106,6 +106,7 @@ export const postAdminProduct = asyncHandler(async (req: Request, res: Response)
     name,
     description,
     price,
+    discountPercent,
     categoryId,
     categorySlug,
     categoryName,
@@ -134,6 +135,7 @@ export const postAdminProduct = asyncHandler(async (req: Request, res: Response)
     name: name.trim(),
     description: typeof description === "string" ? description : undefined,
     price: numericPrice,
+    discountPercent: typeof discountPercent === "number" ? discountPercent : (typeof discountPercent === "string" && discountPercent.trim() !== "" ? Number(discountPercent) : 0),
     categoryId: typeof categoryId === "string" ? categoryId : undefined,
     categorySlug: typeof categorySlug === "string" ? categorySlug : undefined,
     categoryName: typeof categoryName === "string" ? categoryName : undefined,
@@ -153,6 +155,7 @@ export const patchAdminProduct = asyncHandler(async (req: Request, res: Response
     name,
     description,
     price,
+    discountPercent,
     categoryId,
     categorySlug,
     categoryName,
@@ -172,6 +175,12 @@ export const patchAdminProduct = asyncHandler(async (req: Request, res: Response
         ? price
         : typeof price === "string" && price.trim() !== ""
           ? Number(price)
+          : undefined,
+    discountPercent:
+      typeof discountPercent === "number"
+        ? discountPercent
+        : typeof discountPercent === "string" && discountPercent.trim() !== ""
+          ? Number(discountPercent)
           : undefined,
     categoryId: typeof categoryId === "string" ? categoryId : undefined,
     categorySlug: typeof categorySlug === "string" ? categorySlug : undefined,

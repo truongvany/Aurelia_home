@@ -42,6 +42,11 @@ const ProductCardItem: React.FC<{
   return (
     <article className="group transition-transform duration-300 relative flex flex-col">
       <div className="relative overflow-hidden bg-[#ece8e2] mb-4 rounded-xl">
+        {!!product.discountPercent && product.discountPercent > 0 && (
+          <div className="absolute top-3 left-3 z-10 bg-[#e53935] text-white text-[11px] font-bold px-2 py-1 rounded shadow-sm tracking-widest">
+            -{product.discountPercent}%
+          </div>
+        )}
         <Link to={`/product/${product._id}`} className="block">
           <img
             ref={imageRef}
@@ -125,7 +130,16 @@ const ProductCardItem: React.FC<{
       <Link to={`/product/${product._id}`} className="block mb-1.5">
         <h3 className="text-[15px] font-medium text-slate-800 line-clamp-2 leading-relaxed hover:text-[#1e3a8a] transition-colors">{product.name}</h3>
       </Link>
-      <p className="text-[15px] font-bold text-slate-900 mt-auto">{formatVND(product.price)}</p>
+      <div className="mt-auto">
+        {!!product.discountPercent && product.discountPercent > 0 ? (
+          <div className="flex items-center gap-2">
+            <p className="text-[15px] font-bold text-[#e53935]">{formatVND(product.price * (1 - product.discountPercent / 100))}</p>
+            <p className="text-[13px] text-slate-500 line-through">{formatVND(product.price)}</p>
+          </div>
+        ) : (
+          <p className="text-[15px] font-bold text-slate-900">{formatVND(product.price)}</p>
+        )}
+      </div>
     </article>
   );
 }

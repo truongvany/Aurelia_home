@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowRight, BriefcaseBusiness, Building2, Clock3, PhoneCall } from 'lucide-react';
+import { ArrowRight, BriefcaseBusiness, Building2, Clock3, PhoneCall, Sparkles } from 'lucide-react';
 import { api } from '../lib/api';
 import '../assets/css/Contact.css';
 
@@ -113,7 +113,7 @@ export default function Contact() {
     } finally {
       setIsSubmitting(false);
       alert('Yêu cầu của ngài đã được tiếp nhận. Concierge của chúng tôi sẽ liên hệ ngay lập tức.');
-    }, 1500);
+    }
   };
 
   return (
@@ -146,7 +146,7 @@ export default function Contact() {
       </section>
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="mb-20 text-center fade-in-up">
           <h1 className="font-serif text-5xl md:text-7xl font-bold mb-6 tracking-tight text-slate-800">
             Phòng Chờ <span className="text-[#C5A059] italic font-light">Concierge</span>
@@ -271,6 +271,7 @@ export default function Contact() {
           </div>
         </div>
       </div>
+    </section>
 
       {/* Google Map */}
       <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">

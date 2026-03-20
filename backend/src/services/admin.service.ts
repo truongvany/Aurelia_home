@@ -69,6 +69,7 @@ interface CreateAdminProductInput {
   name: string;
   description?: string;
   price: number;
+  discountPercent?: number;
   categoryId?: string;
   categorySlug?: string;
   categoryName?: string;
@@ -84,6 +85,7 @@ interface UpdateAdminProductInput {
   name?: string;
   description?: string;
   price?: number;
+  discountPercent?: number;
   categoryId?: string;
   categorySlug?: string;
   categoryName?: string;
@@ -297,6 +299,7 @@ export const listAdminProducts = async (query: AdminProductListQuery) => {
       slug: product.slug,
       description: product.description,
       price: product.price,
+      discountPercent: product.discountPercent,
       imageUrl: product.imageUrl,
       category: category?.name ?? "Uncategorized",
       categorySlug: category?.slug ?? "",
@@ -343,6 +346,7 @@ export const getAdminProductDetail = async (productId: string) => {
     slug: product.slug,
     description: product.description,
     price: product.price,
+    discountPercent: product.discountPercent,
     imageUrl: product.imageUrl,
     sizeGuideImageUrl: product.sizeGuideImageUrl ?? "",
     isActive: product.isActive,
@@ -387,6 +391,7 @@ export const createAdminProduct = async (actorUserId: string, input: CreateAdmin
     slug,
     description: input.description ?? "",
     price: input.price,
+    discountPercent: input.discountPercent ?? 0,
     imageUrl: input.imageUrl ?? "",
     sizeGuideImageUrl: input.sizeGuideImageUrl ?? "",
     isActive: input.isActive ?? true
@@ -455,15 +460,19 @@ export const updateAdminProduct = async (
     product.description = input.description;
   }
 
-  if (typeof input.price === "number") {
+  if (input.price !== undefined) {
     product.price = input.price;
   }
 
-  if (typeof input.imageUrl === "string") {
+  if (input.discountPercent !== undefined) {
+    product.discountPercent = input.discountPercent;
+  }
+
+  if (input.imageUrl !== undefined) {
     product.imageUrl = input.imageUrl;
   }
 
-  if (typeof input.sizeGuideImageUrl === "string") {
+  if (input.sizeGuideImageUrl !== undefined) {
     product.sizeGuideImageUrl = input.sizeGuideImageUrl;
   }
 
