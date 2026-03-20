@@ -60,6 +60,7 @@ interface ProductVariantInput {
   sku?: string;
   size?: string;
   color?: string;
+  imageUrl?: string;
   stockQuantity?: number;
   priceAdjustment?: number;
 }
@@ -103,6 +104,7 @@ const normalizeVariantInput = (variant: ProductVariantInput | undefined) => {
     sku: variant.sku.trim(),
     size: variant.size?.trim() ?? "",
     color: variant.color?.trim() ?? "",
+    imageUrl: variant.imageUrl?.trim() ?? "",
     stockQuantity: Math.max(0, Number(variant.stockQuantity ?? 0)),
     priceAdjustment: Number(variant.priceAdjustment ?? 0)
   };
@@ -306,6 +308,7 @@ export const listAdminProducts = async (query: AdminProductListQuery) => {
         sku: variant.sku,
         size: variant.size,
         color: variant.color,
+        imageUrl: variant.imageUrl,
         stockQuantity: variant.stockQuantity,
         priceAdjustment: variant.priceAdjustment
       })),
@@ -355,6 +358,7 @@ export const getAdminProductDetail = async (productId: string) => {
       sku: variant.sku,
       size: variant.size,
       color: variant.color,
+      imageUrl: variant.imageUrl,
       stockQuantity: variant.stockQuantity,
       priceAdjustment: variant.priceAdjustment
     })),
@@ -396,6 +400,7 @@ export const createAdminProduct = async (actorUserId: string, input: CreateAdmin
         sku: variant.sku,
         size: variant.size,
         color: variant.color,
+        imageUrl: variant.imageUrl,
         stockQuantity: variant.stockQuantity,
         priceAdjustment: variant.priceAdjustment
       }))
@@ -485,6 +490,7 @@ export const updateAdminProduct = async (
           sku: variant.sku,
           size: variant.size,
           color: variant.color,
+          imageUrl: variant.imageUrl,
           stockQuantity: variant.stockQuantity,
           priceAdjustment: variant.priceAdjustment
         }))
@@ -492,31 +498,67 @@ export const updateAdminProduct = async (
     }
   }
 
-  if (input.imageUrls?.length) {
-    const existingMax = await ProductImageModel.find({ productId: product._id })
-      .sort({ sortOrder: -1 })
-      .limit(1)
-      .lean();
+  if (input.imageUrls) {
+    const sanitizedImageUrls = Array.from(
+      new Set(input.imageUrls.map((url) => (typeof url === "string" ? url.trim() : "")).filter((url) => url))
+    );
 
-    let sortOrder = (existingMax[0]?.sortOrder ?? -1) + 1;
+    const existingImages = await ProductImageModel.find({ productId: product._id }).lean();
+    const existingUrls = new Set(existingImages.map((img) => img.url));
 
-    const docs = input.imageUrls
-      .filter((url) => Boolean(url?.trim()))
-      .map((url) => {
-        const doc = {
-          productId: product._id,
-          url,
-          alt: product.name,
-          sortOrder
-        };
-        sortOrder += 1;
-        return doc;
-      });
+    // Remove images that are not in the new list
+    const imagesToDelete = existingImages.filter((img) => !sanitizedImageUrls.includes(img.url));
+    if (imagesToDelete.length > 0) {
+      const idsToDelete = imagesToDelete.map((img) => img._id);
+      await ProductImageModel.deleteMany({ _id: { $in: idsToDelete } });
+    }
 
-    if (docs.length > 0) {
-      await ProductImageModel.insertMany(docs);
-      if (!product.imageUrl) {
-        product.imageUrl = docs[0].url;
+    // Insert missing new images
+    const imagesToInsert: Array<{ productId: Types.ObjectId; url: string; alt: string; sortOrder: number }> = [];
+    let sortOrder = 0;
+    for (const url of sanitizedImageUrls) {
+      if (!existingUrls.has(url)) {
+        imagesToInsert.push({ productId: product._id, url, alt: product.name, sortOrder });
+      }
+      sortOrder += 1;
+    }
+
+    if (imagesToInsert.length > 0) {
+      await ProductImageModel.insertMany(imagesToInsert);
+    }
+
+    // Reorder all images to match input order + fill remaining existing
+    const finalImages = await ProductImageModel.find({ productId: product._id }).lean();
+    const finalOrderMap = new Map<string, number>();
+    sanitizedImageUrls.forEach((url, index) => finalOrderMap.set(url, index));
+    let nextIndex = sanitizedImageUrls.length;
+
+    for (const img of finalImages) {
+      if (!finalOrderMap.has(img.url)) {
+        finalOrderMap.set(img.url, nextIndex);
+        nextIndex += 1;
+      }
+    }
+
+    await Promise.all(
+      finalImages.map((img) => {
+        const order = finalOrderMap.get(img.url) ?? 0;
+        if (img.sortOrder !== order) {
+          return ProductImageModel.updateOne({ _id: img._id }, { sortOrder: order }).exec();
+        }
+        return Promise.resolve();
+      })
+    );
+
+    // Only fallback if the current imageUrl belongs to an image that was just deleted from the gallery,
+    // and ONLY IF we actually want the main imageUrl to be strictly tied to the gallery.
+    // For many use cases, the main imageUrl is independent of the gallery images array.
+    // Let's ensure we don't clear a perfectly good imageUrl just because it isn't listed in the galleryUrls.
+    // If the imageUrl was explicitly cleared or deleted, it would be handled earlier.
+    if (!product.imageUrl && sanitizedImageUrls.length > 0) {
+      const chosen = await ProductImageModel.findOne({ productId: product._id }).sort({ sortOrder: 1, createdAt: 1 }).lean();
+      if (chosen) {
+        product.imageUrl = chosen.url;
         await product.save();
       }
     }
@@ -625,6 +667,61 @@ export const createAdminProductImage = async (
     url: productImage.url,
     alt: productImage.alt,
     sortOrder: productImage.sortOrder
+  };
+};
+
+export const createAdminProductVariantImage = async (
+  actorUserId: string,
+  productId: string,
+  image: { pathUrl: string; alt?: string }
+) => {
+  ensureObjectId(productId, "product id");
+
+  const product = await ProductModel.findById(productId);
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  // Variant images are not saved to ProductImageModel, they are just stored as URL reference in ProductVariant
+  await writeAudit(actorUserId, "admin.product.variant.image.upload", "product", product._id.toString(), {
+    imageUrl: image.pathUrl
+  });
+
+  return {
+    pathUrl: image.pathUrl,
+    alt: image.alt ?? product.name
+  };
+};
+
+export const deleteAdminProductImage = async (actorUserId: string, productId: string, imageId: string) => {
+  ensureObjectId(productId, "product id");
+  ensureObjectId(imageId, "image id");
+
+  const product = await ProductModel.findById(productId);
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  const productImage = await ProductImageModel.findOne({ _id: imageId, productId: product._id });
+  if (!productImage) {
+    throw new ApiError(404, "Product image not found");
+  }
+
+  await ProductImageModel.deleteOne({ _id: productImage._id });
+
+  if (product.imageUrl === productImage.url) {
+    const nextImage = await ProductImageModel.findOne({ productId: product._id }).sort({ sortOrder: 1, createdAt: 1 }).lean();
+    product.imageUrl = nextImage?.url ?? "";
+    await product.save();
+  }
+
+  await writeAudit(actorUserId, "admin.product.image.delete", "product", product._id.toString(), {
+    imageUrl: productImage.url
+  });
+
+  return {
+    _id: productImage._id,
+    url: productImage.url
   };
 };
 

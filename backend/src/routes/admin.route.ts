@@ -22,28 +22,17 @@ import {
   postAdminVoucher,
   postAdminProduct,
   uploadAdminProductImage,
-  uploadAdminProductSizeGuideImage
+  uploadAdminProductVariantImage,
+  uploadAdminProductSizeGuideImage,
+  deleteAdminProductImage
 } from "../controllers/admin.controller.js";
 import { requireAdmin, requireAuth } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-const uploadDir = path.resolve(process.cwd(), "uploads", "products");
-fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const extension = path.extname(file.originalname) || ".jpg";
-    const baseName = path.basename(file.originalname, extension).toLowerCase().replace(/[^a-z0-9]/g, "-");
-    cb(null, `${Date.now()}-${baseName}${extension}`);
-  }
-});
-
+// Use memory storage for Cloudinary uploads
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (!file.mimetype.startsWith("image/")) {
@@ -64,6 +53,8 @@ router.post("/products", postAdminProduct);
 router.patch("/products/:productId", patchAdminProduct);
 router.delete("/products/:productId", deleteAdminProduct);
 router.post("/products/:productId/images", upload.single("image"), uploadAdminProductImage);
+router.post("/products/:productId/variant-images", upload.single("image"), uploadAdminProductVariantImage);
+router.delete("/products/:productId/images/:imageId", deleteAdminProductImage);
 router.post("/products/:productId/size-guide-image", upload.single("image"), uploadAdminProductSizeGuideImage);
 
 router.get("/orders", getAdminOrders);

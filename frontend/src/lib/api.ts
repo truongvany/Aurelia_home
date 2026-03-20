@@ -300,7 +300,15 @@ export const api = {
       Product & {
         categorySlug: string;
         sizeGuideImageUrl: string;
-        variants: Array<{ _id: string; size: string; color: string; sku: string; stockQuantity: number }>;
+        variants: Array<{
+          _id: string;
+          size: string;
+          color: string;
+          sku: string;
+          imageUrl?: string;
+          stockQuantity: number;
+          priceAdjustment?: number;
+        }>;
         images: Array<{ _id: string; url: string; alt: string; sortOrder: number }>;
       }
     >(`/catalog/products/${id}`),
@@ -511,6 +519,27 @@ export const api = {
       }
     );
   },
+
+  uploadAdminProductVariantImage: (productId: string, file: File, alt?: string) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    if (alt) {
+      formData.append("alt", alt);
+    }
+
+    return request<{ pathUrl: string; alt: string }>(
+      `/admin/products/${productId}/variant-images`,
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+  },
+
+  deleteAdminProductImage: (productId: string, imageId: string) =>
+    request<{ _id: string; url: string }>(`/admin/products/${productId}/images/${imageId}`, {
+      method: "DELETE"
+    }),
   uploadAdminProductSizeGuideImage: (productId: string, file: File) => {
     const formData = new FormData();
     formData.append("image", file);

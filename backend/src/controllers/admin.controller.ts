@@ -20,6 +20,8 @@ import {
   listAdminProducts,
   reviewAdminMembershipRequest,
   setAdminProductSizeGuideImage,
+  createAdminProductVariantImage,
+  deleteAdminProductImage as deleteAdminProductImageService,
   updateAdminOrderStatus,
   updateAdminPaymentStatus,
   updateAdminProduct
@@ -42,6 +44,7 @@ const parseVariantPayload = (variant: unknown) => {
     sku?: unknown;
     size?: unknown;
     color?: unknown;
+    imageUrl?: unknown;
     stockQuantity?: unknown;
     priceAdjustment?: unknown;
   };
@@ -50,6 +53,7 @@ const parseVariantPayload = (variant: unknown) => {
     sku: typeof value.sku === "string" ? value.sku : undefined,
     size: typeof value.size === "string" ? value.size : undefined,
     color: typeof value.color === "string" ? value.color : undefined,
+    imageUrl: typeof value.imageUrl === "string" ? value.imageUrl : undefined,
     stockQuantity:
       typeof value.stockQuantity === "number"
         ? value.stockQuantity
@@ -193,21 +197,49 @@ export const deleteAdminProduct = asyncHandler(async (req: Request, res: Respons
   sendSuccess(res, deleted, "Product deleted successfully");
 });
 
+export const deleteAdminProductImage = asyncHandler(async (req: Request, res: Response) => {
+  const deleted = await deleteAdminProductImageService(getActorUserId(req), req.params.productId, req.params.imageId);
+  sendSuccess(res, deleted, "Product image deleted successfully");
+});
+
 export const uploadAdminProductImage = asyncHandler(async (req: Request, res: Response) => {
   if (!req.file) {
     throw new ApiError(400, "image file is required");
   }
 
-  const normalizedPath = req.file.path.replace(/\\/g, "/");
-  const uploadsIndex = normalizedPath.lastIndexOf("uploads/");
-  const pathUrl = uploadsIndex >= 0 ? `/${normalizedPath.slice(uploadsIndex)}` : `/uploads/${req.file.filename}`;
+  const { uploadToCloudinary } = await import("../utils/cloudinaryUpload.js");
+
+  // Upload to Cloudinary
+  const cloudinaryResult = await uploadToCloudinary(req.file.buffer, req.file.originalname, {
+    folder: "aurelia_products/gallery"
+  }) as any;
 
   const image = await createAdminProductImage(getActorUserId(req), req.params.productId, {
-    pathUrl,
+    pathUrl: cloudinaryResult.secure_url,
     alt: req.body.alt && typeof req.body.alt === "string" ? req.body.alt : undefined
   });
 
   sendSuccess(res, image, "Product image uploaded", 201);
+});
+
+export const uploadAdminProductVariantImage = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.file) {
+    throw new ApiError(400, "image file is required");
+  }
+
+  const { uploadToCloudinary } = await import("../utils/cloudinaryUpload.js");
+
+  // Upload to Cloudinary
+  const cloudinaryResult = await uploadToCloudinary(req.file.buffer, req.file.originalname, {
+    folder: "aurelia_products/variants"
+  }) as any;
+
+  const image = await createAdminProductVariantImage(getActorUserId(req), req.params.productId, {
+    pathUrl: cloudinaryResult.secure_url,
+    alt: req.body.alt && typeof req.body.alt === "string" ? req.body.alt : undefined
+  });
+
+  sendSuccess(res, image, "Product variant image uploaded", 201);
 });
 
 export const uploadAdminProductSizeGuideImage = asyncHandler(async (req: Request, res: Response) => {
@@ -215,12 +247,15 @@ export const uploadAdminProductSizeGuideImage = asyncHandler(async (req: Request
     throw new ApiError(400, "image file is required");
   }
 
-  const normalizedPath = req.file.path.replace(/\\/g, "/");
-  const uploadsIndex = normalizedPath.lastIndexOf("uploads/");
-  const pathUrl = uploadsIndex >= 0 ? `/${normalizedPath.slice(uploadsIndex)}` : `/uploads/${req.file.filename}`;
+  const { uploadToCloudinary } = await import("../utils/cloudinaryUpload.js");
+
+  // Upload to Cloudinary
+  const cloudinaryResult = await uploadToCloudinary(req.file.buffer, req.file.originalname, {
+    folder: "aurelia_products/size_guides"
+  }) as any;
 
   const updated = await setAdminProductSizeGuideImage(getActorUserId(req), req.params.productId, {
-    pathUrl
+    pathUrl: cloudinaryResult.secure_url
   });
 
   sendSuccess(res, updated, "Size guide image uploaded", 201);

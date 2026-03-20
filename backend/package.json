@@ -11,10 +11,14 @@
     "seed": "tsx src/seed/seed.ts",
     "seed:fashion-menu": "tsx src/seed/seed-fashion-menu.ts",
     "seed:shirts": "tsx src/seed/seed-shirts.ts",
-    "seed:users": "tsx src/seed/seed-users.ts"
+    "seed:users": "tsx src/seed/seed-users.ts",
+    "seed:categories": "tsx src/seed/seed-categories.ts",
+    "seed:products": "tsx src/seed/seed-products.ts",
+    "seed:all": "npm run seed:users && npm run seed:categories && npm run seed:products"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.9.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",

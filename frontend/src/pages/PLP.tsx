@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, Filter, ShoppingBag } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, Filter, ShoppingBag, Search } from 'lucide-react';
 import { Product } from '../types';
 import { api } from '../lib/api';
 import { formatVND } from '../utils/currency';
@@ -79,7 +79,32 @@ const ProductCardItem: React.FC<{
       {product.colors.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-3">
           {product.colors.map(color => {
-            const isWhite = color.toLowerCase() === '#ffffff' || color.toLowerCase() === 'white';
+            const getVietnameseColorHex = (name: string): string => {
+              const val = name.toLowerCase().trim();
+              if (val.startsWith('#')) return val;
+              if (val.includes('đen') || val === 'black') return '#000000';
+              if (val.includes('trắng') || val === 'white') return '#ffffff';
+              if (val.includes('nâu') || val === 'brown') return '#5d4037';
+              if (val.includes('xám') || val.includes('ghi') || val === 'grey' || val === 'gray') return '#9e9e9e';
+              if (val.includes('đỏ') || val === 'red') return '#e53935';
+              if (val.includes('xanh nav') || val.includes('xanh dương') || val === 'navy' || val === 'blue') return '#1e3a8a';
+              if (val.includes('xanh lá') || val.includes('xanh ngọc') || val === 'green') return '#2e7d32';
+              if (val.includes('vàng') || val === 'yellow') return '#fbc02d';
+              if (val.includes('cam') || val === 'orange') return '#f57c00';
+              if (val.includes('tím') || val === 'purple') return '#8e24aa';
+              if (val.includes('hồng') || val === 'pink') return '#f48fb1';
+              if (val.includes('kem') || val.includes('be') || val === 'beige') return '#f5f5dc';
+              if (val.includes('bạc') || val === 'silver') return '#e0e0e0';
+              
+              // Fallback simple hash to generate deterministic pleasing background colors
+              let hash = 0;
+              for (let i = 0; i < val.length; i++) hash = val.charCodeAt(i) + ((hash << 5) - hash);
+              const h = hash % 360;
+              return `hsl(${h > 0 ? h : -h}, 30%, 50%)`;
+            };
+
+            const mappedHex = getVietnameseColorHex(color);
+            const isWhite = mappedHex === '#ffffff' || mappedHex.toLowerCase() === 'white';
             return (
               <button 
                 key={color}
@@ -89,7 +114,7 @@ const ProductCardItem: React.FC<{
                     ? 'ring-1 ring-[#1e3a8a] ring-offset-2 border-transparent' 
                     : isWhite ? 'border-slate-300 hover:border-slate-400' : 'border-slate-200/40 hover:scale-110'
                 }`}
-                style={{ backgroundColor: color }}
+                style={{ backgroundColor: mappedHex }}
                 title={color}
               />
             );
@@ -114,6 +139,7 @@ export default function PLP() {
   const [selectedSize, setSelectedSize] = useState<string>('all');
   const [selectedColor, setSelectedColor] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -319,7 +345,10 @@ export default function PLP() {
       const sizeMatch = selectedSize === 'all' || product.sizes.includes(selectedSize);
       const colorMatch = selectedColor === 'all' || product.colors.includes(selectedColor);
       const priceMatch = product.price >= priceRange[0] && product.price <= priceRange[1];
-      return sizeMatch && colorMatch && priceMatch;
+      const searchMatch = !searchQuery || 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        product.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      return sizeMatch && colorMatch && priceMatch && searchMatch;
     });
 
     if (sortBy === 'price-asc') {
@@ -335,11 +364,11 @@ export default function PLP() {
     }
 
     return next;
-  }, [allProducts, selectedSize, selectedColor, priceRange, sortBy]);
+  }, [allProducts, selectedSize, selectedColor, priceRange, sortBy, searchQuery]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedSize, selectedColor, priceRange, sortBy]);
+  }, [selectedSize, selectedColor, priceRange, sortBy, searchQuery]);
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
   const paginatedProducts = filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -392,16 +421,34 @@ export default function PLP() {
         }
       `}</style>
       <div className="max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14">
-        <section className="mb-10 px-2">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-slate-500 mb-3">Aurelia Shop</p>
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-            <div>
-              <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight tracking-tight text-slate-900">{activeCategoryLabel}</h1>
-              <p className="mt-3 text-sm md:text-base text-slate-500 max-w-3xl">
-                Trình bày tinh gọn, dữ liệu rõ nét và phong cách sang trọng theo danh mục đã chọn.
-              </p>
+        <section className="mb-10 px-2 lg:mb-14">
+          <p className="text-[11px] uppercase tracking-[0.3em] text-slate-500 mb-3 font-medium">Aurelia Shop</p>
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div className="flex-1 w-full max-w-full overflow-hidden">
+              <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight tracking-tight text-slate-900 mb-6">{activeCategoryLabel}</h1>
+              
+              <div className="flex flex-nowrap items-center bg-slate-50/70 border border-slate-200/80 rounded-full pl-5 pr-1.5 py-1.5 shadow-sm max-w-4xl overflow-hidden backdrop-blur hover:bg-white transition-colors">
+                <p className="text-[13px] md:text-sm text-slate-600 whitespace-nowrap overflow-hidden text-ellipsis flex-1 mr-4 shrink">
+                  Trình bày tinh gọn, dữ liệu rõ nét và phong cách sang trọng theo danh mục đã chọn.
+                </p>
+                <div className="relative w-[180px] md:w-[280px] lg:w-[320px] shrink-0 group">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Tìm kiếm sản phẩm..."
+                    className="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200/90 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-slate-400 focus:border-slate-400 transition-all placeholder:text-slate-400/80 text-slate-800 shadow-sm"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-slate-900 rounded-full p-1.5 cursor-pointer group-hover:bg-slate-700 transition-colors pointer-events-none">
+                    <Search className="h-3.5 w-3.5 text-white" />
+                  </div>
+                </div>
+              </div>
+
             </div>
-            <p className="text-sm uppercase tracking-[0.24em] text-slate-700">{filteredProducts.length} sản phẩm</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-700 whitespace-nowrap shrink-0 pb-3 lg:pb-6">
+              {filteredProducts.length} sản phẩm
+            </p>
           </div>
         </section>
 
@@ -588,6 +635,7 @@ export default function PLP() {
                   setSelectedColor('all');
                   setPriceRange(priceBounds);
                   setSortBy('newest');
+                  setSearchQuery('');
                   setCurrentPage(1);
                 }}
                 className="w-full border border-slate-300 text-slate-700 rounded-md py-2.5 text-[14px] font-medium hover:bg-slate-50 hover:text-slate-900 transition-colors"
@@ -627,6 +675,7 @@ export default function PLP() {
                     setSelectedColor('all');
                     setPriceRange(priceBounds);
                     setSortBy('newest');
+                    setSearchQuery('');
                     setCurrentPage(1);
                   }}
                   className="bg-slate-900 text-white px-7 py-3 text-xs uppercase tracking-[0.2em] font-semibold hover:bg-slate-700 transition-colors"

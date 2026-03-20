@@ -7,7 +7,7 @@ import { formatVND } from '../utils/currency';
 import { useAuth } from '../contexts/AuthContext';
 import type { CartItemApi } from '../types';
 import type { Product } from '../types';
-import { getWishlistProductIds, getWishlistUpdatedEventName } from '../utils/wishlist';
+import { getWishlistProductIds, getWishlistUpdatedEventName, setWishlistProductIds } from '../utils/wishlist';
 
 // Logo is located in the parent workspace root (outside the frontend/src folder)
 import logo from '../assets/images/logo.png';
@@ -23,9 +23,9 @@ export default function Header() {
   useEffect(() => {
     const syncWishlistData = async () => {
       const wishlistIds = getWishlistProductIds();
-      setWishlistCount(wishlistIds.length);
 
       if (wishlistIds.length === 0) {
+        setWishlistCount(0);
         setWishlistPreviewItems([]);
         return;
       }
@@ -37,8 +37,19 @@ export default function Header() {
           .filter((product) => orderMap.has(product._id))
           .sort((a, b) => (orderMap.get(a._id) ?? 0) - (orderMap.get(b._id) ?? 0))
           .slice(0, 4);
+
+        const validWishlistIds = products
+          .filter((product) => orderMap.has(product._id))
+          .map((product) => product._id);
+
+        if (validWishlistIds.length !== wishlistIds.length) {
+          setWishlistProductIds(validWishlistIds);
+        }
+
+        setWishlistCount(validWishlistIds.length);
         setWishlistPreviewItems(preview);
       } catch {
+        setWishlistCount(0);
         setWishlistPreviewItems([]);
       }
     };
@@ -156,7 +167,7 @@ export default function Header() {
                         to={quickLinks[0] ? `/shop?category=${encodeURIComponent(quickLinks[0].slug)}` : '/shop'}
                         className="relative group/img overflow-hidden rounded-xl aspect-[4/3] block"
                       >
-                        <img src="https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&q=80&w=400" alt="Đồ Thu Đông" className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110" />
+                        <img src="https://product.hstatic.net/1000102419/product/thmts057navy__2__4464ce7894784744803de471b6e277f7_master.jpg" alt="Đồ Thu Đông" className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                         <div className="absolute bottom-4 left-4 right-4">
                           <p className="text-white font-bold text-[15px] tracking-wide">{quickLinks[0]?.name ?? 'Khám phá danh mục'}</p>
@@ -166,7 +177,7 @@ export default function Header() {
                         to={quickLinks[1] ? `/shop?category=${encodeURIComponent(quickLinks[1].slug)}` : '/shop'}
                         className="relative group/img overflow-hidden rounded-xl aspect-[4/3] block"
                       >
-                        <img src="https://images.unsplash.com/photo-1622329661664-811c75908a73?auto=format&fit=crop&q=80&w=400" alt="Pickleball Nam" className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110" />
+                        <img src="https://dongphucbonmua.com/wp-content/uploads/2019/08/dong-phuc-quan-au-cong-so-nam-mau-den.jpg" alt="Pickleball Nam" className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                         <div className="absolute bottom-4 left-4 right-4">
                           <p className="text-white font-bold text-[15px] tracking-wide">{quickLinks[1]?.name ?? 'Bộ sưu tập mới'}</p>

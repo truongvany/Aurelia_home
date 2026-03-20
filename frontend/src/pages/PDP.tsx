@@ -11,7 +11,15 @@ type ProductDetail = Product & {
   categorySlug: string;
   sizeGuideImageUrl: string;
   images: Array<{ _id: string; url: string; alt: string; sortOrder: number }>;
-  variants: Array<{ _id: string; size: string; color: string; sku: string; stockQuantity: number }>;
+  variants: Array<{
+    _id: string;
+    size: string;
+    color: string;
+    sku: string;
+    imageUrl?: string;
+    stockQuantity: number;
+    priceAdjustment?: number;
+  }>;
 };
 
 const API_BASE_URL =
@@ -30,6 +38,29 @@ const toAbsoluteImageUrl = (url?: string | null) => {
 
   const normalized = url.startsWith('/') ? url : `/${url}`;
   return `${API_ORIGIN}${normalized}`;
+};
+
+const normalizeColor = (color?: string | null) => {
+  if (!color) return '';
+  return color.trim().toLowerCase();
+};
+
+const resolveColorImage = (product: ProductDetail, color?: string | null) => {
+  if (!color) {
+    return '';
+  }
+
+  const normalized = normalizeColor(color);
+
+  const direct = Object.entries(product.colorImages ?? {}).find(([key]) => normalizeColor(key) === normalized)?.[1];
+  if (direct) {
+    return toAbsoluteImageUrl(direct);
+  }
+
+  const variantMatch = (product.variants ?? []).find(
+    (variant) => normalizeColor(variant.color) === normalized && variant.imageUrl
+  );
+  return toAbsoluteImageUrl(variantMatch?.imageUrl);
 };
 
 export default function PDP() {
@@ -121,6 +152,55 @@ export default function PDP() {
 
     setSelectedImage(galleryImages[0].url);
   }, [galleryImages]);
+
+  useEffect(() => {
+    if (!product) {
+      return;
+    }
+
+    const inStockVariant = (product.variants ?? []).find((variant) => variant.stockQuantity > 0);
+    const fallbackVariant = inStockVariant ?? product.variants?.[0];
+
+    if (fallbackVariant) {
+      setSelectedSize(fallbackVariant.size || null);
+      setSelectedColor(fallbackVariant.color || null);
+
+      const fallbackImage =
+        toAbsoluteImageUrl(fallbackVariant.imageUrl) || resolveColorImage(product, fallbackVariant.color);
+
+      if (fallbackImage) {
+        setSelectedImage(fallbackImage);
+      }
+    }
+  }, [product]);
+
+  useEffect(() => {
+    if (!product || !selectedColor) {
+      return;
+    }
+
+    const normalizedSelectedColor = normalizeColor(selectedColor);
+    let selectedVariantByColor = (product.variants ?? []).find(
+      (variant) => normalizeColor(variant.color) === normalizedSelectedColor && variant.imageUrl
+    );
+
+    if (!selectedVariantByColor) {
+      selectedVariantByColor = (product.variants ?? []).find(
+        (variant) => normalizeColor(variant.color) === normalizedSelectedColor
+      );
+    }
+
+    if (selectedVariantByColor && selectedVariantByColor.size) {
+      setSelectedSize(selectedVariantByColor.size);
+    }
+
+    const nextImage =
+      toAbsoluteImageUrl(selectedVariantByColor?.imageUrl) || resolveColorImage(product, selectedColor);
+
+    if (nextImage) {
+      setSelectedImage(nextImage);
+    }
+  }, [product, selectedColor]);
 
   useEffect(() => {
     if (!id) {
@@ -308,19 +388,48 @@ export default function PDP() {
                 <span className="text-xs font-semibold text-charcoal">Màu sắc: {selectedColor || ''}</span>
               </div>
               <div className="flex flex-wrap gap-2">
-                {product.colors.map(color => (
-                  <button 
-                    key={color}
-                    onClick={() => setSelectedColor(color)}
-                    className={`px-3 py-1.5 border text-xs uppercase tracking-wide transition-colors ${
-                      selectedColor === color 
-                        ? 'border-charcoal bg-charcoal text-white' 
-                        : 'border-slate-300 text-slate-600 hover:border-charcoal'
-                    }`}
-                  >
-                    {color}
-                  </button>
-                ))}
+                {product.colors.map(color => {
+                  const getVietnameseColorHex = (name: string): string => {
+                    const val = name.toLowerCase().trim();
+                    if (val.startsWith('#')) return val;
+                    if (val.includes('đen') || val === 'black') return '#000000';
+                    if (val.includes('trắng') || val === 'white') return '#ffffff';
+                    if (val.includes('nâu') || val === 'brown') return '#5d4037';
+                    if (val.includes('xám') || val.includes('ghi') || val === 'grey' || val === 'gray') return '#9e9e9e';
+                    if (val.includes('đỏ') || val === 'red') return '#e53935';
+                    if (val.includes('xanh nav') || val.includes('xanh dương') || val === 'navy' || val === 'blue') return '#1e3a8a';
+                    if (val.includes('xanh lá') || val.includes('xanh ngọc') || val === 'green') return '#2e7d32';
+                    if (val.includes('vàng') || val === 'yellow') return '#fbc02d';
+                    if (val.includes('cam') || val === 'orange') return '#f57c00';
+                    if (val.includes('tím') || val === 'purple') return '#8e24aa';
+                    if (val.includes('hồng') || val === 'pink') return '#f48fb1';
+                    if (val.includes('kem') || val.includes('be') || val === 'beige') return '#f5f5dc';
+                    if (val.includes('bạc') || val === 'silver') return '#e0e0e0';
+                    
+                    let hash = 0;
+                    for (let i = 0; i < val.length; i++) hash = val.charCodeAt(i) + ((hash << 5) - hash);
+                    const h = hash % 360;
+                    return `hsl(${h > 0 ? h : -h}, 30%, 50%)`;
+                  };
+                  
+                  return (
+                    <button 
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      className={`px-3 py-1.5 border text-xs uppercase tracking-wide transition-colors flex items-center gap-2 ${
+                        selectedColor === color 
+                          ? 'border-charcoal bg-charcoal text-white' 
+                          : 'border-slate-300 text-slate-600 hover:border-charcoal'
+                      }`}
+                    >
+                      <span 
+                        className="w-3.5 h-3.5 rounded-full border border-black/10 shadow-sm shrink-0" 
+                        style={{ backgroundColor: getVietnameseColorHex(color) }} 
+                      />
+                      {color}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

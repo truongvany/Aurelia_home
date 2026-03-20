@@ -28,6 +28,11 @@ const saveWishlistProductIds = (productIds: string[]) => {
   window.dispatchEvent(new Event(WISHLIST_UPDATED_EVENT));
 };
 
+export const setWishlistProductIds = (productIds: string[]) => {
+  const normalized = normalizeIds(productIds);
+  saveWishlistProductIds(normalized);
+};
+
 export const isProductWishlisted = (productId: string) => getWishlistProductIds().includes(productId);
 
 export const toggleWishlistProduct = (productId: string) => {

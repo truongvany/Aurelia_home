@@ -41,7 +41,7 @@ export default function Contact() {
     // Mock submission
     setTimeout(() => {
       setIsSubmitting(false);
-      alert('Yêu cầu của ngài đã được tiếp nhận. Concierge của chúng tôi sẽ liên hệ ngay lập tức.');
+      alert('Hồ sơ của bạn đã được ghi nhận. Chúng tôi sẽ liên hệ qua số điện thoại hoặc email trong vòng 24h.');
     }, 1500);
   };
 
@@ -60,14 +60,14 @@ export default function Contact() {
               <Sparkles className="w-8 h-8 animate-spin-slow" />
             </div>
           </div>
-          <p className="text-[#C5A059] text-sm tracking-[0.4em] uppercase mt-4 opacity-80">Digital Concierge</p>
-        </div>
+            <p className="text-[#C5A059] text-sm tracking-[0.4em] uppercase mt-4 opacity-80">Tuyển dụng chuyên nghiệp</p>
+          </div>
 
         <div className="relative z-10 w-full">
           <div className="marquee-contact-container py-3">
             <div className="marquee-contact-content text-[#C5A059] font-medium tracking-[0.3em] text-xs md:text-sm uppercase">
               {[...Array(10)].map((_, i) => (
-                <span key={i} className="mx-8">DỊCH VỤ CONCIERGE CHỈ DÀNH CHO BẠN &bull; LIÊN HỆ ĐỘC QUYỀN &bull; CHẮC CHẮN SỰ HOÀN HẢO &bull;</span>
+                <span key={i} className="mx-8">CƠ HỘI TUYỂN DỤNG &bull; ỨNG VIÊN CHẤT LƯỢNG &bull; PHÁT TRIỂN NGHỀ NGHIỆP &bull;</span>
               ))}
             </div>
           </div>
@@ -78,11 +78,11 @@ export default function Contact() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="mb-20 text-center fade-in-up">
           <h1 className="font-serif text-5xl md:text-7xl font-bold mb-6 tracking-tight text-slate-800">
-            Phòng Chờ <span className="text-[#C5A059] italic font-light">Concierge</span>
+            Tuyển Dụng & Việc Làm
           </h1>
           <div className="w-24 h-px bg-[#C5A059] mx-auto mb-8"></div>
-          <p className="text-slate-500 max-w-2xl mx-auto text-lg font-light tracking-wide">
-            Không gian kỹ thuật số dành riêng cho những yêu cầu độc bản, lịch hẹn thử đồ riêng tư và đặc quyền hỗ trợ từ đội ngũ chuyên gia của chúng tôi.
+          <p className="text-slate-500 max-w-2xl mx-auto text-lg font-normal tracking-wide">
+            Chúng tôi đang tìm kiếm những tài năng đam mê, chuyên nghiệp và cam kết phục vụ khách hàng theo tiêu chuẩn cao nhất. Vui lòng điền đầy đủ thông tin để chúng tôi liên hệ bạn nhanh chóng.
           </p>
         </div>
 
@@ -124,68 +124,105 @@ export default function Contact() {
               <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="input-deep-wrapper group">
-                    <label htmlFor="firstName" className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">
-                      Chúng tôi nên gọi ngài là gì?
+                    <label htmlFor="fullName" className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">
+                      Họ và Tên
                     </label>
                     <input 
                       type="text" 
-                      id="firstName"
+                      id="fullName"
                       required 
                       className="w-full input-deep px-6 py-4 text-slate-800 focus:outline-none placeholder-slate-300"
-                      placeholder="Họ và Tên"
+                      placeholder="Nguyễn Văn A"
                     />
                   </div>
                   <div className="input-deep-wrapper group">
-                    <label htmlFor="phone" className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">
-                      Số điện thoại ưu tiên
+                    <label htmlFor="birthDate" className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">
+                      Ngày tháng năm sinh
+                    </label>
+                    <input 
+                      type="date" 
+                      id="birthDate"
+                      required 
+                      className="w-full input-deep px-6 py-4 text-slate-800 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="input-deep-wrapper group">
+                    <span className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">Giới tính</span>
+                    <div className="flex items-center gap-4 text-slate-700">
+                      <label className="inline-flex items-center gap-2"><input type="radio" name="gender" value="male" defaultChecked /> Nam</label>
+                      <label className="inline-flex items-center gap-2"><input type="radio" name="gender" value="female" /> Nữ</label>
+                      <label className="inline-flex items-center gap-2"><input type="radio" name="gender" value="other" /> Khác</label>
+                    </div>
+                  </div>
+
+                  <div className="input-deep-wrapper group">
+                    <label htmlFor="position" className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">
+                      Vị trí ứng tuyển
+                    </label>
+                    <input 
+                      type="text" 
+                      id="position"
+                      required 
+                      className="w-full input-deep px-6 py-4 text-slate-800 focus:outline-none placeholder-slate-300"
+                      placeholder="Ví dụ: Nhân viên bán hàng, Content, Thiết kế..."
+                    />
+                  </div>
+                </div>
+
+                <div className="input-deep-wrapper group">
+                  <label htmlFor="shift" className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">
+                    Ca làm (Part-time / Full-time)
+                  </label>
+                  <select 
+                    id="shift" 
+                    required
+                    className="w-full input-deep px-6 py-4 text-slate-800 focus:outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="part-time">Part-time</option>
+                    <option value="full-time">Full-time</option>
+                    <option value="flexible">Linh hoạt</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="input-deep-wrapper group">
+                    <label htmlFor="contactPhone" className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">
+                      Số điện thoại liên hệ
                     </label>
                     <input 
                       type="tel" 
-                      id="phone"
+                      id="contactPhone"
+                      required 
                       className="w-full input-deep px-6 py-4 text-slate-800 focus:outline-none placeholder-slate-300"
                       placeholder="+84..."
                     />
                   </div>
-                </div>
-                
-                <div className="input-deep-wrapper group">
-                  <label htmlFor="email" className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">
-                    Làm thế nào để chúng tôi gửi thư phản hồi?
-                  </label>
-                  <input 
-                    type="email" 
-                    id="email"
-                    required 
-                    className="w-full input-deep px-6 py-4 text-slate-800 focus:outline-none placeholder-slate-300"
-                    placeholder="Địa chỉ Email"
-                  />
-                </div>
-
-                <div className="input-deep-wrapper group">
-                  <label htmlFor="subject" className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">
-                    Chủ đề của cuộc trò chuyện này là gì?
-                  </label>
-                  <select 
-                    id="subject" 
-                    className="w-full input-deep px-6 py-4 text-slate-800 focus:outline-none appearance-none cursor-pointer"
-                  >
-                    <option>Đặt lịch thử đồ riêng tư (Private Fitting)</option>
-                    <option>Tư vấn may đo Bespoke</option>
-                    <option>Yêu cầu dịch vụ VIP</option>
-                    <option>Khác</option>
-                  </select>
+                  <div className="input-deep-wrapper group">
+                    <label htmlFor="cvContact" className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">
+                      Gửi CV qua Gmail / Zalo
+                    </label>
+                    <input 
+                      type="text" 
+                      id="cvContact"
+                      required 
+                      className="w-full input-deep px-6 py-4 text-slate-800 focus:outline-none placeholder-slate-300"
+                      placeholder="email@gmail.com hoặc Zalo ID"
+                    />
+                  </div>
                 </div>
 
                 <div className="input-deep-wrapper group">
-                  <label htmlFor="message" className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">
-                    Hãy chia sẻ yêu cầu độc bản của ngài...
+                  <label htmlFor="additionalInfo" className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 ml-4">
+                    Thông tin thêm (tùy chọn)
                   </label>
                   <textarea 
-                    id="message" 
+                    id="additionalInfo" 
                     rows={4}
-                    required 
                     className="w-full input-deep px-6 py-4 text-slate-800 focus:outline-none resize-none placeholder-slate-300"
-                    placeholder="Chi tiết yêu cầu..."
+                    placeholder="Kinh nghiệm, kỹ năng hoặc mong muốn riêng..."
                   ></textarea>
                 </div>
 
@@ -194,7 +231,7 @@ export default function Contact() {
                   disabled={isSubmitting}
                   className="group flex items-center justify-center space-x-4 w-full px-8 py-5 bg-slate-900 text-[#C5A059] font-bold uppercase tracking-[0.2em] rounded-xl transition-all hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/20 disabled:opacity-70 mt-8"
                 >
-                  <span>{isSubmitting ? 'Đang kết nối...' : 'Gửi Yêu Cầu'}</span>
+                  <span>{isSubmitting ? 'Đang gửi...' : 'Nộp Ứng Tuyển'}</span>
                   <ArrowRight className={`h-5 w-5 transition-transform duration-300 ${isSubmitting ? 'translate-x-4 opacity-0' : 'group-hover:translate-x-2'}`} />
                 </button>
               </form>

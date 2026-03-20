@@ -19,5 +19,8 @@ export const env = {
   REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN ?? "7d",
   CORS_ORIGIN:
     process.env.CORS_ORIGIN ?? "http://localhost:3000,http://localhost:3001,http://localhost:5173",
-  GROQ_API_KEY: process.env.GROQ_API_KEY ?? ""
+  GROQ_API_KEY: process.env.GROQ_API_KEY ?? "",
+  CLOUDINARY_CLOUD_NAME: getRequired("CLOUDINARY_CLOUD_NAME"),
+  CLOUDINARY_API_KEY: getRequired("CLOUDINARY_API_KEY"),
+  CLOUDINARY_API_SECRET: getRequired("CLOUDINARY_API_SECRET")
 };

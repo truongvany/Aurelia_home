@@ -35,8 +35,11 @@ type VariantForm = {
   _id?: string;
   sku: string;
   size: string;
-  color: string;
+  colorCode: string;
+  colorName: string;
   imageUrl: string;
+  imageFile: File | null;
+  imagePreviewUrl?: string;
   stockQuantity: string;
   priceAdjustment: string;
 };
@@ -44,11 +47,28 @@ type VariantForm = {
 const createEmptyVariant = (): VariantForm => ({
   sku: '',
   size: 'M',
-  color: '#1e293b',
+  colorCode: '#1e293b',
+  colorName: '',
   imageUrl: '',
+  imageFile: null,
+  imagePreviewUrl: undefined,
   stockQuantity: '0',
   priceAdjustment: '0'
 });
+
+const isHexColor = (value: string) => /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(value.trim());
+
+const getColorPickerValue = (value: string) => {
+  const normalized = value.trim();
+  if (isHexColor(normalized)) {
+    if (normalized.length === 4) {
+      const [r, g, b] = normalized.slice(1).split('');
+      return `#${r}${r}${g}${g}${b}${b}`;
+    }
+    return normalized;
+  }
+  return '#1e293b';
+};
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -67,8 +87,12 @@ export default function ProductDetail() {
   const [galleryInput, setGalleryInput] = useState('');
   const [existingImages, setExistingImages] = useState<Array<{ _id: string; url: string; alt: string; sortOrder: number }>>([]);
   const [files, setFiles] = useState<File[]>([]);
+  const [filePreviews, setFilePreviews] = useState<string[]>([]);
+  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
+  const [mainImagePreviewUrl, setMainImagePreviewUrl] = useState<string | null>(null);
   const [sizeGuideImageUrl, setSizeGuideImageUrl] = useState('');
   const [sizeGuideFile, setSizeGuideFile] = useState<File | null>(null);
+  const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(!isNew);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,15 +124,21 @@ export default function ProductDetail() {
         setGalleryInput((detail.images ?? []).map((image) => image.url).join('\n'));
         setSizeGuideImageUrl(detail.sizeGuideImageUrl ?? '');
 
-        const loadedVariants = (detail.variants ?? []).map((variant) => ({
-          _id: variant._id,
-          sku: variant.sku ?? '',
-          size: variant.size || 'M',
-          color: variant.color || '#1e293b',
-          imageUrl: variant.imageUrl || '',
-          stockQuantity: String(variant.stockQuantity ?? 0),
-          priceAdjustment: String(variant.priceAdjustment ?? 0)
-        }));
+        const loadedVariants = (detail.variants ?? []).map((variant) => {
+          const isHex = /^#([0-9a-f]{3}){1,2}$/i.test(variant.color ?? '');
+          return {
+            _id: variant._id,
+            sku: variant.sku ?? '',
+            size: variant.size || 'M',
+            colorCode: isHex ? variant.color || '#1e293b' : '#1e293b',
+            colorName: isHex ? '' : variant.color || '',
+            imageUrl: variant.imageUrl || '',
+            imageFile: null,
+            imagePreviewUrl: undefined,
+            stockQuantity: String(variant.stockQuantity ?? 0),
+            priceAdjustment: String(variant.priceAdjustment ?? 0)
+          };
+        });
 
         setVariants(loadedVariants.length > 0 ? loadedVariants : [createEmptyVariant()]);
         setForm({
@@ -125,6 +155,43 @@ export default function ProductDetail() {
 
   const handleVariantChange = (index: number, key: keyof VariantForm, value: string) => {
     setVariants((prev) => prev.map((item, idx) => (idx === index ? { ...item, [key]: value } : item)));
+  };
+
+  const handleVariantFileChange = (index: number, file: File | null) => {
+    setVariants((prev) =>
+      prev.map((item, idx) => {
+        if (idx === index) {
+          if (item.imagePreviewUrl) URL.revokeObjectURL(item.imagePreviewUrl);
+          return {
+            ...item,
+            imageFile: file,
+            imagePreviewUrl: file ? URL.createObjectURL(file) : undefined
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleDeleteProductImage = async (imageId: string) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa ảnh này?')) {
+      return;
+    }
+
+    if (!id) {
+      return;
+    }
+
+    try {
+      setDeletingImageId(imageId);
+      await api.deleteAdminProductImage(id, imageId);
+      setExistingImages((prev) => prev.filter((image) => image._id !== imageId));
+    } catch (err) {
+      console.error('Xóa ảnh không thành công', err);
+      alert('Không thể xóa ảnh. Vui lòng thử lại.');
+    } finally {
+      setDeletingImageId(null);
+    }
   };
 
   const addVariant = () => {
@@ -163,8 +230,10 @@ export default function ProductDetail() {
       .map((variant) => ({
         sku: variant.sku.trim(),
         size: variant.size.trim(),
-        color: variant.color.trim(),
+        colorCode: variant.colorCode.trim(),
+        colorName: variant.colorName.trim(),
         imageUrl: variant.imageUrl.trim(),
+        imageFile: variant.imageFile,
         stockQuantity: Number(variant.stockQuantity),
         priceAdjustment: Number(variant.priceAdjustment || 0)
       }))
@@ -183,33 +252,107 @@ export default function ProductDetail() {
       return;
     }
 
+    const hasMissingColor = normalizedVariants.some(
+      (variant) => variant.colorCode.length === 0 && variant.colorName.length === 0
+    );
+    if (hasMissingColor) {
+      setError('Mỗi biến thể cần chọn màu hoặc nhập tên màu');
+      return;
+    }
+
+    const hasMissingVariantImage = normalizedVariants.some(
+      (variant) => !variant.imageUrl && !variant.imageFile
+    );
+    if (hasMissingVariantImage) {
+      setError('Mỗi biến thể cần ảnh đại diện màu (dán link hoặc tải ảnh lên)');
+      return;
+    }
+
     setError(null);
     setIsSaving(true);
 
     try {
-      const imageUrls = galleryInput
+      // Collect gallery URLs from textarea
+      const galleryUrls = galleryInput
         .split('\n')
         .map((url) => url.trim())
         .filter(Boolean);
 
+      // For new products, use existing imageUrl or empty (will upload main image after creating)
       const payload = {
         name: form.name.trim(),
         description: form.description,
         categoryId: form.categoryId,
         price,
-        imageUrl: form.imageUrl || undefined,
-        imageUrls,
-        variants: normalizedVariants
+        imageUrl: mainImageFile ? undefined : (form.imageUrl || undefined),
+        imageUrls: galleryUrls,
+        variants: normalizedVariants.map((variant) => ({
+          sku: variant.sku,
+          size: variant.size,
+          color: variant.colorName || variant.colorCode,
+          imageUrl: variant.imageUrl,
+          stockQuantity: variant.stockQuantity,
+          priceAdjustment: variant.priceAdjustment
+        }))
       };
 
       const product = isNew ? await api.createAdminProduct(payload) : await api.updateAdminProduct(id!, payload);
 
+      // Upload main product image if file is selected (AFTER product is created)
+      if (mainImageFile) {
+        const uploadedMainImage = await api.uploadAdminProductImage(product._id, mainImageFile, form.name);
+        await api.updateAdminProduct(product._id, {
+          imageUrl: uploadedMainImage.url,
+          imageUrls: galleryUrls,
+          variants: normalizedVariants.map((variant) => ({
+            sku: variant.sku,
+            size: variant.size,
+            color: variant.colorName || variant.colorCode,
+            imageUrl: variant.imageUrl,
+            stockQuantity: variant.stockQuantity,
+            priceAdjustment: variant.priceAdjustment
+          }))
+        });
+      }
+
+      const hasVariantFiles = normalizedVariants.some((variant) => Boolean(variant.imageFile));
+      if (hasVariantFiles) {
+        const uploadedVariantImageUrls: string[] = [];
+
+        for (let i = 0; i < normalizedVariants.length; i += 1) {
+          const variant = normalizedVariants[i];
+          if (variant.imageFile) {
+            const uploaded = await api.uploadAdminProductVariantImage(
+              product._id,
+              variant.imageFile,
+              `${form.name} - ${(variant.colorName || variant.colorCode) || variant.sku}`
+            );
+            uploadedVariantImageUrls.push(uploaded.pathUrl);
+          } else {
+            uploadedVariantImageUrls.push(variant.imageUrl);
+          }
+        }
+
+        await api.updateAdminProduct(product._id, {
+          variants: normalizedVariants.map((variant, index) => ({
+            sku: variant.sku,
+            size: variant.size,
+            color: variant.colorName || variant.colorCode,
+            imageUrl: uploadedVariantImageUrls[index],
+            stockQuantity: variant.stockQuantity,
+            priceAdjustment: variant.priceAdjustment
+          }))
+        });
+      }
+
+      // Upload gallery images from files
       if (files.length > 0) {
         for (const nextFile of files) {
           await api.uploadAdminProductImage(product._id, nextFile, form.name);
         }
       }
 
+      // Upload size guide image if selected
       if (sizeGuideFile) {
         await api.uploadAdminProductSizeGuideImage(product._id, sizeGuideFile);
       }
@@ -358,15 +501,15 @@ export default function ProductDetail() {
                       <div className="flex items-center gap-2">
                         <input
                           type="color"
-                          value={variant.color || '#1e293b'}
-                          onChange={(e) => handleVariantChange(index, 'color', e.target.value)}
-                          className="h-9 w-12 rounded border border-slate-300 cursor-pointer"
-                        />
-                        <input
-                          type="text"
-                          value={variant.color}
-                          onChange={(e) => handleVariantChange(index, 'color', e.target.value)}
-                          placeholder="#1e293b"
+                        value={getColorPickerValue(variant.colorCode)}
+                        onChange={(e) => handleVariantChange(index, 'colorCode', e.target.value)}
+                        className="h-9 w-12 rounded border border-slate-300 cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={variant.colorName}
+                        onChange={(e) => handleVariantChange(index, 'colorName', e.target.value)}
+                        placeholder="Tên màu (ví dụ Đen, Nâu)"
                           className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                         />
                       </div>
@@ -382,7 +525,7 @@ export default function ProductDetail() {
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-medium text-slate-700 mb-1.5">Image URL (Optional)</label>
+                      <label className="block text-xs font-medium text-slate-700 mb-1.5">Ảnh màu bằng link</label>
                       <input
                         type="text"
                         value={variant.imageUrl}
@@ -390,6 +533,47 @@ export default function ProductDetail() {
                         placeholder="VD: https://example.com/red.jpg"
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       />
+                      <p className="mt-1 text-[11px] text-slate-500">Có thể dán URL hoặc dùng tải ảnh bên dưới.</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-medium text-slate-700 mb-1.5">Tải ảnh đại diện theo màu</label>
+                      <label className="block border border-dashed border-slate-300 rounded-lg p-3 hover:border-slate-400 hover:bg-white transition-colors cursor-pointer">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-xs text-slate-600 truncate">
+                            {variant.imageFile ? `Đã chọn: ${variant.imageFile.name}` : 'Chọn ảnh màu từ máy'}
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700">
+                            <Upload className="h-3.5 w-3.5" />
+                            Tải lên
+                          </span>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleVariantFileChange(index, e.target.files?.[0] ?? null)}
+                        />
+                      </label>
+                      {(variant.imageFile || variant.imageUrl) && (
+                        <div className="mt-3 rounded-md border border-slate-200 bg-white p-2 inline-flex items-center gap-2">
+                          {(variant.imagePreviewUrl || variant.imageUrl) ? (
+                            <img
+                              src={variant.imagePreviewUrl || toAbsoluteImageUrl(variant.imageUrl)}
+                              alt={`Preview ${variant.colorName || variant.colorCode}`}
+                              className="w-12 h-12 rounded object-cover border border-slate-200"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded border border-slate-200 bg-slate-100 flex items-center justify-center text-[10px] text-slate-500">
+                              FILE
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-[11px] text-slate-600">Ảnh đại diện màu sẽ hiển thị ở trang sản phẩm user.</p>
+                            {variant.imageFile && <p className="text-[11px] text-slate-500">{variant.imageFile.name}</p>}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -400,26 +584,78 @@ export default function ProductDetail() {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
             <h3 className="text-lg font-semibold text-slate-900">Hình Ảnh Sản Phẩm</h3>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-900 mb-2">URL Hình Ảnh</label>
-              <input
-                type="url"
-                value={form.imageUrl}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                placeholder="https://..."
-              />
-            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-900 mb-2">Ảnh Đại Diện Chính</label>
+                <p className="text-xs text-slate-500 mb-3">Chọn 1 trong 2: dán URL hoặc tải ảnh lên</p>
+                
+                {(form.imageUrl || mainImagePreviewUrl) && (
+                  <div className="mb-3 rounded-lg overflow-hidden border border-slate-200 w-32 h-40">
+                    <img
+                      src={mainImagePreviewUrl || toAbsoluteImageUrl(form.imageUrl)}
+                      alt="Main product"
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                )}
+                
+                {mainImageFile && (
+                  <div className="mb-3 text-sm text-slate-600 flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-600" />
+                    Đã chọn: {mainImageFile.name}
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-medium text-slate-600 mb-1.5 block">URL Hình Ảnh</label>
+                    <input
+                      type="url"
+                      value={form.imageUrl}
+                      onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm"
+                      placeholder="https://..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="mainImageUpload" className="cursor-pointer">
+                      <span className="text-xs font-medium text-slate-600 mb-1.5 block">Hoặc Tải Từ Máy</span>
+                      <div className="border-2 border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-slate-400 hover:bg-slate-50 transition-colors">
+                        <Upload className="h-4 w-4 text-slate-400 mx-auto mb-1" />
+                        <p className="text-[11px] text-slate-600 font-medium">Chọn ảnh</p>
+                      </div>
+                    </label>
+                    <input
+                      id="mainImageUpload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] ?? null;
+                        setMainImageFile(file);
+                        if (mainImagePreviewUrl) URL.revokeObjectURL(mainImagePreviewUrl);
+                        setMainImagePreviewUrl(file ? URL.createObjectURL(file) : null);
+                        if (file) {
+                          setForm({ ...form, imageUrl: '' });
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-900 mb-2">Ảnh Trình Bày (mỗi dòng 1 URL)</label>
-              <textarea
-                value={galleryInput}
-                onChange={(e) => setGalleryInput(e.target.value)}
-                rows={4}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors resize-y text-sm"
-                placeholder="https://example.com/image-1.jpg&#10;https://example.com/image-2.jpg"
-              />
+              <div>
+                <label className="block text-sm font-medium text-slate-900 mb-2">Ảnh Trình Bày Bổ Sung (mỗi dòng 1 URL)</label>
+                <textarea
+                  value={galleryInput}
+                  onChange={(e) => setGalleryInput(e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors resize-y text-sm"
+                  placeholder="https://example.com/image-1.jpg&#10;https://example.com/image-2.jpg"
+                />
+              </div>
             </div>
 
             {existingImages.length > 0 && (
@@ -427,13 +663,21 @@ export default function ProductDetail() {
                 <p className="text-sm font-medium text-slate-900 mb-3">Ảnh Trình Bày Hiện Có</p>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                   {existingImages.map((image) => (
-                    <div key={image._id} className="aspect-[3/4] border border-slate-200 rounded-md overflow-hidden bg-slate-50">
+                    <div key={image._id} className="relative aspect-[3/4] border border-slate-200 rounded-md overflow-hidden bg-slate-50">
                       <img
                         src={toAbsoluteImageUrl(image.url)}
                         alt={image.alt || form.name}
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
                       />
+                      <button
+                        type="button"
+                        disabled={deletingImageId === image._id}
+                        onClick={() => handleDeleteProductImage(image._id)}
+                        className="absolute top-2 right-2 bg-white/80 hover:bg-red-500 hover:text-white text-red-600 rounded-full p-1 text-xs font-medium transition-colors"
+                      >
+                        {deletingImageId === image._id ? 'Đang xóa...' : 'Xóa'}
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -455,9 +699,31 @@ export default function ProductDetail() {
                 accept="image/*"
                 multiple
                 className="hidden"
-                onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
+                onChange={(e) => {
+                  const newFiles = Array.from(e.target.files ?? []) as File[];
+                  setFiles(newFiles);
+                  filePreviews.forEach((p) => URL.revokeObjectURL(p));
+                  setFilePreviews(newFiles.map((f) => URL.createObjectURL(f)));
+                }}
               />
             </label>
+
+            {files.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-slate-900 mb-3">Sẽ Tải Lên</p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  {filePreviews.map((preview, i) => (
+                    <div key={i} className="relative aspect-[3/4] border border-blue-200 rounded-md overflow-hidden bg-blue-50">
+                      <img
+                        src={preview}
+                        alt={`Preview ${i}`}
+                        className="w-full h-full object-cover opacity-80"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
