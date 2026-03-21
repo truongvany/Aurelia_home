@@ -519,176 +519,186 @@ export default function PLP() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-9">
           <aside className={`lg:col-span-3 ${isFilterOpen ? 'block' : 'hidden lg:block'}`}>
             <div className="sticky top-24 pr-4">
-              <div className="mb-6 pb-6 border-b border-slate-200">
+              <div className="mb-4 pb-4 border-b border-slate-200/70">
                 <button
-                  className="w-full flex items-center justify-between text-left text-[15px] font-semibold text-slate-800"
+                  className="w-full flex items-center justify-between text-left text-[14px] font-semibold text-slate-800 group"
                   onClick={() => toggleSection('category')}
                 >
                   Danh mục
-                  {openSections.category ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
+                  <ChevronDown className={`h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300 ${openSections.category ? '-rotate-180' : ''}`} />
                 </button>
-                {openSections.category && (
-                  <div className="mt-4 space-y-3 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
-                    {[
-                      { slug: 'all', name: 'Tất cả' },
-                      { slug: 'ao', name: 'Áo Nam' },
-                      { slug: 'quan', name: 'Quần Nam' },
-                      { slug: 'phu-kien', name: 'Phụ kiện' },
-                      { slug: 'giam-gia', name: 'Giảm giá' },
-                      ...categories
-                    ].map((cat) => {
-                      const isSelected = selectedCategory === cat.slug;
-                      return (
-                        <button
-                          key={cat.slug}
-                          type="button"
-                          role="radio"
-                          aria-checked={isSelected}
-                          onClick={() => updateCategory(cat.slug)}
-                          className="group flex items-center gap-3 w-full text-left text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
-                        >
-                          <span className={`flex items-center justify-center w-[18px] h-[18px] rounded-full border transition-colors shrink-0 ${isSelected ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
-                            {isSelected && <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />}
-                          </span>
-                          <span className={isSelected ? "font-medium text-slate-900" : ""}>{cat.name}</span>
-                        </button>
-                      );
-                    })}
+                <div className={`grid transition-all duration-300 ease-in-out ${openSections.category ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+                  <div className="overflow-hidden">
+                    <div className="space-y-2.5 max-h-[240px] overflow-y-auto pr-2 custom-scrollbar pb-1">
+                      {[
+                        { slug: 'all', name: 'Tất cả' },
+                        { slug: 'ao', name: 'Áo Nam' },
+                        { slug: 'quan', name: 'Quần Nam' },
+                        { slug: 'phu-kien', name: 'Phụ kiện' },
+                        { slug: 'giam-gia', name: 'Giảm giá' },
+                        ...categories
+                      ].map((cat) => {
+                        const isSelected = selectedCategory === cat.slug;
+                        return (
+                          <button
+                            key={cat.slug}
+                            type="button"
+                            role="radio"
+                            aria-checked={isSelected}
+                            onClick={() => updateCategory(cat.slug)}
+                            className="group flex items-center gap-2.5 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-colors"
+                          >
+                            <span className={`flex items-center justify-center w-[16px] h-[16px] rounded-full border transition-colors shrink-0 ${isSelected ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                              {isSelected && <span className="w-2 h-2 rounded-full bg-slate-800" />}
+                            </span>
+                            <span className={isSelected ? "font-medium text-slate-900" : ""}>{cat.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
 
-              <div className="mb-6 pb-6 border-b border-slate-200">
+              <div className="mb-4 pb-4 border-b border-slate-200/70">
                 <button
-                  className="w-full flex items-center justify-between text-left text-[15px] font-semibold text-slate-800"
+                  className="w-full flex items-center justify-between text-left text-[14px] font-semibold text-slate-800 group"
                   onClick={() => toggleSection('size')}
                 >
                   Kích thước
-                  {openSections.size ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
+                  <ChevronDown className={`h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300 ${openSections.size ? '-rotate-180' : ''}`} />
                 </button>
-                {openSections.size && (
-                  <div className="mt-4 space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedSize('all')}
-                      className="group flex items-center gap-3 w-full text-left text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
-                    >
-                      <span className={`flex items-center justify-center w-[18px] h-[18px] rounded-full border transition-colors shrink-0 ${selectedSize === 'all' ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
-                        {selectedSize === 'all' && <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />}
-                      </span>
-                      <span className={selectedSize === 'all' ? "font-medium text-slate-900" : ""}>Tất cả</span>
-                    </button>
-                    {sizeOptions.map((size) => (
+                <div className={`grid transition-all duration-300 ease-in-out ${openSections.size ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+                  <div className="overflow-hidden">
+                    <div className="space-y-2.5 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar pb-1">
                       <button
-                        key={size}
                         type="button"
-                        onClick={() => setSelectedSize(size)}
-                        className="group flex items-center gap-3 w-full text-left text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
+                        onClick={() => setSelectedSize('all')}
+                        className="group flex items-center gap-2.5 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-colors"
                       >
-                        <span className={`flex items-center justify-center w-[18px] h-[18px] rounded-full border transition-colors shrink-0 ${selectedSize === size ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
-                          {selectedSize === size && <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />}
+                        <span className={`flex items-center justify-center w-[16px] h-[16px] rounded-full border transition-colors shrink-0 ${selectedSize === 'all' ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                          {selectedSize === 'all' && <span className="w-2 h-2 rounded-full bg-slate-800" />}
                         </span>
-                        <span className={selectedSize === size ? "font-medium text-slate-900" : ""}>{size}</span>
+                        <span className={selectedSize === 'all' ? "font-medium text-slate-900" : ""}>Tất cả</span>
                       </button>
-                    ))}
+                      {sizeOptions.map((size) => (
+                        <button
+                          key={size}
+                          type="button"
+                          onClick={() => setSelectedSize(size)}
+                          className="group flex items-center gap-2.5 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-colors"
+                        >
+                          <span className={`flex items-center justify-center w-[16px] h-[16px] rounded-full border transition-colors shrink-0 ${selectedSize === size ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                            {selectedSize === size && <span className="w-2 h-2 rounded-full bg-slate-800" />}
+                          </span>
+                          <span className={selectedSize === size ? "font-medium text-slate-900" : ""}>{size}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
 
-              <div className="mb-6 pb-6 border-b border-slate-200">
+              <div className="mb-4 pb-4 border-b border-slate-200/70">
                 <button
-                  className="w-full flex items-center justify-between text-left text-[15px] font-semibold text-slate-800"
+                  className="w-full flex items-center justify-between text-left text-[14px] font-semibold text-slate-800 group"
                   onClick={() => toggleSection('color')}
                 >
                   Màu sắc
-                  {openSections.color ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
+                  <ChevronDown className={`h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300 ${openSections.color ? '-rotate-180' : ''}`} />
                 </button>
-                {openSections.color && (
-                  <div className="mt-4 space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedColor('all')}
-                      className="group flex items-center gap-3 w-full text-left text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
-                    >
-                      <span className={`flex items-center justify-center w-[18px] h-[18px] rounded-full border transition-colors shrink-0 ${selectedColor === 'all' ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
-                        {selectedColor === 'all' && <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />}
-                      </span>
-                      <span className={selectedColor === 'all' ? "font-medium text-slate-900" : ""}>Tất cả</span>
-                    </button>
-                    {colorOptions.map((color) => (
+                <div className={`grid transition-all duration-300 ease-in-out ${openSections.color ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+                  <div className="overflow-hidden">
+                    <div className="space-y-2.5 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar pb-1">
                       <button
-                        key={color}
                         type="button"
-                        onClick={() => setSelectedColor(color)}
-                        className="group flex items-center gap-3 w-full text-left text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
+                        onClick={() => setSelectedColor('all')}
+                        className="group flex items-center gap-2.5 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-colors"
                       >
-                        <span className={`flex items-center justify-center w-[18px] h-[18px] rounded-full border transition-colors shrink-0 ${selectedColor === color ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
-                          {selectedColor === color && <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />}
+                        <span className={`flex items-center justify-center w-[16px] h-[16px] rounded-full border transition-colors shrink-0 ${selectedColor === 'all' ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                          {selectedColor === 'all' && <span className="w-2 h-2 rounded-full bg-slate-800" />}
                         </span>
-                        <span className={selectedColor === color ? "font-medium text-slate-900" : ""}>{color}</span>
+                        <span className={selectedColor === 'all' ? "font-medium text-slate-900" : ""}>Tất cả</span>
                       </button>
-                    ))}
+                      {colorOptions.map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setSelectedColor(color)}
+                          className="group flex items-center gap-2.5 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-colors"
+                        >
+                          <span className={`flex items-center justify-center w-[16px] h-[16px] rounded-full border transition-colors shrink-0 ${selectedColor === color ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                            {selectedColor === color && <span className="w-2 h-2 rounded-full bg-slate-800" />}
+                          </span>
+                          <span className={selectedColor === color ? "font-medium text-slate-900" : ""}>{color}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
 
-              <div className="mb-6 pb-6 border-b border-slate-200">
+              <div className="mb-4 pb-4 border-b border-slate-200/70">
                 <button
-                  className="w-full flex items-center justify-between text-left text-[15px] font-semibold text-slate-800 mb-4"
+                  className="w-full flex items-center justify-between text-left text-[14px] font-semibold text-slate-800 group"
                   onClick={() => toggleSection('price')}
                 >
                   Giá
-                  {openSections.price ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
+                  <ChevronDown className={`h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300 ${openSections.price ? '-rotate-180' : ''}`} />
                 </button>
-                {openSections.price && (
-                  <>
-                  <div className="text-[14px] text-slate-600 mb-4 flex items-center justify-between">
-                    <span className="font-semibold">{formatVND(priceRange[0])}</span>
-                    <span className="font-semibold">{formatVND(priceRange[1])}</span>
+                <div className={`grid transition-all duration-300 ease-in-out ${openSections.price ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+                  <div className="overflow-hidden">
+                    <div className="px-1 pb-2">
+                       <div className="text-[12px] text-slate-600 mb-4 flex items-center justify-between">
+                        <span className="font-semibold">{formatVND(priceRange[0])}</span>
+                        <span className="font-semibold">{formatVND(priceRange[1])}</span>
+                      </div>
+                      <PriceRangeSlider
+                        min={priceBounds[0]}
+                        max={priceBounds[1]}
+                        step={Math.max(1000, Math.round(priceSpan / 40))}
+                        currentRange={priceRange}
+                        onRangeChange={setPriceRange}
+                      />
+                    </div>
                   </div>
-                  <PriceRangeSlider
-                    min={priceBounds[0]}
-                    max={priceBounds[1]}
-                    step={Math.max(1000, Math.round(priceSpan / 40))}
-                    currentRange={priceRange}
-                    onRangeChange={setPriceRange}
-                  />
-                  </>
-                )}
+                </div>
               </div>
 
-              <div className="mb-6 pb-6">
+              <div className="mb-6 pb-2">
                 <button
-                  className="w-full flex items-center justify-between text-left text-[15px] font-semibold text-slate-800 mb-4"
+                  className="w-full flex items-center justify-between text-left text-[14px] font-semibold text-slate-800 group"
                   onClick={() => toggleSection('sort')}
                 >
                   Sắp xếp
-                  {openSections.sort ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
+                  <ChevronDown className={`h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-300 ${openSections.sort ? '-rotate-180' : ''}`} />
                 </button>
-                {openSections.sort && (
-                  <div className="mt-2 space-y-3">
-                    {[
-                      { id: 'newest', label: 'Mới nhất' },
-                      { id: 'price-asc', label: 'Giá tăng' },
-                      { id: 'price-desc', label: 'Giá giảm' },
-                      { id: 'name-asc', label: 'Tên A-Z' }
-                    ].map((option) => (
-                      <button
-                        key={option.id}
-                        type="button"
-                        role="radio"
-                        aria-checked={sortBy === option.id}
-                        onClick={() => setSortBy(option.id)}
-                        className="group flex items-center gap-3 w-full text-left text-[14px] text-slate-600 hover:text-slate-900 transition-colors"
-                      >
-                        <span className={`flex items-center justify-center w-[18px] h-[18px] rounded-full border transition-colors shrink-0 ${sortBy === option.id ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
-                          {sortBy === option.id && <span className="w-2.5 h-2.5 rounded-full bg-slate-800" />}
-                        </span>
-                        <span className={sortBy === option.id ? "font-medium text-slate-900" : ""}>{option.label}</span>
-                      </button>
-                    ))}
+                <div className={`grid transition-all duration-300 ease-in-out ${openSections.sort ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+                  <div className="overflow-hidden">
+                    <div className="space-y-2.5 pb-1">
+                      {[
+                        { id: 'newest', label: 'Mới nhất' },
+                        { id: 'price-asc', label: 'Giá tăng' },
+                        { id: 'price-desc', label: 'Giá giảm' },
+                        { id: 'name-asc', label: 'Tên A-Z' }
+                      ].map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={sortBy === option.id}
+                          onClick={() => setSortBy(option.id)}
+                          className="group flex items-center gap-2.5 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-colors"
+                        >
+                          <span className={`flex items-center justify-center w-[16px] h-[16px] rounded-full border transition-colors shrink-0 ${sortBy === option.id ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
+                            {sortBy === option.id && <span className="w-2 h-2 rounded-full bg-slate-800" />}
+                          </span>
+                          <span className={sortBy === option.id ? "font-medium text-slate-900" : ""}>{option.label}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
 
               <button
@@ -702,7 +712,7 @@ export default function PLP() {
                   setSearchQuery('');
                   setCurrentPage(1);
                 }}
-                className="w-full border border-slate-300 text-slate-700 rounded-md py-2.5 text-[14px] font-medium hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                className="w-full border border-slate-300 text-slate-700 rounded py-2 text-[13px] font-bold uppercase tracking-[0.1em] hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
               >
                 Xóa bộ lọc
               </button>

@@ -4,14 +4,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Package, ShoppingBag, User, Pencil, Check, X, ShieldCheck, Diamond, Star, ChevronRight, LogOut, MapPin, Award, CreditCard, Ticket, Clock } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
-import { MembershipPayload, OrderPayload, ProfilePayload, VoucherPayload } from '../types';
+import { MembershipPayload, OrderPayload, ProfilePayload } from '../types';
 import { formatVND } from '../utils/currency';
 
 export default function Profile() {
   const { signOut } = useAuth();
   const [profile, setProfile] = useState<ProfilePayload | null>(null);
   const [membership, setMembership] = useState<MembershipPayload | null>(null);
-  const [vouchers, setVouchers] = useState<VoucherPayload[]>([]);
   const [orders, setOrders] = useState<OrderPayload[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
@@ -34,17 +33,15 @@ export default function Profile() {
     const loadData = async () => {
       try {
         setError(null);
-        const [profileData, ordersData, membershipData, vouchersData] = await Promise.all([
+        const [profileData, ordersData, membershipData] = await Promise.all([
           api.getProfile(),
           api.getMyOrders(),
-          api.getMembership(),
-          api.getVouchers()
+          api.getMembership()
         ]);
         setProfile(profileData);
         setEditedPhone(profileData.user.phone ?? '');
         setOrders(ordersData);
         setMembership(membershipData);
-        setVouchers(vouchersData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Không thể tải thông tin tài khoản');
       } finally {
@@ -58,7 +55,6 @@ export default function Profile() {
   const displayName = profile ? `${profile.user.firstName} ${profile.user.lastName}`.trim() || 'Khách hàng' : 'Khách hàng';
   const isMember = membership?.user.memberStatus === 'active';
   const isPending = membership?.user.memberStatus === 'pending';
-  const availableVouchers = vouchers.filter((v) => !v.isExpired && v.usedCount < v.maxUsesPerUser);
 
   const handleSavePhone = async () => {
     if (!profile) return;
@@ -103,12 +99,12 @@ export default function Profile() {
             <p className="mt-2 text-slate-600 font-medium">Xin chào, {displayName}</p>
           </div>
           {isMember ? (
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-200 via-gold to-amber-400 text-charcoal font-bold rounded-full shadow-[0_4px_20px_rgba(251,191,36,0.3)]">
+            <div className="inline-flex items-center gap-2 px-5 py-2 border border-slate-300 bg-white text-slate-800 font-bold uppercase tracking-widest text-[11px]">
               <span>Premium</span>
             </div>
           ) : (
-            <Link to="/membership" className="inline-flex items-center gap-2 px-4 py-2 bg-charcoal text-white text-sm font-medium rounded-full hover:bg-slate-800 transition-colors shadow-md">
-              <Star className="h-4 w-4" />
+            <Link to="/membership" className="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-900 text-white text-[11px] uppercase tracking-widest font-bold hover:bg-slate-800 transition-colors">
+              <Star className="h-3.5 w-3.5" />
               <span>Nâng cấp thành viên</span>
             </Link>
           )}
@@ -127,99 +123,93 @@ export default function Profile() {
             
             {/* Main User Card */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className={`relative overflow-hidden rounded-2xl shadow-xl border ${isMember ? 'border-amber-200 bg-gradient-to-br from-white via-amber-50 to-amber-100' : 'border-slate-200 bg-white'}`}
+              className="bg-white border border-slate-200 p-8"
             >
-              {/* Premium Background Glow */}
-              {isMember && (
-                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-gradient-to-br from-gold/40 to-amber-500/20 rounded-full blur-3xl pointer-events-none" />
-              )}
-              
-              <div className="p-8 relative z-10">
-                <div className="flex items-center gap-6 mb-8">
-                  <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-serif text-white shadow-lg shrink-0 ${isMember ? 'bg-gradient-to-br from-amber-400 to-amber-600' : 'bg-charcoal'}`}>
-                    {displayName.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-charcoal leading-tight">{displayName}</h2>
-                    <p className="text-sm text-slate-500 mt-1">{profile?.user.email ?? 'Chưa cập nhật email'}</p>
-                    
-                    <div className="mt-2">
-                      {isMember ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold bg-amber-200 text-amber-900 rounded-md">
-                          <ShieldCheck className="w-3 h-3" /> Thành viên Premium
-                        </span>
-                      ) : isPending ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-md">
-                          <Check className="w-3 h-3" /> Đang xét duyệt
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-slate-100 text-slate-600 rounded-md">
-                          Tài khoản thường
-                        </span>
-                      )}
-                    </div>
+              <div className="flex items-center gap-6 mb-8">
+                <div className={`w-20 h-20 flex items-center justify-center text-3xl font-serif text-white shrink-0 ${isMember ? 'bg-amber-600' : 'bg-slate-900'}`}>
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900 leading-tight">{displayName}</h2>
+                  <p className="text-[13px] text-slate-500 mt-1">{profile?.user.email ?? 'Chưa cập nhật email'}</p>
+                  
+                  <div className="mt-3">
+                    {isMember ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200">
+                        <ShieldCheck className="w-3.5 h-3.5" /> Thành viên Premium
+                      </span>
+                    ) : isPending ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+                        <Check className="w-3.5 h-3.5" /> Đang xét duyệt
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold uppercase tracking-wider bg-slate-50 text-slate-600 border border-slate-200">
+                        Tài khoản thường
+                      </span>
+                    )}
                   </div>
                 </div>
+              </div>
 
-                <div className="space-y-4 border-t border-slate-200/60 pt-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                      <Award className="w-4 h-4 text-slate-500" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Hạng thành viên</p>
-                      <p className="text-sm font-semibold text-charcoal">{profile?.user.tier || 'Mới'}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Điểm tích lũy</p>
-                      <p className="text-sm font-bold text-charcoal">{(profile?.user.points || 0).toLocaleString()} pt</p>
-                    </div>
+              <div className="grid grid-cols-2 gap-6 border-t border-slate-200 pt-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Award className="w-3.5 h-3.5 text-slate-400" />
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Hạng thành viên</p>
                   </div>
+                  <p className="text-[15px] font-bold text-slate-900">{profile?.user.tier || 'Mới'}</p>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Star className="w-3.5 h-3.5 text-slate-400" />
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Điểm tích lũy</p>
+                  </div>
+                  <p className="text-[15px] font-bold text-slate-900">{(profile?.user.points || 0).toLocaleString()} pt</p>
+                </div>
+              </div>
 
-                  <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                      <MapPin className="w-4 h-4 text-slate-500" />
+              <div className="mt-6 border-t border-slate-200 pt-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Số điện thoại</p>
+                </div>
+                <div className="flex items-center justify-between group h-[34px]">
+                  {isEditingPhone ? (
+                    <div className="flex items-center gap-2 w-full max-w-[220px]">
+                      <input
+                        className="flex-1 border border-slate-300 px-3 py-1.5 text-[13px] focus:outline-none focus:border-slate-800 transition-colors"
+                        value={editedPhone}
+                        onChange={(e) => setEditedPhone(e.target.value)}
+                        placeholder="Nhập..."
+                      />
+                      <button
+                        onClick={handleSavePhone}
+                        disabled={isSavingPhone}
+                        className="p-1.5 bg-slate-900 text-white shrink-0 hover:bg-slate-800 transition-colors"
+                      >
+                        <Check className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => { setIsEditingPhone(false); setEditedPhone(profile?.user.phone ?? ''); }}
+                        className="p-1.5 bg-slate-100 text-slate-600 shrink-0 hover:bg-slate-200 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
-                    <div className="flex-1 min-w-0">
-                       <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Số điện thoại</p>
-                      {isEditingPhone ? (
-                        <div className="flex items-center gap-2">
-                          <input
-                            className="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-charcoal"
-                            value={editedPhone}
-                            onChange={(e) => setEditedPhone(e.target.value)}
-                            placeholder="Nhập số điện thoại"
-                          />
-                          <button
-                            onClick={handleSavePhone}
-                            disabled={isSavingPhone}
-                            className="p-1.5 bg-charcoal text-white rounded hover:bg-slate-800 transition-colors shrink-0"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => { setIsEditingPhone(false); setEditedPhone(profile?.user.phone ?? ''); }}
-                            className="p-1.5 bg-slate-200 text-slate-600 rounded hover:bg-slate-300 transition-colors shrink-0"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-between group">
-                          <p className="text-sm font-medium text-slate-800 truncate">{profile?.user.phone || 'Chưa cập nhật'}</p>
-                          <button
-                            onClick={() => setIsEditingPhone(true)}
-                            className="p-1 text-slate-400 opacity-0 group-hover:opacity-100 hover:text-charcoal transition-all"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  ) : (
+                    <>
+                      <p className="text-[14px] font-medium text-slate-900 truncate">{profile?.user.phone || 'Chưa cập nhật'}</p>
+                      <button
+                        onClick={() => setIsEditingPhone(true)}
+                        className="p-1.5 text-slate-400 opacity-0 group-hover:opacity-100 hover:text-slate-900 transition-all bg-slate-50 border border-slate-200"
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -229,7 +219,7 @@ export default function Profile() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden"
+              className="bg-white shadow-sm border border-slate-200 overflow-hidden"
             >
               <div className="divide-y divide-slate-100">
                 <Link to="/cart" className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors group">
@@ -257,6 +247,13 @@ export default function Profile() {
                     <ChevronRight className="w-4 h-4 text-amber-400 group-hover:text-amber-600 transition-colors" />
                   </Link>
                 )}
+                <Link to="/profile/vouchers" className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors group">
+                  <div className="flex items-center gap-3 text-slate-700">
+                    <Ticket className="w-5 h-5 text-slate-400 group-hover:text-charcoal transition-colors" />
+                    <span className="font-medium">Voucher của bạn</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-600 transition-colors" />
+                </Link>
                 <button 
                   onClick={signOut}
                   className="w-full flex items-center justify-between p-4 hover:bg-rose-50 transition-colors group text-left"
@@ -268,43 +265,6 @@ export default function Profile() {
                 </button>
               </div>
             </motion.div>
-            
-            {/* Vouchers Widget */}
-            {availableVouchers.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="bg-charcoal text-white rounded-2xl shadow-lg p-6 relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
-                <div className="relative z-10 flex items-center justify-between mb-4">
-                  <h3 className="font-semibold flex items-center gap-2 text-lg">
-                    <Ticket className="w-5 h-5 text-amber-400" />
-                    Voucher của bạn
-                  </h3>
-                  <span className="bg-white/20 text-white text-xs font-bold px-2 py-1 rounded-full">{availableVouchers.length}</span>
-                </div>
-                <div className="space-y-3">
-                  {availableVouchers.slice(0, 2).map((v) => (
-                    <div key={v._id} className="bg-white/10 border border-white/20 rounded-lg p-3 backdrop-blur-sm flex items-center justify-between">
-                      <div>
-                        <p className="font-bold text-amber-300 tracking-wide text-sm">{v.code}</p>
-                        <p className="text-xs text-slate-300 mt-0.5">Giảm {v.discountType === 'percent' ? `${v.discountValue}%` : formatVND(v.discountValue)}</p>
-                      </div>
-                      <div className="text-xs text-white/60">
-                        {v.minOrderAmount > 0 ? `Đơn từ ${formatVND(v.minOrderAmount)}` : 'Mọi đơn'}
-                      </div>
-                    </div>
-                  ))}
-                  {availableVouchers.length > 2 && (
-                    <Link to="/cart" className="block text-center text-xs text-amber-300 hover:text-amber-200 mt-2 hover:underline">
-                      Xem tất cả trong phần thanh toán
-                    </Link>
-                  )}
-                </div>
-              </motion.div>
-            )}
 
           </div>
 
@@ -314,7 +274,7 @@ export default function Profile() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white border text-[#0a192f] border-slate-200 rounded-2xl shadow-md overflow-hidden"
+              className="bg-white border text-[#0a192f] border-slate-200 shadow-sm overflow-hidden"
             >
               <div className="p-6 md:p-8 border-b border-slate-100 flex items-center gap-3">
                 <Package className="h-6 w-6 text-charcoal" />
@@ -370,7 +330,7 @@ export default function Profile() {
                             {new Date(order.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}
                           </p>
                         </div>
-                        <div className="w-full md:w-auto p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between md:justify-end gap-6 group-hover:bg-white group-hover:border-slate-200 transition-colors">
+                        <div className="w-full md:w-auto p-4 bg-slate-50 border border-slate-100 flex items-center justify-between md:justify-end gap-6 group-hover:bg-white group-hover:border-slate-200 transition-colors">
                           <div className="text-left md:text-right">
                             <p className="text-xs text-slate-500 uppercase font-semibold mb-0.5">Tổng tiền</p>
                             <p className="text-lg font-bold text-charcoal">{formatVND(order.totalAmount)}</p>

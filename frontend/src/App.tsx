@@ -17,6 +17,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Membership from './pages/Membership';
 import Profile from './pages/Profile';
+import VoucherPage from './pages/VoucherPage';
 import OrderDetail from './pages/OrderDetail';
 import WishlistPage from './pages/WishlistPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -58,6 +59,7 @@ function AppRoutes() {
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/profile" element={<ProtectedRoute roles={['customer']} />}>
             <Route index element={<Profile />} />
+            <Route path="vouchers" element={<VoucherPage />} />
           </Route>
           <Route path="/orders/:id" element={<ProtectedRoute roles={['customer']} />}>
             <Route index element={<OrderDetail />} />

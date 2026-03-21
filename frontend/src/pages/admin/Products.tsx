@@ -23,6 +23,8 @@ export default function Products() {
   const [category, setCategory] = useState('');
   const [user, setUser] = useState<{ role: string } | null>(null);
 
+  const scrollStorageKey = 'admin-products-scroll-position';
+
   const stats = useMemo(() => {
     const totalProducts = products.length;
     const lowStockCount = products.filter((p) => p.stockStatus === 'Low Stock' || p.stockQuantity <= 5).length;
@@ -37,6 +39,15 @@ export default function Products() {
 
   useEffect(() => {
     api.getCategories().then(setCategories).catch(() => setCategories([]));
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      sessionStorage.setItem(scrollStorageKey, String(window.scrollY));
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -57,6 +68,15 @@ export default function Products() {
 
     return () => window.clearTimeout(timeout);
   }, [search, category]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      const saved = Number(sessionStorage.getItem(scrollStorageKey) ?? '0');
+      if (saved > 0) {
+        window.scrollTo({ top: saved, behavior: 'auto' });
+      }
+    }
+  }, [isLoading]);
 
   const getImageUrl = (url: string) => {
     if (!url) return 'https://via.placeholder.com/120x120?text=No+Image';
@@ -178,7 +198,12 @@ export default function Products() {
                   </td>
                   <td className="px-6 py-4 text-sm text-right">
                     <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Link to={`/admin/products/${product._id}`} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors" title="Chỉnh sửa sản phẩm">
+                      <Link
+                        to={`/admin/products/${product._id}`}
+                        onClick={() => sessionStorage.setItem(scrollStorageKey, String(window.scrollY))}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        title="Chỉnh sửa sản phẩm"
+                      >
                         <Edit2 className="h-4 w-4" />
                       </Link>
                       {user?.role === 'admin' && (

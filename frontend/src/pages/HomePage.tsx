@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight, Bot, Package, RefreshCw, Headset, CreditCard, Crown, Star, Truck, ShieldCheck, ShoppingBag } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Bot, Package, RefreshCw, Headset, CreditCard, Crown, Star, Truck, ShieldCheck, ShoppingBag, Check } from 'lucide-react';
 import { Product } from '../types';
 import { api } from '../lib/api';
 import { formatVND } from '../utils/currency';
@@ -307,16 +307,32 @@ export default function HomePage() {
           const all = await api.getProducts();
           products = all.filter(p => p.discountPercent && p.discountPercent > 0);
         } else if (activeShowcaseTab === 'phu-kien') {
-          const [res1, res2] = await Promise.all([
-            api.searchProducts('phụ kiện'),
+          const [res1, res2, res3, res4] = await Promise.all([
+            api.searchProducts('dây lưng'),
+            api.searchProducts('giày'),
+            api.searchProducts('mũ'),
             api.searchProducts('tất')
           ]);
-          // simple deduplicate
+          
+          const rawProducts = [...res1, ...res2, ...res3, ...res4];
           const uniqueIds = new Set();
-          for (const p of [...res1, ...res2]) {
+          
+          // Filter carefully to eliminate loose full-text matches (like shirts hitting 'mũ' description)
+          for (const p of rawProducts) {
             if (!uniqueIds.has(p._id)) {
-              uniqueIds.add(p._id);
-              products.push(p);
+              const lowerName = p.name.toLowerCase();
+              if (
+                lowerName.includes('dây lưng') || 
+                lowerName.includes('thắt lưng') ||
+                lowerName.includes('giày') || 
+                lowerName.includes('mũ') || 
+                lowerName.includes('nón') ||
+                lowerName.includes('tất') ||
+                lowerName.includes('vớ')
+              ) {
+                uniqueIds.add(p._id);
+                products.push(p);
+              }
             }
           }
         } else {
@@ -520,8 +536,9 @@ export default function HomePage() {
         <div className="max-w-[1500px] mx-auto px-4 md:px-8 relative z-10 w-full">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-16 gap-4">
             <div>
-              <span className="text-blue-600 uppercase tracking-widest text-xs font-bold mb-3 block">Không Gian Premium</span>
-              <h2 className="text-4xl md:text-5xl font-serif text-slate-900">Danh Mục Cửa Hàng</h2>
+              <h2 className="text-xl md:text-2xl font-bold uppercase tracking-widest text-[#2a2a2a] whitespace-nowrap">
+                  Danh Mục Cửa Hàng
+                </h2>
             </div>
             <div className="hidden md:block">
                <p className="text-slate-500 max-w-md text-sm leading-relaxed">Bộ sưu tập thời trang thiết kế với chất liệu cao cấp, cắt may tỉ mỉ, mang lại sự tự tin và khí chất lãnh đạo cho nam giới hiện đại.</p>
@@ -688,11 +705,10 @@ export default function HomePage() {
 
       {/* Bestseller Carousel */}
       <section className="py-24 bg-gray-50 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 mb-12">
-          <div>
-            <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-2 block">Tinh Hoa Của Chúng Tôi</span>
-            <h2 className="text-4xl font-serif text-slate-900">Những Sản Phẩm Bán Chạy Nhất Mùa</h2>
-          </div>
+        <div className="max-w-[1440px] mx-auto px-6 mb-12">
+          <h2 className="text-xl md:text-2xl font-bold uppercase tracking-widest text-[#2a2a2a] whitespace-nowrap">
+            Những Sản Phẩm Bán Chạy Nhất Mùa
+          </h2>
         </div>
         
         <div 
@@ -749,8 +765,9 @@ export default function HomePage() {
           <div className="mb-16">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
               <div>
-                <span className="text-blue-600 uppercase tracking-widest text-xs font-semibold mb-3 block">Bộ Sưu Tập Tinh Tế</span>
-                <h2 className="text-4xl md:text-5xl font-serif text-slate-900">Áo Sơ Mi Lịch Lãm</h2>
+                <h2 className="text-xl md:text-2xl font-bold uppercase tracking-widest text-[#2a2a2a] whitespace-nowrap">
+                  Áo Sơ Mi Lịch Lãm
+                </h2>
                 <p className="text-slate-600 text-lg mt-4 max-w-2xl leading-relaxed">Những chiếc áo sơ mi được chọn lọc từ các nhà thiết kế hàng đầu, kết hợp giữa vải chất lượng cao và thiết kế tinh tế.</p>
               </div>
               <Link
@@ -843,115 +860,114 @@ export default function HomePage() {
       </section>
 
       {/* Policies & Privileges Section */}
-      <section className="py-24 bg-slate-50 border-t border-slate-200">
+      <section className="py-20 md:py-28 bg-white border-t border-slate-200">
         <div className="max-w-[1440px] mx-auto px-6">
-          <div className="text-center mb-16">
-            <span className="text-blue-600 uppercase tracking-widest text-xs font-bold mb-3 block">Chính Sách & Đặc Quyền</span>
-            <h2 className="text-4xl md:text-5xl font-serif text-slate-900">Trải Nghiệm Mua Sắm Hoàn Hảo</h2>
-            <p className="text-slate-500 mt-4 max-w-2xl mx-auto">Chúng tôi cam kết mang lại những giá trị tốt nhất với chính sách rõ ràng và ưu đãi đặc quyền dành riêng cho khách hàng King Man.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-12 gap-6">
-            {/* Membership Banner */}
-            <div className="md:col-span-3 xl:col-span-6 relative rounded-[32px] overflow-hidden bg-slate-900 text-white shadow-xl group flex flex-col justify-between p-8 md:p-12 min-h-[400px]">
-              <div className="absolute inset-0 z-0">
-                <img 
-                  src="https://images.unsplash.com/photo-1594938298596-88efb0453303?q=80&w=1200&auto=format&fit=crop" 
-                  alt="King Man Membership" 
-                  className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000 ease-out" 
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10"></div>
-              </div>
-              
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center backdrop-blur-sm border border-yellow-500/30">
-                    <Crown className="w-5 h-5 text-yellow-500" />
-                  </div>
-                  <span className="text-yellow-500 font-bold tracking-widest uppercase text-[11px]">King Man Club</span>
-                </div>
-                <h3 className="text-3xl md:text-4xl lg:text-5xl font-serif mb-4 leading-tight drop-shadow-md">Chính Sách<br/>Membership</h3>
-                <p className="text-slate-200 text-sm md:text-[15px] max-w-md mb-8 leading-relaxed drop-shadow">
-                  Điểm tích luỹ sẽ được tính cho mỗi đơn hàng để thăng hạng thành viên. Mở khóa hàng loạt đặc quyền VIP, quà tặng và ưu đãi bí mật dành riêng cho bạn.
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            
+            {/* Left: Introduction Image & Concept */}
+            <div className="relative group overflow-hidden h-[450px] md:h-[550px]">
+              <img 
+                src="https://bizweb.dktcdn.net/100/399/392/files/ao-so-mi-nam.jpg?v=1680252176645" 
+                alt="Trải nghiệm mua sắm" 
+                className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute bottom-0 left-0 bg-white p-6 md:p-8 max-w-[90%] md:max-w-[80%]">
+                <h2 className="text-xl md:text-2xl font-bold uppercase tracking-widest text-[#2a2a2a] mb-3 leading-tight">Trải Nghiệm Hoàn Hảo</h2>
+                <p className="text-slate-500 text-[13px] leading-relaxed mb-6">
+                  Trở thành viên King Man để mở khóa các đặc quyền riêng biệt. Tích lũy điểm thưởng và nhận ưu đãi độc quyền.
                 </p>
-                <div className="inline-block bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-4 mb-2 shadow-lg">
-                  <p className="text-white font-medium flex items-start md:items-center gap-3 text-sm">
-                    <Star className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5 md:mt-0" />
-                    <span><strong>Đăng ký ngay</strong> để nhận ưu đãi <strong>10%</strong> cho đơn đầu.</span>
-                  </p>
-                </div>
-              </div>
-
-              <div className="relative z-10 mt-8">
-                <Link to="/register" className="inline-flex items-center justify-center bg-white text-slate-900 px-8 py-4 rounded-full font-bold uppercase tracking-[0.15em] text-xs hover:bg-yellow-500 hover:text-white transition-all duration-300 shadow-lg hover:shadow-yellow-500/25">
-                  Đăng Ký Ngay
-                  <ArrowRight className="ml-3 w-4 h-4" />
+                <Link to="/register" className="inline-flex items-center text-[10px] font-bold uppercase tracking-[0.2em] text-slate-900 border-b border-black pb-1 hover:text-slate-500 hover:border-slate-500 transition-colors">
+                  Đăng Ký Thành Viên <ArrowRight className="ml-2 w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
 
-            {/* Policy 1: Đổi trả */}
-            <div className="md:col-span-1 xl:col-span-2 group bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 flex flex-col">
-              <div className="w-14 h-14 shrink-0 bg-slate-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-                <RefreshCw className="w-6 h-6" />
+            {/* Right: Policies Minimal Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-16">
+              
+              {/* Policy: Đổi Trả */}
+              <div>
+                <RefreshCw className="w-6 h-6 text-[#2a2a2a] mb-5 stroke-[1.5]" />
+                <h4 className="text-[12px] font-bold uppercase tracking-widest text-[#2a2a2a] mb-3">Chính Sách Đổi Trả</h4>
+                <ul className="space-y-3 text-[13px] text-slate-500 leading-relaxed">
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Hỗ trợ đổi trả trong vòng 7–14 ngày kể từ khi nhận hàng.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Sản phẩm giữ nguyên tem mác, chưa qua sử dụng.</span>
+                  </li>
+                </ul>
               </div>
-              <h4 className="text-[17px] font-serif text-slate-900 mb-4 font-bold">Chính sách đổi trả</h4>
-              <ul className="space-y-3 text-[13px] text-slate-600 leading-relaxed grow">
-                <li className="flex items-start gap-2.5">
-                  <span className="text-blue-500 text-[10px] mt-1 shrink-0">●</span>
-                  <span>Khách hàng được hỗ trợ đổi trả trong vòng <strong>7–14 ngày</strong> kể từ khi nhận hàng.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-blue-500 text-[10px] mt-1 shrink-0">●</span>
-                  <span>Sản phẩm phải còn nguyên tem, chưa qua sử dụng.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-blue-500 text-[10px] mt-1 shrink-0">●</span>
-                  <span>Không áp dụng đổi trả với sản phẩm đã sử dụng hoặc hư hỏng do khách hàng.</span>
-                </li>
-              </ul>
+
+              {/* Policy: Giao hàng */}
+              <div>
+                <Truck className="w-6 h-6 text-[#2a2a2a] mb-5 stroke-[1.5]" />
+                <h4 className="text-[12px] font-bold uppercase tracking-widest text-[#2a2a2a] mb-3">Giao Hàng Miễn Phí</h4>
+                <ul className="space-y-3 text-[13px] text-slate-500 leading-relaxed">
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Giao hàng toàn quốc cho mọi đơn đặt hàng.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Thời gian nhận hàng tiêu chuẩn từ 2–5 ngày tùy khu vực.</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Policy: Bảo mật */}
+              <div>
+                <ShieldCheck className="w-6 h-6 text-[#2a2a2a] mb-5 stroke-[1.5]" />
+                <h4 className="text-[12px] font-bold uppercase tracking-widest text-[#2a2a2a] mb-3">Bảo Mật Thông Tin</h4>
+                <ul className="space-y-3 text-[13px] text-slate-500 leading-relaxed">
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Cam kết bảo mật tuyệt đối dữ liệu cá nhân khách hàng.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Không tiết lộ cho bên thứ ba khi không có sự đồng ý.</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Policy: Khách hàng thân thiết */}
+              <div>
+                <Crown className="w-6 h-6 text-[#2a2a2a] mb-5 stroke-[1.5]" />
+                <h4 className="text-[12px] font-bold uppercase tracking-widest text-[#2a2a2a] mb-3">Đặc Quyền Vip</h4>
+                <ul className="space-y-3 text-[13px] text-slate-500 leading-relaxed">
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Nhận thông báo sớm nhất về các BST mới và giới hạn.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Ưu đãi đặc quyền độc quyền vào tháng sinh nhật.</span>
+                  </li>
+                </ul>
+              </div>
+
             </div>
 
-            {/* Policy 2: Giao hàng */}
-            <div className="md:col-span-1 xl:col-span-2 group bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 flex flex-col">
-              <div className="w-14 h-14 shrink-0 bg-slate-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-                <Truck className="w-6 h-6" />
-              </div>
-              <h4 className="text-[17px] font-serif text-slate-900 mb-4 font-bold">Chính sách giao hàng</h4>
-              <ul className="space-y-3 text-[13px] text-slate-600 leading-relaxed grow">
-                <li className="flex items-start gap-2.5">
-                  <span className="text-blue-500 text-[10px] mt-1 shrink-0">●</span>
-                  <span>Shop hỗ trợ giao hàng toàn quốc.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-blue-500 text-[10px] mt-1 shrink-0">●</span>
-                  <span>Thời gian giao hàng từ 2–5 ngày tùy khu vực.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-blue-500 text-[10px] mt-1 shrink-0">●</span>
-                  <span>Phí vận chuyển sẽ được thông báo khi đặt hàng.</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Policy 3: Bảo mật */}
-            <div className="md:col-span-1 xl:col-span-2 group bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 flex flex-col">
-              <div className="w-14 h-14 shrink-0 bg-slate-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-              <h4 className="text-[17px] font-serif text-slate-900 mb-4 font-bold">Bảo mật thông tin</h4>
-              <ul className="space-y-3 text-[13px] text-slate-600 leading-relaxed grow">
-                <li className="flex items-start gap-2.5">
-                  <span className="text-blue-500 text-[10px] mt-1 shrink-0">●</span>
-                  <span>Chúng tôi cam kết bảo mật tuyệt đối thông tin cá nhân của khách hàng.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-blue-500 text-[10px] mt-1 shrink-0">●</span>
-                  <span>Không chia sẻ, mua bán hoặc tiết lộ thông tin cho bên thứ ba nếu không có sự đồng ý.</span>
-                </li>
-              </ul>
-            </div>
           </div>
         </div>
       </section>
