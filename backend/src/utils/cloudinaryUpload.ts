@@ -23,7 +23,7 @@ export const uploadToCloudinary = async (
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        folder: options?.folder || "aurelia_products",
+        folder: options?.folder || "kingman_products",
         resource_type: options?.resource_type || "auto",
         public_id: options?.public_id,
         overwrite: options?.overwrite ?? false,

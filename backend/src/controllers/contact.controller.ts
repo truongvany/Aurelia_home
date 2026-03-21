@@ -5,12 +5,12 @@ import { ApiError } from "../utils/ApiError.js";
 import { listInquiries, submitInquiry } from "../services/contact.service.js";
 
 export const createInquiry = asyncHandler(async (req: Request, res: Response) => {
-  const { name, email, subject, message } = req.body;
+  const { name, email, phone, subject, message } = req.body;
   if (!name || !email || !subject || !message) {
     throw new ApiError(400, "name, email, subject and message are required");
   }
 
-  const inquiry = await submitInquiry({ name, email, subject, message });
+  const inquiry = await submitInquiry({ name, email, phone, subject, message });
   sendSuccess(res, inquiry, "Inquiry submitted", 201);
 });
 

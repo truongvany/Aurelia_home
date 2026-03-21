@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-10 xl:gap-14 pb-12 border-b border-slate-300/70">
           <div className="xl:pr-8 xl:border-r xl:border-slate-300/70">
-            <h3 className="text-[34px] leading-none font-serif tracking-tight mb-4 text-[#111827]">Aurelia Home</h3>
+            <h3 className="text-[34px] leading-none font-serif tracking-tight mb-4 text-[#111827]">King Man</h3>
             <p className="text-[15px] leading-8 text-slate-700 max-w-sm mb-7">
               Hệ thống thời trang nam cao cấp, theo đuổi phong cách lịch lãm hiện đại và dịch vụ tư vấn cá nhân hóa.
             </p>
@@ -48,7 +48,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-slate-900" />
-                <a href="mailto:cskh@aurelia.vn" className="hover:text-slate-900 transition-colors">cskh@aurelia.vn</a>
+                <a href="mailto:cskh@kingman.vn" className="hover:text-slate-900 transition-colors">cskh@kingman.vn</a>
               </li>
             </ul>
 
@@ -77,7 +77,7 @@ export default function Footer() {
           <div className="xl:pl-2">
             <h4 className="text-[32px] leading-none font-serif mb-6 text-[#111827]">Đăng ký nhận tin</h4>
             <p className="text-[16px] leading-8 text-slate-700 mb-5">
-              Nhận cập nhật sản phẩm mới, ưu đãi đặc biệt và thông tin giảm giá mới nhất từ Aurelia Home.
+              Nhận cập nhật sản phẩm mới, ưu đãi đặc biệt và thông tin giảm giá mới nhất từ King Man.
             </p>
 
             <form className="flex bg-white">
@@ -106,7 +106,7 @@ export default function Footer() {
         </div>
 
         <div className="pt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <p className="text-sm text-slate-600">Copyright © {new Date().getFullYear()} Aurelia Home. Powered by Haravan.</p>
+          <p className="text-sm text-slate-600">Copyright © {new Date().getFullYear()} King Man. Powered by Haravan.</p>
           <div className="flex items-center gap-6 text-xs uppercase tracking-[0.16em] text-slate-500">
             <Link to="/" className="hover:text-slate-900 transition-colors">Chính sách bảo mật</Link>
             <Link to="/" className="hover:text-slate-900 transition-colors">Điều khoản sử dụng</Link>

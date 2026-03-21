@@ -68,14 +68,14 @@ export default function AuthPage() {
         <section className="relative hidden min-h-[680px] p-10 md:flex md:flex-col md:justify-between">
           <img
             src={loginImage}
-            alt="Aurelia Home Fashion"
+            alt="King Man Fashion"
             className="absolute inset-0 h-full w-full object-cover"
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-br from-[#0f2238]/75 via-[#1a2e46]/65 to-[#8f6a35]/45" />
 
           <div className="relative z-10">
-            <p className="mb-3 text-[11px] uppercase tracking-[0.3em] text-white/85">Aurelia Home</p>
+            <p className="mb-3 text-[11px] uppercase tracking-[0.3em] text-white/85">King Man</p>
             <h2 className="max-w-sm font-serif text-4xl leading-tight text-white">Nâng tầm trải nghiệm mua sắm thời trang cao cấp.</h2>
           </div>
 
@@ -249,7 +249,7 @@ export default function AuthPage() {
           )}
 
           <p className="mt-6 text-center text-xs text-slate-500">
-            Tiếp tục nghĩa là bạn đồng ý với điều khoản sử dụng và chính sách bảo mật của Aurelia Home.
+            Tiếp tục nghĩa là bạn đồng ý với điều khoản sử dụng và chính sách bảo mật của King Man.
           </p>
         </section>
       </div>

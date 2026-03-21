@@ -23,6 +23,8 @@ export interface User {
   isMember?: boolean;
   memberStatus?: 'inactive' | 'pending' | 'active';
   memberSince?: string | null;
+  points?: number;
+  tier?: 'Mới' | 'Bạc' | 'Vàng' | 'Kim cương';
 }
 
 export interface MembershipPayload {
@@ -35,6 +37,20 @@ export interface MembershipPayload {
     fashionWarranty: boolean;
     bespokeDesignSupport: boolean;
   };
+  latestRequest?: {
+    _id: string;
+    fullName: string;
+    email: string;
+    phone: string;
+    address?: string;
+    status: 'pending' | 'approved' | 'rejected';
+    paymentAmount: number;
+    paymentTransferNote: string;
+    proofImageUrl: string;
+    requestedAt: string;
+    reviewedAt?: string | null;
+    reviewNote?: string;
+  } | null;
 }
 
 export interface VoucherPayload {

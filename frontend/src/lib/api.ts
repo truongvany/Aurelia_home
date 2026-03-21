@@ -124,6 +124,10 @@ interface AdminCustomerItem {
   createdAt: string;
   orderCount: number;
   totalSpent: number;
+  points: number;
+  tier: string;
+  isMember: boolean;
+  memberStatus: 'inactive' | 'pending' | 'active';
 }
 
 interface AdminCustomerDetail {
@@ -136,22 +140,72 @@ interface AdminCustomerDetail {
   createdAt: string;
   orderCount: number;
   totalSpent: number;
+  points: number;
+  tier: string;
+  isMember: boolean;
+  memberStatus: 'inactive' | 'pending' | 'active';
 }
 
 interface AdminMembershipRequestItem {
   _id: string;
+  userId: string;
   email: string;
   firstName?: string;
   lastName?: string;
   fullName: string;
   phone?: string;
+  address?: string;
   isMember: boolean;
   memberStatus: "inactive" | "pending" | "active";
   memberSince?: string | null;
   membershipRequestedAt?: string | null;
   membershipReviewedAt?: string | null;
   membershipReviewNote?: string;
+  paymentAmount?: number;
+  paymentTransferNote?: string;
+  recipientBankBin?: string;
+  recipientBankName?: string;
+  recipientAccountNumber?: string;
+  recipientAccountName?: string;
+  proofImageUrl?: string;
   createdAt: string;
+}
+
+interface AdminSettingsPayload {
+  store: {
+    name: string;
+    email: string;
+    currency: string;
+    timezone: string;
+    taxRate: number;
+    shippingRate: number;
+  };
+  membershipPayment: {
+    bankBin: string;
+    bankName: string;
+    accountNumber: string;
+    accountName: string;
+    transferPrefix: string;
+    isActive: boolean;
+  };
+}
+
+interface MembershipPaymentConfig {
+  bankBin: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  transferPrefix: string;
+  isActive: boolean;
+  amount: number;
+}
+
+interface AdminBankItem {
+  bin: string;
+  code: string;
+  shortName: string;
+  name: string;
+  logo?: string;
 }
 
 interface AdminVoucherItem {
@@ -195,13 +249,13 @@ const API_BASE_URL =
   ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) ??
   "http://localhost:5000/api/v1";
 
-const ACCESS_TOKEN_KEY = "aurelia_access_token";
-const REFRESH_TOKEN_KEY = "aurelia_refresh_token";
+const ACCESS_TOKEN_KEY = "kingman_access_token";
+const REFRESH_TOKEN_KEY = "kingman_refresh_token";
 
 const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
 const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
 const emitCartUpdated = () => {
-  window.dispatchEvent(new Event("aurelia:cart-updated"));
+  window.dispatchEvent(new Event("kingman:cart-updated"));
 };
 
 export const hasAuthSession = () => Boolean(getAccessToken() && getRefreshToken());
@@ -296,6 +350,11 @@ export const api = {
   getCategories: () => request<Array<{ _id: string; name: string; slug: string }>>("/catalog/categories"),
   getProducts: (params?: URLSearchParams) =>
     request<Product[]>(`/catalog/products${params ? `?${params.toString()}` : ""}`),
+  searchProducts: (query: string) => {
+    const params = new URLSearchParams();
+    params.set("q", query);
+    return request<Product[]>(`/catalog/products?${params.toString()}`);
+  },
   getFeaturedProducts: () => request<Product[]>("/catalog/products/featured"),
   getProductById: (id: string) =>
     request<
@@ -339,7 +398,31 @@ export const api = {
 
   getProfile: () => request<ProfilePayload>("/profile"),
   getMembership: () => request<MembershipPayload>("/profile/membership"),
-  enrollMembership: () => request<MembershipPayload>("/profile/membership/enroll", { method: "POST" }),
+  getMembershipPaymentConfig: () =>
+    request<MembershipPaymentConfig>("/profile/membership/payment-config"),
+  enrollMembership: (input: {
+    fullName: string;
+    phone: string;
+    address?: string;
+    paymentTransferNote?: string;
+    proofImage: File;
+  }) => {
+    const formData = new FormData();
+    formData.append("fullName", input.fullName);
+    formData.append("phone", input.phone);
+    if (input.address) {
+      formData.append("address", input.address);
+    }
+    if (input.paymentTransferNote) {
+      formData.append("paymentTransferNote", input.paymentTransferNote);
+    }
+    formData.append("proofImage", input.proofImage);
+
+    return request<MembershipPayload>("/profile/membership/enroll", {
+      method: "POST",
+      body: formData
+    });
+  },
   getVouchers: () => request<VoucherPayload[]>("/profile/vouchers"),
   updateProfile: (input: { firstName?: string; lastName?: string; phone?: string }) =>
     request<ProfilePayload["user"]>("/profile", {
@@ -405,7 +488,7 @@ export const api = {
   getMyOrders: () => request<OrderPayload[]>("/orders"),
   getMyOrderById: (orderId: string) => request<OrderPayload>(`/orders/${orderId}`),
 
-  submitContact: (input: { name: string; email: string; subject: string; message: string }) =>
+  submitContact: (input: { name: string; email: string; phone?: string; subject: string; message: string }) =>
     request<{ _id: string }>("/contact", {
       method: "POST",
       body: JSON.stringify(input)
@@ -427,6 +510,13 @@ export const api = {
     ),
 
   getAdminDashboard: () => request<AdminDashboardPayload>("/admin/dashboard"),
+  getAdminBanks: () => request<AdminBankItem[]>("/admin/banks"),
+  getAdminSettings: () => request<AdminSettingsPayload>("/admin/settings"),
+  updateAdminSettings: (input: Partial<AdminSettingsPayload>) =>
+    request<AdminSettingsPayload>("/admin/settings", {
+      method: "PATCH",
+      body: JSON.stringify(input)
+    }),
   getAdminProducts: (query?: {
     page?: number;
     limit?: number;
@@ -579,7 +669,7 @@ export const api = {
       body: JSON.stringify({ paymentStatus })
     }),
 
-  getAdminCustomers: (query?: { page?: number; limit?: number; search?: string }) =>
+  getAdminCustomers: (query?: { page?: number; limit?: number; search?: string; memberStatus?: "all" | "member" | "non-member" }) =>
     request<{ items: AdminCustomerItem[]; meta: AdminMeta }>(withQuery("/admin/customers", query)),
   getAdminCustomerById: (customerId: string) => request<AdminCustomerDetail>(`/admin/customers/${customerId}`),
   getAdminCustomerOrders: (customerId: string) =>
@@ -593,6 +683,11 @@ export const api = {
         paymentStatus: string;
       }>
     >(`/admin/customers/${customerId}/orders`),
+  updateAdminCustomerPoints: (customerId: string, points?: number, tier?: string) =>
+    request<AdminCustomerDetail>(`/admin/customers/${customerId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ points, tier })
+    }),
   getAdminMembershipRequests: (query?: {
     page?: number;
     limit?: number;

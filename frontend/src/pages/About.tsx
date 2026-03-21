@@ -30,7 +30,7 @@ const mockHeritage: HeritageItem[] = [
   {
     id: 'h1',
     title: 'Khởi Nguồn Đam Mê',
-    description: 'Bắt đầu từ một xưởng may nhỏ tại Ý vào năm 1985, Aurelia Home mang trong mình khát vọng định nghĩa lại sự sang trọng của thời trang nam giới. Chúng tôi tin rằng mỗi đường kim mũi chỉ không chỉ là kỹ thuật, mà là ngôn ngữ của sự tinh tế và đẳng cấp.',
+    description: 'Bắt đầu từ một xưởng may nhỏ tại Ý vào năm 1985, King Man mang trong mình khát vọng định nghĩa lại sự sang trọng của thời trang nam giới. Chúng tôi tin rằng mỗi đường kim mũi chỉ không chỉ là kỹ thuật, mà là ngôn ngữ của sự tinh tế và đẳng cấp.',
     imageUrl: 'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?q=80&w=2000&auto=format&fit=crop',
     year: 1985,
     align: 'left'
@@ -38,7 +38,7 @@ const mockHeritage: HeritageItem[] = [
   {
     id: 'h2',
     title: 'Nghệ Thuật Bespoke',
-    description: 'Tại Aurelia, Bespoke không chỉ là may đo, đó là hành trình khám phá bản ngã. Mỗi bộ trang phục là một tác phẩm nghệ thuật độc bản, được đo ni đóng giày để tôn vinh khí chất và câu chuyện riêng của người mặc.',
+    description: 'Tại King Man, Bespoke không chỉ là may đo, đó là hành trình khám phá bản ngã. Mỗi bộ trang phục là một tác phẩm nghệ thuật độc bản, được đo ni đóng giày để tôn vinh khí chất và câu chuyện riêng của người mặc.',
     imageUrl: 'https://images.unsplash.com/photo-1585914924626-15adac1e6402?q=80&w=2000&auto=format&fit=crop',
     year: 2010,
     align: 'right'
@@ -130,7 +130,7 @@ export default function About() {
             Since 1985
           </span>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold text-white mb-6 drop-shadow-sm">
-            AURELIA HOME
+            KING MAN
           </h1>
           <p className="text-lg md:text-xl text-slate-200 font-light max-w-2xl mx-auto leading-relaxed">
             Nơi di sản may đo Ý gặp gỡ phong cách sống đương đại. <br className="hidden md:block"/>
@@ -259,7 +259,7 @@ export default function About() {
       {/* 6. Contact Banner */}
       <section className="py-20 bg-[#C5A059] text-white">
          <div className="container mx-auto px-6 text-center animate-on-scroll opacity-0 translate-y-10 transition-all duration-1000">
-            <h2 className="text-3xl md:text-4xl font-serif mb-6">Trải Nghiệm Aurelia Home</h2>
+            <h2 className="text-3xl md:text-4xl font-serif mb-6">Trải Nghiệm King Man</h2>
             <p className="text-white/90 mb-8 max-w-2xl mx-auto text-lg">
                Đặt lịch hẹn riêng tại showroom của chúng tôi để được tư vấn và trải nghiệm dịch vụ may đo bespoke đẳng cấp.
             </p>

@@ -3,8 +3,8 @@ import { MessageSquare, X, Send, Trash2, Maximize2, Minimize2 } from 'lucide-rea
 import { ChatMessage } from '../types';
 import { api } from '../lib/api';
 
-const STORAGE_KEY = 'aurelia_chat_history';
-const CONVERSATION_KEY = 'aurelia_conversation_id';
+const STORAGE_KEY = 'kingman_chat_history';
+const CONVERSATION_KEY = 'kingman_conversation_id';
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +17,7 @@ export default function ChatWidget() {
       {
         _id: 'msg-1',
         sender: 'ai' as const,
-        text: 'Xin chào, chúc Quý khách một ngày tốt lành! ❤ Đây là Aurelia, trợ lý ảo của Aurelia Home. Quý khách muốn Aurelia hỗ trợ về vấn đề gì ạ?',
+        text: 'Xin chào, chúc Quý khách một ngày tốt lành! ❤ Đây là King Man, trợ lý ảo của King Man Home. Quý khách muốn King Man hỗ trợ về vấn đề gì ạ?',
         timestamp: new Date()
       }
     ];
@@ -68,8 +68,8 @@ export default function ChatWidget() {
 
   useEffect(() => {
     const handleOpen = () => setIsOpen(true);
-    window.addEventListener('aurelia:open-chat', handleOpen);
-    return () => window.removeEventListener('aurelia:open-chat', handleOpen);
+    window.addEventListener('kingman:open-chat', handleOpen);
+    return () => window.removeEventListener('kingman:open-chat', handleOpen);
   }, []);
 
   useEffect(() => {
@@ -122,7 +122,7 @@ export default function ChatWidget() {
       const initialMessage = {
         _id: `msg-${Date.now()}`,
         sender: 'ai' as const,
-        text: 'Lịch sử trò chuyện đã được xóa. Quý khách muốn Aurelia hỗ trợ về vấn đề gì ạ?',
+        text: 'Lịch sử trò chuyện đã được xóa. Quý khách muốn King Man hỗ trợ về vấn đề gì ạ?',
         timestamp: new Date()
       };
       setMessages([initialMessage]);
@@ -196,7 +196,7 @@ export default function ChatWidget() {
                 <span className="font-serif font-bold text-lg">A</span>
               </div>
               <div>
-                <h3 className="text-black font-semibold text-md tracking-tight">Aurelia</h3>
+                <h3 className="text-black font-semibold text-md tracking-tight">King Man</h3>
                 <p className="text-gray-500 text-xs flex items-center">
                   <span className="w-2 h-2 rounded-full bg-green-500 mr-1.5 animate-pulse"></span>
                   Online
@@ -275,7 +275,7 @@ export default function ChatWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Nhắn tin cho Aurelia..."
+                placeholder="Nhắn tin cho King Man..."
                 className="w-full bg-transparent py-3.5 pl-5 pr-12 text-black text-sm focus:outline-none placeholder:text-gray-400"
                 disabled={isTyping}
               />
@@ -288,7 +288,7 @@ export default function ChatWidget() {
               </button>
             </div>
             <div className="text-center mt-2.5">
-              <span className="text-[10px] text-gray-400 font-medium tracking-wide uppercase">Powered by Aurelia AI</span>
+              <span className="text-[10px] text-gray-400 font-medium tracking-wide uppercase">Powered by King Man AI</span>
             </div>
           </div>
         </div>
@@ -302,7 +302,7 @@ export default function ChatWidget() {
           
           {/* Hover Tooltip */}
           <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap hidden sm:block">
-            Trò chuyện với Aurelia
+            Trò chuyện với King Man
             <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 border-4 border-transparent border-l-black"></div>
           </div>
         </button>
@@ -310,3 +310,4 @@ export default function ChatWidget() {
     </div>
   );
 }
+

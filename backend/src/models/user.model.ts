@@ -21,7 +21,13 @@ const userSchema = new Schema(
     memberSince: { type: Date, default: null },
     membershipRequestedAt: { type: Date, default: null },
     membershipReviewedAt: { type: Date, default: null },
-    membershipReviewNote: { type: String, default: "" }
+    membershipReviewNote: { type: String, default: "" },
+    points: { type: Number, default: 0 },
+    tier: {
+      type: String,
+      enum: ["Mới", "Bạc", "Vàng", "Kim cương"],
+      default: "Mới"
+    }
   },
   {
     timestamps: true,

@@ -576,7 +576,7 @@ export default function PDP() {
                 <div className="grid grid-cols-2 gap-y-4 gap-x-8 border-t border-slate-100 pt-6">
                   <div>
                     <span className="block text-[10px] uppercase tracking-widest text-slate-400 mb-1">SKU</span>
-                    <span className="text-sm font-medium text-slate-900">{selectedVariant?.sku ?? 'AURELIA-GEN'}</span>
+                    <span className="text-sm font-medium text-slate-900">{selectedVariant?.sku ?? 'KINGMAN-GEN'}</span>
                   </div>
                   <div>
                     <span className="block text-[10px] uppercase tracking-widest text-slate-400 mb-1">Phân loại</span>

@@ -1,5 +1,5 @@
-const WISHLIST_STORAGE_KEY = 'aurelia_wishlist_product_ids';
-const WISHLIST_UPDATED_EVENT = 'aurelia:wishlist-updated';
+const WISHLIST_STORAGE_KEY = 'kingman_wishlist_product_ids';
+const WISHLIST_UPDATED_EVENT = 'kingman:wishlist-updated';
 
 const normalizeIds = (ids: unknown): string[] => {
   if (!Array.isArray(ids)) {

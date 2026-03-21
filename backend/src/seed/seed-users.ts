@@ -6,15 +6,15 @@ import { UserProfileModel } from "../models/userProfile.model.js";
 
 const usersSeed = [
   {
-    email: "admin@aurelia.com",
+    email: "admin@kingman.vn",
     password: "Admin123@456",
     firstName: "Admin",
-    lastName: "Aurelia",
+    lastName: "King Man",
     phone: "+84901234567",
     role: "admin"
   },
   {
-    email: "user@aurelia.com",
+    email: "user@kingman.vn",
     password: "User123@456",
     firstName: "Nguyễn",
     lastName: "Văn A",
@@ -22,7 +22,7 @@ const usersSeed = [
     role: "customer"
   },
   {
-    email: "customer1@aurelia.com",
+    email: "customer1@kingman.vn",
     password: "Customer123@456",
     firstName: "Trần",
     lastName: "Thị B",
@@ -30,7 +30,7 @@ const usersSeed = [
     role: "customer"
   },
   {
-    email: "customer2@aurelia.com",
+    email: "customer2@kingman.vn",
     password: "Customer123@456",
     firstName: "Lê",
     lastName: "Văn C",

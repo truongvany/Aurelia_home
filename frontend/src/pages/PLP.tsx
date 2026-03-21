@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, Filter, ShoppingBag, Search } from 'lucide-react';
 import { Product } from '../types';
 import { api } from '../lib/api';
@@ -146,10 +146,17 @@ const ProductCardItem: React.FC<{
 
 export default function PLP() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+
   const queryCategory = searchParams.get('category') ?? 'all';
+  const querySearch = searchParams.get('q') ?? '';
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Array<{ _id: string; name: string; slug: string }>>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>(queryCategory);
   const [selectedSize, setSelectedSize] = useState<string>('all');
   const [selectedColor, setSelectedColor] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
@@ -161,7 +168,7 @@ export default function PLP() {
   const [addingToCartProductId, setAddingToCartProductId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const itemImageRefs = useRef<Record<string, HTMLImageElement | null>>({});
-  const itemsPerPage = 20;
+  const itemsPerPage = 25;
 
   // Accordion state
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -301,28 +308,57 @@ export default function PLP() {
     if (queryCategory !== selectedCategory) {
       setSelectedCategory(queryCategory);
     }
-  }, [queryCategory, selectedCategory]);
+    if (querySearch !== searchQuery) {
+      setSearchQuery(querySearch);
+    }
+  }, [queryCategory, selectedCategory, querySearch, searchQuery]);
 
   useEffect(() => {
+    let isCancelled = false;
+
     const fetchProducts = async () => {
       try {
         setLoading(true);
         const params = new URLSearchParams();
+        
         if (selectedCategory !== 'all') {
-          params.set('category', selectedCategory);
+          if (selectedCategory === 'ao') {
+            params.set('q', 'áo');
+          } else if (selectedCategory === 'quan') {
+            params.set('q', 'quần');
+          } else if (selectedCategory === 'phu-kien') {
+            params.set('q', 'phụ kiện');
+          } else if (selectedCategory !== 'giam-gia') {
+            params.set('category', selectedCategory);
+          }
+        }
+
+        if (searchQuery) {
+          params.set('q', searchQuery);
         }
         const data = await api.getProducts(params);
-        setAllProducts(data);
-        setCurrentPage(1);
+        
+        if (!isCancelled) {
+          setAllProducts(data);
+          setCurrentPage(1);
+        }
       } catch (error) {
-        console.error('Failed to fetch products', error);
+        if (!isCancelled) {
+          console.error('Failed to fetch products', error);
+        }
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchProducts();
-  }, [selectedCategory]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedCategory, searchQuery]);
 
   const sizeOptions = useMemo(() => {
     const values = new Set<string>();
@@ -356,6 +392,9 @@ export default function PLP() {
 
   const filteredProducts = useMemo(() => {
     const next = allProducts.filter((product) => {
+      if (selectedCategory === 'giam-gia' && !(product.discountPercent && product.discountPercent > 0)) {
+        return false;
+      }
       const sizeMatch = selectedSize === 'all' || product.sizes.includes(selectedSize);
       const colorMatch = selectedColor === 'all' || product.colors.includes(selectedColor);
       const priceMatch = product.price >= priceRange[0] && product.price <= priceRange[1];
@@ -407,7 +446,11 @@ export default function PLP() {
 
   const priceSpan = Math.max(1, priceBounds[1] - priceBounds[0]);
   const activeCategoryLabel = selectedCategory === 'all'
-    ? 'Sản phẩm mới'
+    ? 'Tất cả sản phẩm'
+    : selectedCategory === 'ao' ? 'Áo Nam'
+    : selectedCategory === 'quan' ? 'Quần Nam'
+    : selectedCategory === 'phu-kien' ? 'Phụ Kiện'
+    : selectedCategory === 'giam-gia' ? 'Giảm Giá'
     : categories.find((cat) => cat.slug === selectedCategory)?.name ?? selectedCategory.replace(/[-_]/g, ' ');
 
   return (
@@ -436,7 +479,7 @@ export default function PLP() {
       `}</style>
       <div className="max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14">
         <section className="mb-10 px-2 lg:mb-14">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-slate-500 mb-3 font-medium">Aurelia Shop</p>
+          <p className="text-[11px] uppercase tracking-[0.3em] text-slate-500 mb-3 font-medium">King Man Shop</p>
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div className="flex-1 w-full max-w-full overflow-hidden">
               <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight tracking-tight text-slate-900 mb-6">{activeCategoryLabel}</h1>
@@ -486,7 +529,14 @@ export default function PLP() {
                 </button>
                 {openSections.category && (
                   <div className="mt-4 space-y-3 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
-                    {[{ slug: 'all', name: 'Tất cả' }, ...categories].map((cat) => {
+                    {[
+                      { slug: 'all', name: 'Tất cả' },
+                      { slug: 'ao', name: 'Áo Nam' },
+                      { slug: 'quan', name: 'Quần Nam' },
+                      { slug: 'phu-kien', name: 'Phụ kiện' },
+                      { slug: 'giam-gia', name: 'Giảm giá' },
+                      ...categories
+                    ].map((cat) => {
                       const isSelected = selectedCategory === cat.slug;
                       return (
                         <button
@@ -664,16 +714,16 @@ export default function PLP() {
               <p className="text-sm text-slate-600">
                 Hiển thị {startItem}-{endItem} trên {filteredProducts.length} sản phẩm
               </p>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">20 sản phẩm mỗi trang</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">25 sản phẩm mỗi trang</p>
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-7">
-                {Array.from({ length: 8 }).map((_, index) => (
-                  <div key={index} className="animate-pulse bg-white p-3">
-                    <div className="aspect-[4/5] bg-slate-300 mb-3" />
-                    <div className="h-3 bg-slate-300 w-5/6 mb-2" />
-                    <div className="h-3 bg-slate-300 w-1/2" />
+              <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-7">
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <div key={index} className="animate-pulse bg-white p-3 border border-slate-100/60 rounded">
+                    <div className="aspect-[4/5] bg-slate-200 mb-3 rounded-sm" />
+                    <div className="h-2.5 bg-slate-200 w-5/6 mb-2 rounded-sm" />
+                    <div className="h-2.5 bg-slate-200 w-1/2 rounded-sm" />
                   </div>
                 ))}
               </div>
@@ -699,7 +749,7 @@ export default function PLP() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+                <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
                   {paginatedProducts.map((product) => (
                     <ProductCardItem
                       key={product._id}

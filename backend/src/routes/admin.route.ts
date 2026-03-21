@@ -4,12 +4,15 @@ import { Router } from "express";
 import multer from "multer";
 import {
   deleteAdminProduct,
+  getAdminBanks,
   getAdminCustomer,
   getAdminCustomerOrderList,
   getAdminCustomers,
   getAdminDashboard,
   getAdminMembershipRequests,
   getAdminOrder,
+  getAdminStoreSettings,
+  patchAdminCustomer,
   getAdminOrders,
   getAdminProduct,
   getAdminProducts,
@@ -18,6 +21,7 @@ import {
   patchAdminOrderStatus,
   patchAdminPaymentStatus,
   patchAdminProduct,
+  patchAdminStoreSettings,
   patchAdminVoucherDeactivate,
   postAdminVoucher,
   postAdminProduct,
@@ -46,6 +50,9 @@ const upload = multer({
 router.use(requireAuth, requireAdmin);
 
 router.get("/dashboard", getAdminDashboard);
+router.get("/banks", getAdminBanks);
+router.get("/settings", getAdminStoreSettings);
+router.patch("/settings", patchAdminStoreSettings);
 
 router.get("/products", getAdminProducts);
 router.get("/products/:productId", getAdminProduct);
@@ -65,6 +72,7 @@ router.patch("/orders/:orderId/payment-status", patchAdminPaymentStatus);
 router.get("/customers", getAdminCustomers);
 router.get("/customers/:customerId", getAdminCustomer);
 router.get("/customers/:customerId/orders", getAdminCustomerOrderList);
+router.patch("/customers/:customerId", patchAdminCustomer);
 
 router.get("/membership-requests", getAdminMembershipRequests);
 router.patch("/membership-requests/:userId/:action", patchAdminMembershipRequest);

@@ -1,4 +1,4 @@
-# Aurelia Homme Backend
+# King Man Backend
 
 MVC backend built with Express + TypeScript + MongoDB.
 

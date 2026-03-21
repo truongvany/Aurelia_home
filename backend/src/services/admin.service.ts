@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { USER_ROLES } from "../constants/roles.js";
+import { AppSettingModel } from "../models/appSetting.model.js";
 import { AuditLogModel } from "../models/auditLog.model.js";
 import { CategoryModel } from "../models/category.model.js";
 import { CouponModel } from "../models/coupon.model.js";
@@ -8,10 +9,23 @@ import { PaymentModel } from "../models/payment.model.js";
 import { ProductImageModel } from "../models/productImage.model.js";
 import { ProductModel } from "../models/product.model.js";
 import { ProductVariantModel } from "../models/productVariant.model.js";
+import { MembershipRequestModel } from "../models/membershipRequest.model.js";
 import { UserModel } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 
 const LOW_STOCK_THRESHOLD = 5;
+const VIETQR_BANKS_URL = "https://api.vietqr.io/v2/banks";
+const BANK_CACHE_TTL_MS = 1000 * 60 * 60 * 12;
+
+type AdminBankItem = {
+  bin: string;
+  code: string;
+  shortName: string;
+  name: string;
+  logo?: string;
+};
+
+let banksCache: { data: AdminBankItem[]; expiresAt: number } | null = null;
 
 type PaginationMeta = {
   page: number;
@@ -38,6 +52,10 @@ interface AdminOrderListQuery extends AdminListQuery {
 
 interface AdminMembershipListQuery extends AdminListQuery {
   status?: "inactive" | "pending" | "active";
+}
+
+interface AdminCustomerListQuery extends AdminListQuery {
+  memberStatus?: "all" | "member" | "non-member";
 }
 
 interface AdminVoucherListQuery extends AdminListQuery {
@@ -223,6 +241,183 @@ const writeAudit = async (
   }
 
   await AuditLogModel.create({ actorUserId, action, targetType, targetId, metadata });
+};
+
+const getGlobalSettings = async () => {
+  const existing = await AppSettingModel.findOne({ key: "global" });
+  if (existing) {
+    return existing;
+  }
+
+  return AppSettingModel.create({ key: "global" });
+};
+
+export const listVietnamBanks = async () => {
+  const now = Date.now();
+  if (banksCache && banksCache.expiresAt > now) {
+    return banksCache.data;
+  }
+
+  try {
+    const response = await fetch(VIETQR_BANKS_URL, {
+      method: "GET",
+      headers: {
+        Accept: "application/json"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`VietQR banks API returned status ${response.status}`);
+    }
+
+    const payload = (await response.json()) as {
+      data?: Array<{
+        bin?: string;
+        code?: string;
+        shortName?: string;
+        short_name?: string;
+        name?: string;
+        logo?: string;
+      }>;
+    };
+
+    const banks: AdminBankItem[] = [];
+    for (const item of payload.data ?? []) {
+      const bin = item.bin?.trim() ?? "";
+      const name = item.name?.trim() ?? "";
+      const shortName = item.shortName?.trim() || item.short_name?.trim() || name;
+
+      if (!bin || !name) {
+        continue;
+      }
+
+      banks.push({
+        bin,
+        code: item.code?.trim() ?? "",
+        shortName,
+        name,
+        logo: item.logo?.trim() || undefined
+      });
+    }
+    banks.sort((a, b) => a.shortName.localeCompare(b.shortName, "vi"));
+
+    banksCache = {
+      data: banks,
+      expiresAt: now + BANK_CACHE_TTL_MS
+    };
+
+    return banks;
+  } catch (error) {
+    if (banksCache?.data?.length) {
+      return banksCache.data;
+    }
+
+    throw new ApiError(502, "Không thể tải danh sách ngân hàng từ VietQR");
+  }
+};
+
+export const getAdminSettings = async () => {
+  const settings = await getGlobalSettings();
+  const store = {
+    name: settings.store?.name ?? "King Man",
+    email: settings.store?.email ?? "support@kingman.vn",
+    currency: settings.store?.currency ?? "VND",
+    timezone: settings.store?.timezone ?? "Asia/Ho_Chi_Minh",
+    taxRate: settings.store?.taxRate ?? 10,
+    shippingRate: settings.store?.shippingRate ?? 20000
+  };
+  const membershipPayment = {
+    bankBin: settings.membershipPayment?.bankBin ?? "",
+    bankName: settings.membershipPayment?.bankName ?? "",
+    accountNumber: settings.membershipPayment?.accountNumber ?? "",
+    accountName: settings.membershipPayment?.accountName ?? "",
+    transferPrefix: settings.membershipPayment?.transferPrefix ?? "PREMIUM",
+    isActive: settings.membershipPayment?.isActive ?? true
+  };
+
+  return {
+    store,
+    membershipPayment
+  };
+};
+
+export const updateAdminSettings = async (
+  actorUserId: string,
+  input: {
+    store?: {
+      name?: string;
+      email?: string;
+      currency?: string;
+      timezone?: string;
+      taxRate?: number;
+      shippingRate?: number;
+    };
+    membershipPayment?: {
+      bankBin?: string;
+      bankName?: string;
+      accountNumber?: string;
+      accountName?: string;
+      transferPrefix?: string;
+      isActive?: boolean;
+    };
+  }
+) => {
+  const settings = await getGlobalSettings();
+  const store = {
+    name: settings.store?.name ?? "King Man",
+    email: settings.store?.email ?? "support@kingman.vn",
+    currency: settings.store?.currency ?? "VND",
+    timezone: settings.store?.timezone ?? "Asia/Ho_Chi_Minh",
+    taxRate: settings.store?.taxRate ?? 10,
+    shippingRate: settings.store?.shippingRate ?? 20000
+  };
+  const membershipPayment = {
+    bankBin: settings.membershipPayment?.bankBin ?? "",
+    bankName: settings.membershipPayment?.bankName ?? "",
+    accountNumber: settings.membershipPayment?.accountNumber ?? "",
+    accountName: settings.membershipPayment?.accountName ?? "",
+    transferPrefix: settings.membershipPayment?.transferPrefix ?? "PREMIUM",
+    isActive: settings.membershipPayment?.isActive ?? true
+  };
+
+  if (input.store) {
+    store.name = input.store.name?.trim() || store.name;
+    store.email = input.store.email?.trim() || store.email;
+    store.currency = input.store.currency?.trim() || store.currency;
+    store.timezone = input.store.timezone?.trim() || store.timezone;
+    if (typeof input.store.taxRate === "number" && Number.isFinite(input.store.taxRate)) {
+      store.taxRate = Math.max(0, input.store.taxRate);
+    }
+    if (typeof input.store.shippingRate === "number" && Number.isFinite(input.store.shippingRate)) {
+      store.shippingRate = Math.max(0, input.store.shippingRate);
+    }
+  }
+
+  if (input.membershipPayment) {
+    membershipPayment.bankBin = input.membershipPayment.bankBin?.trim() ?? membershipPayment.bankBin;
+    membershipPayment.bankName = input.membershipPayment.bankName?.trim() ?? membershipPayment.bankName;
+    membershipPayment.accountNumber =
+      input.membershipPayment.accountNumber?.trim() ?? membershipPayment.accountNumber;
+    membershipPayment.accountName =
+      input.membershipPayment.accountName?.trim() ?? membershipPayment.accountName;
+    membershipPayment.transferPrefix =
+      input.membershipPayment.transferPrefix?.trim() ?? membershipPayment.transferPrefix;
+    if (typeof input.membershipPayment.isActive === "boolean") {
+      membershipPayment.isActive = input.membershipPayment.isActive;
+    }
+  }
+
+  settings.store = store;
+  settings.membershipPayment = membershipPayment;
+
+  await settings.save();
+
+  await writeAudit(actorUserId, "admin.settings.update", "setting", settings._id.toString(), {
+    store: settings.store,
+    membershipPayment: settings.membershipPayment
+  });
+
+  return getAdminSettings();
 };
 
 export const listAdminProducts = async (query: AdminProductListQuery) => {
@@ -972,10 +1167,16 @@ export const updateAdminPaymentStatus = async (
   };
 };
 
-export const listAdminCustomers = async (query: AdminListQuery) => {
+export const listAdminCustomers = async (query: AdminCustomerListQuery) => {
   const { page, limit, skip } = toPagination(query);
 
   const filter: Record<string, unknown> = { role: USER_ROLES.CUSTOMER };
+
+  if (query.memberStatus === "member") {
+    filter.isMember = true;
+  } else if (query.memberStatus === "non-member") {
+    filter.isMember = false;
+  }
 
   if (query.search?.trim()) {
     const regex = new RegExp(query.search.trim(), "i");
@@ -993,7 +1194,7 @@ export const listAdminCustomers = async (query: AdminListQuery) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .select("_id email firstName lastName phone createdAt")
+      .select("_id email firstName lastName phone createdAt points tier isMember memberStatus")
       .lean()
   ]);
 
@@ -1027,6 +1228,10 @@ export const listAdminCustomers = async (query: AdminListQuery) => {
         `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() || customer.email,
       phone: customer.phone,
       createdAt: customer.createdAt,
+      points: customer.points ?? 0,
+      tier: customer.tier ?? "Mới",
+      isMember: customer.isMember ?? false,
+      memberStatus: customer.memberStatus ?? "inactive",
       orderCount: metric?.orderCount ?? 0,
       totalSpent: metric?.totalSpent ?? 0
     };
@@ -1045,7 +1250,7 @@ export const getAdminCustomerDetail = async (customerId: string) => {
     _id: customerId,
     role: USER_ROLES.CUSTOMER
   })
-    .select("_id email firstName lastName phone createdAt")
+    .select("_id email firstName lastName phone createdAt points tier isMember memberStatus")
     .lean();
 
   if (!customer) {
@@ -1069,8 +1274,47 @@ export const getAdminCustomerDetail = async (customerId: string) => {
     phone: customer.phone,
     createdAt: customer.createdAt,
     orderCount: ordersCount,
-    totalSpent: aggregateSpent[0]?.totalSpent ?? 0
+    totalSpent: aggregateSpent[0]?.totalSpent ?? 0,
+    points: customer.points ?? 0,
+    tier: customer.tier ?? "Mới",
+    isMember: customer.isMember ?? false,
+    memberStatus: customer.memberStatus ?? "inactive"
   };
+};
+
+export const updateAdminCustomerPoints = async (
+  actorUserId: string,
+  customerId: string,
+  points?: number,
+  tier?: string
+) => {
+  ensureObjectId(customerId, "customer id");
+
+  const customer = await UserModel.findOne({ _id: customerId, role: USER_ROLES.CUSTOMER });
+  if (!customer) {
+    throw new ApiError(404, "Customer not found");
+  }
+
+  if (points !== undefined) {
+    customer.points = Math.max(0, points);
+  }
+
+  if (tier) {
+    const validTiers = ["Mới", "Bạc", "Vàng", "Kim cương"];
+    if (!validTiers.includes(tier)) {
+      throw new ApiError(400, "Invalid tier");
+    }
+    customer.tier = tier as "Mới" | "Bạc" | "Vàng" | "Kim cương";
+  }
+
+  await customer.save();
+
+  await writeAudit(actorUserId, "admin.customer.update", "user", customer._id.toString(), {
+    points: customer.points,
+    tier: customer.tier
+  });
+
+  return getAdminCustomerDetail(customer._id.toString());
 };
 
 export const listAdminCustomerOrders = async (customerId: string) => {
@@ -1093,47 +1337,67 @@ export const listAdminCustomerOrders = async (customerId: string) => {
 
 export const listAdminMembershipRequests = async (query: AdminMembershipListQuery) => {
   const { page, limit, skip } = toPagination(query);
-  const filter: Record<string, unknown> = { role: USER_ROLES.CUSTOMER };
+  const filter: Record<string, unknown> = {};
 
-  if (query.status) {
-    filter.memberStatus = query.status;
-  } else {
-    filter.memberStatus = "pending";
+  if (query.status === "pending" || !query.status) {
+    filter.status = "pending";
+  } else if (query.status === "active") {
+    filter.status = "approved";
+  } else if (query.status === "inactive") {
+    filter.status = "rejected";
   }
 
   if (query.search?.trim()) {
     const regex = new RegExp(query.search.trim(), "i");
-    filter.$or = [{ email: regex }, { firstName: regex }, { lastName: regex }, { phone: regex }];
+    filter.$or = [{ fullName: regex }, { email: regex }, { phone: regex }, { paymentTransferNote: regex }];
   }
 
-  const [total, users] = await Promise.all([
-    UserModel.countDocuments(filter),
-    UserModel.find(filter)
-      .sort({ membershipRequestedAt: -1, createdAt: -1 })
+  const [total, requests] = await Promise.all([
+    MembershipRequestModel.countDocuments(filter),
+    MembershipRequestModel.find(filter)
+      .sort({ requestedAt: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .select(
-        "_id email firstName lastName phone isMember memberStatus memberSince membershipRequestedAt membershipReviewedAt membershipReviewNote createdAt"
-      )
       .lean()
   ]);
 
+  const userIds = requests.map((request) => request.userId);
+  const users = await UserModel.find({ _id: { $in: userIds }, role: USER_ROLES.CUSTOMER })
+    .select(
+      "_id email firstName lastName phone isMember memberStatus memberSince membershipRequestedAt membershipReviewedAt membershipReviewNote createdAt"
+    )
+    .lean();
+  const userMap = new Map(users.map((user) => [user._id.toString(), user]));
+
   return {
-    items: users.map((user) => ({
-      _id: user._id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      fullName: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email,
-      phone: user.phone,
-      isMember: user.isMember,
-      memberStatus: user.memberStatus,
-      memberSince: user.memberSince,
-      membershipRequestedAt: user.membershipRequestedAt,
-      membershipReviewedAt: user.membershipReviewedAt,
-      membershipReviewNote: user.membershipReviewNote,
-      createdAt: user.createdAt
-    })),
+    items: requests.map((request) => {
+      const user = userMap.get(request.userId.toString());
+
+      return {
+        _id: request._id,
+        userId: request.userId,
+        email: user?.email ?? request.email,
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        fullName: request.fullName,
+        phone: request.phone,
+        address: request.address,
+        isMember: user?.isMember ?? false,
+        memberStatus: user?.memberStatus ?? "inactive",
+        memberSince: user?.memberSince ?? null,
+        membershipRequestedAt: request.requestedAt,
+        membershipReviewedAt: request.reviewedAt,
+        membershipReviewNote: request.reviewNote,
+        paymentAmount: request.paymentAmount,
+        paymentTransferNote: request.paymentTransferNote,
+        recipientBankBin: request.recipientBankBin,
+        recipientBankName: request.recipientBankName,
+        recipientAccountNumber: request.recipientAccountNumber,
+        recipientAccountName: request.recipientAccountName,
+        proofImageUrl: request.proofImageUrl,
+        createdAt: request.createdAt
+      };
+    }),
     meta: toPaginationMeta(page, limit, total)
   };
 };
@@ -1188,22 +1452,16 @@ export const reviewAdminMembershipRequest = async (
     throw new ApiError(404, "Customer not found");
   }
 
-  if (action === "approve") {
-    if (user.memberStatus === "active") {
-      const safeUser = await UserModel.findById(user._id)
-        .select(
-          "_id email firstName lastName phone isMember memberStatus memberSince membershipRequestedAt membershipReviewedAt membershipReviewNote createdAt"
-        )
-        .lean();
-      if (!safeUser) {
-        throw new ApiError(404, "Customer not found");
-      }
-      return {
-        ...safeUser,
-        fullName: `${safeUser.firstName ?? ""} ${safeUser.lastName ?? ""}`.trim() || safeUser.email
-      };
-    }
+  const request = await MembershipRequestModel.findOne({
+    userId: user._id,
+    status: "pending"
+  }).sort({ createdAt: -1 });
 
+  if (!request) {
+    throw new ApiError(422, "No pending membership request found");
+  }
+
+  if (action === "approve") {
     if (user.memberStatus !== "pending") {
       throw new ApiError(422, "Only pending membership requests can be approved");
     }
@@ -1214,54 +1472,66 @@ export const reviewAdminMembershipRequest = async (
     user.membershipReviewedAt = new Date();
     user.membershipReviewNote = note?.trim() ?? "";
     await user.save();
+
+    request.status = "approved";
+    request.reviewedAt = new Date();
+    request.reviewedBy = new Types.ObjectId(actorUserId);
+    request.reviewNote = note?.trim() ?? "";
+    await request.save();
+
     await createMembershipVoucherOnApprove(user._id.toString());
 
-    await writeAudit(actorUserId, "admin.membership.approve", "user", user._id.toString(), {
-      note: user.membershipReviewNote
+    await writeAudit(actorUserId, "admin.membership.approve", "membership_request", request._id.toString(), {
+      note: request.reviewNote,
+      userId: user._id.toString()
     });
-
-    const safeUser = await UserModel.findById(user._id)
-      .select(
-        "_id email firstName lastName phone isMember memberStatus memberSince membershipRequestedAt membershipReviewedAt membershipReviewNote createdAt"
-      )
-      .lean();
-    if (!safeUser) {
-      throw new ApiError(404, "Customer not found");
+  } else {
+    if (user.memberStatus !== "pending") {
+      throw new ApiError(422, "Only pending membership requests can be rejected");
     }
 
-    return {
-      ...safeUser,
-      fullName: `${safeUser.firstName ?? ""} ${safeUser.lastName ?? ""}`.trim() || safeUser.email
-    };
-  }
+    user.isMember = false;
+    user.memberStatus = "inactive";
+    user.memberSince = null;
+    user.membershipReviewedAt = new Date();
+    user.membershipReviewNote = note?.trim() ?? "";
+    await user.save();
 
-  if (user.memberStatus !== "pending") {
-    throw new ApiError(422, "Only pending membership requests can be rejected");
-  }
+    request.status = "rejected";
+    request.reviewedAt = new Date();
+    request.reviewedBy = new Types.ObjectId(actorUserId);
+    request.reviewNote = note?.trim() ?? "";
+    await request.save();
 
-  user.isMember = false;
-  user.memberStatus = "inactive";
-  user.memberSince = null;
-  user.membershipReviewedAt = new Date();
-  user.membershipReviewNote = note?.trim() ?? "";
-  await user.save();
-
-  await writeAudit(actorUserId, "admin.membership.reject", "user", user._id.toString(), {
-    note: user.membershipReviewNote
-  });
-
-  const safeUser = await UserModel.findById(user._id)
-    .select(
-      "_id email firstName lastName phone isMember memberStatus memberSince membershipRequestedAt membershipReviewedAt membershipReviewNote createdAt"
-    )
-    .lean();
-  if (!safeUser) {
-    throw new ApiError(404, "Customer not found");
+    await writeAudit(actorUserId, "admin.membership.reject", "membership_request", request._id.toString(), {
+      note: request.reviewNote,
+      userId: user._id.toString()
+    });
   }
 
   return {
-    ...safeUser,
-    fullName: `${safeUser.firstName ?? ""} ${safeUser.lastName ?? ""}`.trim() || safeUser.email
+    _id: request._id,
+    userId: user._id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    fullName: request.fullName,
+    phone: request.phone,
+    address: request.address,
+    isMember: user.isMember,
+    memberStatus: user.memberStatus,
+    memberSince: user.memberSince,
+    membershipRequestedAt: request.requestedAt,
+    membershipReviewedAt: request.reviewedAt,
+    membershipReviewNote: request.reviewNote,
+    paymentAmount: request.paymentAmount,
+    paymentTransferNote: request.paymentTransferNote,
+    recipientBankBin: request.recipientBankBin,
+    recipientBankName: request.recipientBankName,
+    recipientAccountNumber: request.recipientAccountNumber,
+    recipientAccountName: request.recipientAccountName,
+    proofImageUrl: request.proofImageUrl,
+    createdAt: request.createdAt
   };
 };
 

@@ -10,6 +10,8 @@ import {
   deactivateAdminVoucher,
   getAdminCustomerDetail,
   getAdminDashboardStats,
+  getAdminSettings,
+  listVietnamBanks,
   getAdminOrderDetail,
   getAdminProductDetail,
   listAdminMembershipRequests,
@@ -24,7 +26,9 @@ import {
   deleteAdminProductImage as deleteAdminProductImageService,
   updateAdminOrderStatus,
   updateAdminPaymentStatus,
-  updateAdminProduct
+  updateAdminProduct,
+  updateAdminCustomerPoints,
+  updateAdminSettings
 } from "../services/admin.service.js";
 
 const getActorUserId = (req: Request): string => {
@@ -82,6 +86,24 @@ const parseVariantsPayload = (variants: unknown) => {
 export const getAdminDashboard = asyncHandler(async (_req: Request, res: Response) => {
   const stats = await getAdminDashboardStats();
   sendSuccess(res, stats, "Dashboard fetched");
+});
+
+export const getAdminStoreSettings = asyncHandler(async (_req: Request, res: Response) => {
+  const settings = await getAdminSettings();
+  sendSuccess(res, settings, "Admin settings fetched");
+});
+
+export const getAdminBanks = asyncHandler(async (_req: Request, res: Response) => {
+  const banks = await listVietnamBanks();
+  sendSuccess(res, banks, "Admin banks fetched");
+});
+
+export const patchAdminStoreSettings = asyncHandler(async (req: Request, res: Response) => {
+  const updated = await updateAdminSettings(getActorUserId(req), {
+    store: req.body.store,
+    membershipPayment: req.body.membershipPayment
+  });
+  sendSuccess(res, updated, "Admin settings updated");
 });
 
 export const getAdminProducts = asyncHandler(async (req: Request, res: Response) => {
@@ -220,7 +242,7 @@ export const uploadAdminProductImage = asyncHandler(async (req: Request, res: Re
 
   // Upload to Cloudinary
   const cloudinaryResult = await uploadToCloudinary(req.file.buffer, req.file.originalname, {
-    folder: "aurelia_products/gallery"
+    folder: "kingman_products/gallery"
   }) as any;
 
   const image = await createAdminProductImage(getActorUserId(req), req.params.productId, {
@@ -240,7 +262,7 @@ export const uploadAdminProductVariantImage = asyncHandler(async (req: Request, 
 
   // Upload to Cloudinary
   const cloudinaryResult = await uploadToCloudinary(req.file.buffer, req.file.originalname, {
-    folder: "aurelia_products/variants"
+    folder: "kingman_products/variants"
   }) as any;
 
   const image = await createAdminProductVariantImage(getActorUserId(req), req.params.productId, {
@@ -260,7 +282,7 @@ export const uploadAdminProductSizeGuideImage = asyncHandler(async (req: Request
 
   // Upload to Cloudinary
   const cloudinaryResult = await uploadToCloudinary(req.file.buffer, req.file.originalname, {
-    folder: "aurelia_products/size_guides"
+    folder: "kingman_products/size_guides"
   }) as any;
 
   const updated = await setAdminProductSizeGuideImage(getActorUserId(req), req.params.productId, {
@@ -321,7 +343,8 @@ export const getAdminCustomers = asyncHandler(async (req: Request, res: Response
   const customers = await listAdminCustomers({
     page: req.query.page ? Number(req.query.page) : undefined,
     limit: req.query.limit ? Number(req.query.limit) : undefined,
-    search: req.query.search?.toString()
+    search: req.query.search?.toString(),
+    memberStatus: req.query.memberStatus as "all" | "member" | "non-member" | undefined
   });
 
   sendSuccess(res, customers, "Admin customers fetched");
@@ -330,6 +353,15 @@ export const getAdminCustomers = asyncHandler(async (req: Request, res: Response
 export const getAdminCustomer = asyncHandler(async (req: Request, res: Response) => {
   const customer = await getAdminCustomerDetail(req.params.customerId);
   sendSuccess(res, customer, "Admin customer fetched");
+});
+
+export const patchAdminCustomer = asyncHandler(async (req: Request, res: Response) => {
+  const { points, tier } = req.body;
+  const numericPoints = typeof points === 'number' ? points : (typeof points === 'string' ? Number(points) : undefined);
+  const validTier = typeof tier === 'string' ? tier : undefined;
+
+  const updated = await updateAdminCustomerPoints(getActorUserId(req), req.params.customerId, numericPoints, validTier);
+  sendSuccess(res, updated, "Customer updated successfully");
 });
 
 export const getAdminCustomerOrderList = asyncHandler(async (req: Request, res: Response) => {

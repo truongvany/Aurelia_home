@@ -1,229 +1,422 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Crown, Gift, Sparkles, Truck, Wrench, ShieldCheck, ScissorsLineDashed, Headset } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
-import type { MembershipPayload, VoucherPayload } from '../types';
+import policyImage from '../assets/images/chinh-sach.jpg';
+import { MembershipPayload } from '../types';
 
-const memberBenefits = [
+type RewardTier = {
+  name: string;
+  minSpend: number;
+  discount: string;
+  birthdayDiscount: string;
+};
+
+type PaymentConfig = {
+  bankBin: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  transferPrefix: string;
+  isActive: boolean;
+  amount: number;
+};
+
+const REWARD_TIERS: RewardTier[] = [
+  { name: 'Thân Thiết', minSpend: 0, discount: '0%', birthdayDiscount: '20%' },
+  { name: 'VIP', minSpend: 5000000, discount: '10%', birthdayDiscount: '25%' },
+  { name: 'Vàng', minSpend: 20000000, discount: '15%', birthdayDiscount: '35%' }
+];
+
+const POLICY_ROWS = [
   {
-    key: 'freeShipping',
-    title: 'Miễn phí vận chuyển',
-    description: 'Mọi đơn hàng đều được miễn phí ship khi bạn là thành viên.',
-    icon: Truck
+    label: 'Điều kiện lên hạng',
+    values: ['Dưới 5.000.000đ', 'Từ 5.000.000đ đến dưới 20.000.000đ', 'Từ 20.000.000đ trở lên']
   },
   {
-    key: 'flexibleSizeExchange',
-    title: 'Trả đổi size linh hoạt',
-    description: 'Hỗ trợ đổi size nhanh chóng với ưu tiên dành riêng cho member.',
-    icon: ScissorsLineDashed
+    label: 'Điều kiện duy trì thẻ',
+    values: ['Vĩnh viễn', 'Vĩnh viễn', 'Vĩnh viễn']
   },
   {
-    key: 'priorityContact',
-    title: 'Liên hệ nhanh chóng',
-    description: 'Kênh hỗ trợ ưu tiên giúp xử lý yêu cầu trong thời gian ngắn hơn.',
-    icon: Headset
+    label: 'Ưu đãi hàng nguyên giá',
+    values: ['0%', '10%', '15%']
   },
   {
-    key: 'freeAlteration',
-    title: 'Sửa đồ miễn phí',
-    description: 'Tinh chỉnh lên form vừa vặn hơn tại điểm dịch vụ của Aurelia Home.',
-    icon: Wrench
+    label: 'Số lần áp dụng',
+    values: ['Theo chương trình', 'Không giới hạn', 'Không giới hạn']
   },
   {
-    key: 'fashionWarranty',
-    title: 'Bảo hành thời trang',
-    description: 'Chính sách bảo hành cho nhóm sản phẩm giày dép và phụ kiện chọn lọc.',
-    icon: ShieldCheck
-  },
-  {
-    key: 'bespokeDesignSupport',
-    title: 'Đặt thiết kế riêng',
-    description: 'Nhận tư vấn cá nhân hóa cho nhu cầu thiết kế theo phong cách cá nhân.',
-    icon: Sparkles
+    label: 'Ưu đãi sinh nhật',
+    values: ['20%', '25%', '35%']
   }
-] as const;
+];
 
-const formatDate = (value: string) => new Date(value).toLocaleDateString('vi-VN');
+function formatCurrency(value: number) {
+  return `${value.toLocaleString('vi-VN')}đ`;
+}
 
 export default function Membership() {
   const { isAuthenticated, user, refreshMe } = useAuth();
-  const [membership, setMembership] = useState<MembershipPayload | null>(null);
-  const [vouchers, setVouchers] = useState<VoucherPayload[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isEnrolling, setIsEnrolling] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [points, setPoints] = useState(0);
+  const [currentTierIndex, setCurrentTierIndex] = useState(0);
+  const [membershipData, setMembershipData] = useState<MembershipPayload | null>(null);
+  const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const memberStatus = membership?.user.memberStatus ?? user?.memberStatus ?? 'inactive';
-  const isPending = memberStatus === 'pending';
-  const isMemberActive = memberStatus === 'active';
-
-  const activeVouchers = useMemo(
-    () => vouchers.filter((voucher) => !voucher.isExpired && voucher.usedCount < voucher.maxUsesPerUser),
-    [vouchers]
-  );
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [paymentTransferNote, setPaymentTransferNote] = useState('');
+  const [proofImage, setProofImage] = useState<File | null>(null);
 
   useEffect(() => {
-    const loadPrivateData = async () => {
-      if (!isAuthenticated) {
-        setMembership(null);
-        setVouchers([]);
-        return;
-      }
+    if (!isAuthenticated || !user) {
+      setPoints(0);
+      setCurrentTierIndex(0);
+      setMembershipData(null);
+      setPaymentConfig(null);
+      return;
+    }
 
+    const userPoints = user.points || 0;
+    setPoints(userPoints);
+
+    const estimatedSpend = userPoints * 10000;
+    let tierIdx = 0;
+    for (let i = REWARD_TIERS.length - 1; i >= 0; i--) {
+      if (estimatedSpend >= REWARD_TIERS[i].minSpend) {
+        tierIdx = i;
+        break;
+      }
+    }
+    setCurrentTierIndex(tierIdx);
+
+    const name = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
+    setFullName(name || user.email || '');
+    setPhone(user.phone || '');
+  }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const loadMembershipContext = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-        const [membershipData, voucherData] = await Promise.all([
+        setIsLoadingConfig(true);
+        const [membership, config] = await Promise.all([
           api.getMembership(),
-          api.getVouchers()
+          api.getMembershipPaymentConfig()
         ]);
-        setMembership(membershipData);
-        setVouchers(voucherData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Không thể tải dữ liệu Membership');
+        setMembershipData(membership);
+        setPaymentConfig(config);
+        if (!paymentTransferNote) {
+          setPaymentTransferNote(`${config.transferPrefix || 'PREMIUM'} ${user?.email || ''}`.trim());
+        }
+      } catch (error) {
+        console.error(error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingConfig(false);
       }
     };
 
-    loadPrivateData();
-  }, [isAuthenticated]);
+    loadMembershipContext();
+  }, [isAuthenticated, user?.email]);
 
-  const handleEnroll = async () => {
-    if (!isAuthenticated) {
+  const estimatedSpend = points * 10000;
+  const currentTier = REWARD_TIERS[currentTierIndex];
+  const nextTier = currentTierIndex < REWARD_TIERS.length - 1 ? REWARD_TIERS[currentTierIndex + 1] : null;
+  const isPremiumActive = user?.isMember && user?.memberStatus === 'active';
+  const isPremiumPending = user?.memberStatus === 'pending';
+
+  const vietQrImage = useMemo(() => {
+    if (!paymentConfig?.bankBin || !paymentConfig?.accountNumber || !paymentConfig?.accountName) {
+      return '';
+    }
+
+    const amount = paymentConfig.amount || 29000;
+    const addInfo = encodeURIComponent(paymentTransferNote || `${paymentConfig.transferPrefix} ${user?.email || ''}`);
+    const accountName = encodeURIComponent(paymentConfig.accountName);
+
+    return `https://img.vietqr.io/image/${paymentConfig.bankBin}-${paymentConfig.accountNumber}-compact2.png?amount=${amount}&addInfo=${addInfo}&accountName=${accountName}`;
+  }, [paymentConfig, paymentTransferNote, user?.email]);
+
+  const handleProofFileChange = (file: File | null) => {
+    if (!file) {
+      setProofImage(null);
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn file ảnh cho bằng chứng thanh toán.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Kích thước ảnh tối đa là 5MB.');
+      return;
+    }
+
+    setProofImage(file);
+  };
+
+  const [notificationVisible, setNotificationVisible] = useState(false);
+
+  const handleEnrollPremium = async () => {
+    if (!isAuthenticated) return;
+
+    if (!paymentConfig?.isActive) {
+      alert('Đăng ký Premium hiện đang tạm ngưng. Vui lòng liên hệ hỗ trợ.');
+      return;
+    }
+
+    if (!fullName.trim()) {
+      alert('Vui lòng nhập họ và tên.');
+      return;
+    }
+
+    if (!phone.trim()) {
+      alert('Vui lòng nhập số điện thoại.');
+      return;
+    }
+
+    if (!proofImage) {
+      alert('Vui lòng upload bằng chứng thanh toán.');
       return;
     }
 
     try {
-      setIsEnrolling(true);
-      setError(null);
-      const data = await api.enrollMembership();
-      setMembership(data);
-      const voucherData = await api.getVouchers();
-      setVouchers(voucherData);
+      setIsSubmitting(true);
+      const note = (paymentTransferNote || `${paymentConfig.transferPrefix} ${user?.email || ''}`).trim();
+      await api.enrollMembership({
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        paymentTransferNote: note,
+        proofImage
+      });
+
       await refreshMe();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể kích hoạt Membership');
+      const latestMembership = await api.getMembership();
+      setMembershipData(latestMembership);
+      setNotificationVisible(true);
+      setTimeout(() => setNotificationVisible(false), 6500);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.');
+      console.error(error);
     } finally {
-      setIsEnrolling(false);
+      setIsSubmitting(false);
     }
   };
 
+  const latestRequest = membershipData?.latestRequest;
+
   return (
-    <div className="relative overflow-hidden bg-[#f3f0eb] text-[#1c1a18]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(197,160,89,0.2),transparent_45%),radial-gradient(circle_at_bottom_right,rgba(28,26,24,0.12),transparent_40%)]" />
-
-      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-10">
-        <div className="rounded-3xl border border-[#d6c5a5] bg-[#fbf9f6]/90 p-8 md:p-12 shadow-[0_25px_60px_rgba(34,27,17,0.12)]">
-          <p className="inline-flex items-center gap-2 rounded-full border border-[#cab07a] bg-[#f6ecda] px-4 py-2 text-xs uppercase tracking-[0.25em] text-[#7f5a22]">
-            <Crown className="h-4 w-4" />
-            Aurelia Member
-          </p>
-          <h1 className="mt-6 font-serif text-4xl md:text-6xl leading-tight">
-            Membership dành cho trải nghiệm thời trang cao cấp
-          </h1>
-          <p className="mt-5 max-w-3xl text-base md:text-lg text-[#5f564c]">
-            Kích hoạt membership để nhận voucher độc quyền, miễn phí vận chuyển trên mọi đơn,
-            cùng các đặc quyền chăm sóc và bảo hành dành cho khách hàng thân thiết.
-          </p>
-
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            {!isAuthenticated ? (
-              <Link
-                to="/auth"
-                className="inline-flex items-center justify-center rounded-full bg-[#1f1a14] px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-[#3a2f23]"
-              >
-                Đăng nhập để tham gia
-              </Link>
-            ) : (
-              <button
-                type="button"
-                onClick={handleEnroll}
-                disabled={isPending || isMemberActive || isEnrolling}
-                className="inline-flex items-center justify-center rounded-full bg-[#1f1a14] px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-[#3a2f23] disabled:opacity-60"
-              >
-                {isMemberActive
-                  ? 'Bạn đã là thành viên'
-                  : isPending
-                    ? 'Yêu cầu đang chờ duyệt'
-                    : isEnrolling
-                      ? 'Đang gửi yêu cầu...'
-                      : 'Gửi yêu cầu tham gia'}
-              </button>
-            )}
-
-            <Link
-              to="/shop"
-              className="inline-flex items-center justify-center rounded-full border border-[#1f1a14] px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#1f1a14] hover:bg-[#1f1a14] hover:text-white"
-            >
-              Mua sắm ngay
-            </Link>
-          </div>
-
-          {error && <p className="mt-4 text-sm text-rose-700">{error}</p>}
-          {isPending && (
-            <p className="mt-3 text-sm text-amber-700">
-              Yêu cầu của bạn đã được gửi. Quyền lợi membership sẽ kích hoạt sau khi admin duyệt.
-            </p>
-          )}
+    <div className="min-h-screen bg-[#f3f5f8] pt-24 pb-16 relative">
+      {notificationVisible && (
+        <div className="fixed right-4 top-24 z-50 w-80 rounded-lg border border-emerald-200 bg-emerald-50 p-4 shadow-lg shadow-emerald-200/30 animate-slide-in-right">
+          <p className="text-sm font-semibold text-emerald-900">Đã gửi đăng ký thành viên</p>
+          <p className="mt-1 text-xs text-emerald-800">Admin sẽ kiểm tra bằng chứng và duyệt trong 1-2 giờ làm việc.</p>
         </div>
-      </section>
+      )}
 
-      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {memberBenefits.map((benefit) => {
-            const Icon = benefit.icon;
-            const enabled = isMemberActive && membership?.benefits?.[benefit.key as keyof MembershipPayload['benefits']];
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <header className="mb-6 border border-slate-200 bg-white px-6 py-5">
+          <h1 className="text-3xl font-extrabold tracking-tight text-[#0f1f3d] sm:text-4xl">Chính Sách Khách Hàng</h1>
+          <p className="mt-2 text-sm text-slate-600 sm:text-base">
+            Đăng ký thành viên Premium với thông tin cá nhân đầy đủ và bằng chứng thanh toán VietQR.
+          </p>
+        </header>
 
-            return (
-              <article
-                key={benefit.key}
-                className="rounded-2xl border border-[#e6dac7] bg-white/90 p-6 shadow-[0_16px_36px_rgba(45,34,24,0.08)]"
-              >
-                <div className="flex items-center justify-between">
-                  <Icon className="h-6 w-6 text-[#9b6b2d]" />
-                  <span className={`text-xs font-semibold uppercase tracking-[0.15em] ${enabled ? 'text-emerald-700' : 'text-[#a2937c]'}`}>
-                    {enabled ? 'Đang kích hoạt' : 'Chưa kích hoạt'}
-                  </span>
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-[#1f1a14]">{benefit.title}</h3>
-                <p className="mt-2 text-sm text-[#6f6458]">{benefit.description}</p>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="relative bg-[#1f1a14] py-14 text-[#f7f2e8]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="font-serif text-3xl">Voucher dành cho Membership</h2>
-            <Gift className="h-7 w-7 text-[#d8b173]" />
-          </div>
-
-          {!isAuthenticated ? (
-            <p className="mt-4 text-sm text-[#d7ccbf]">Đăng nhập để xem voucher cá nhân và áp dụng tại trang thanh toán.</p>
-          ) : isPending ? (
-            <p className="mt-4 text-sm text-[#d7ccbf]">Tài khoản đang chờ duyệt membership. Voucher membership sẽ xuất hiện sau khi được duyệt.</p>
-          ) : isLoading ? (
-            <p className="mt-4 text-sm text-[#d7ccbf]">Đang tải voucher...</p>
-          ) : activeVouchers.length === 0 ? (
-            <p className="mt-4 text-sm text-[#d7ccbf]">Hiện chưa có voucher khả dụng. Hãy tham gia Membership để nhận ưu đãi đầu tiên.</p>
-          ) : (
-            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {activeVouchers.map((voucher) => (
-                <article key={voucher._id} className="rounded-2xl border border-[#46382a] bg-[#2a221a] p-5">
-                  <p className="text-xs uppercase tracking-[0.2em] text-[#d8b173]">{voucher.source}</p>
-                  <p className="mt-3 text-2xl font-bold">{voucher.code}</p>
-                  <p className="mt-2 text-sm text-[#e6daca]">Giảm {voucher.discountValue}% cho đơn từ {voucher.minOrderAmount.toLocaleString('vi-VN')}đ</p>
-                  <p className="mt-3 text-xs text-[#bcae9a]">Hạn dùng: {formatDate(voucher.expiresAt)}</p>
-                </article>
-              ))}
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.25fr_1fr]">
+          <section className="border border-slate-200 bg-white">
+            <div className="border-b border-slate-200 bg-[#0f1f3d] px-5 py-3 text-sm font-semibold uppercase tracking-wide text-white">
+              Chính sách thành viên
             </div>
-          )}
+            <img src={policyImage} alt="Chính sách khách hàng King Man" className="h-full w-full object-cover" />
+          </section>
+
+          <section className="border border-slate-200 bg-white">
+            <div className="border-b border-slate-200 bg-[#0f1f3d] px-5 py-3 text-sm font-semibold uppercase tracking-wide text-white">
+              Thông tin và đăng ký thanh toán
+            </div>
+
+            <div className="space-y-4 p-5">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Điểm Rewards</p>
+                  <p className="mt-2 text-2xl font-bold text-[#0f1f3d]">{points.toLocaleString('vi-VN')}</p>
+                </div>
+                <div className="border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Hạng hiện tại</p>
+                  <p className="mt-2 text-2xl font-bold text-[#0f1f3d]">{currentTier.name}</p>
+                </div>
+              </div>
+
+              <div className="border border-slate-200 bg-white p-4 text-sm text-slate-700">
+                {nextTier ? (
+                  <p>
+                    Bạn cần thêm <strong>{formatCurrency(nextTier.minSpend - estimatedSpend)}</strong> chi tiêu để lên hạng{' '}
+                    <strong>{nextTier.name}</strong>.
+                  </p>
+                ) : (
+                  <p>Bạn đang ở hạng cao nhất trong chương trình Rewards.</p>
+                )}
+              </div>
+
+              {!isAuthenticated && (
+                <div className="border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm font-semibold text-[#0f1f3d]">Đăng nhập để đăng ký Premium</p>
+                  <p className="mt-1 text-sm text-slate-600">Vui lòng đăng nhập để gửi thông tin cá nhân và bằng chứng thanh toán.</p>
+                  <Link to="/auth" className="mt-3 inline-block bg-[#0f1f3d] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0a1530]">
+                    Đăng ký / Đăng nhập
+                  </Link>
+                </div>
+              )}
+
+              {isAuthenticated && (
+                <div className="border border-slate-200 bg-white p-4 space-y-3">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-[#0f1f3d]">Đăng ký King Man Premium</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Họ và tên</label>
+                      <input
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="w-full border border-slate-300 px-3 py-2 text-sm"
+                        placeholder="Nguyễn Văn A"
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Số điện thoại</label>
+                      <input
+                        type="text"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full border border-slate-300 px-3 py-2 text-sm"
+                        placeholder="090xxxxxxx"
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Địa chỉ</label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="w-full border border-slate-300 px-3 py-2 text-sm"
+                      placeholder="Số nhà, đường, quận/huyện, tỉnh/thành"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+
+                  {isLoadingConfig && <p className="text-sm text-slate-500">Đang tải cấu hình thanh toán...</p>}
+
+                  {!isLoadingConfig && paymentConfig && (
+                    <>
+                      <div className="border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 space-y-1">
+                        <p><span className="font-semibold">Phí thành viên:</span> {formatCurrency(paymentConfig.amount)}</p>
+                        <p>
+                          <span className="font-semibold">Tài khoản nhận:</span>{' '}
+                          {[paymentConfig.bankName, paymentConfig.accountNumber, paymentConfig.accountName]
+                            .filter(Boolean)
+                            .join(' | ') || 'Chưa cấu hình'}
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Nội dung chuyển khoản</label>
+                        <input
+                          type="text"
+                          value={paymentTransferNote}
+                          onChange={(e) => setPaymentTransferNote(e.target.value)}
+                          className="w-full border border-slate-300 px-3 py-2 text-sm"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+
+                      {vietQrImage ? (
+                        <div className="border border-slate-200 bg-slate-50 p-3 text-center">
+                          <img src={vietQrImage} alt="VietQR thanh toán Premium" className="mx-auto h-[190px] w-[190px]" />
+                          <p className="mt-2 text-xs text-slate-500">Quét QR và chuyển đúng nội dung để admin dễ đối soát.</p>
+                        </div>
+                      ) : (
+                        <div className="border border-amber-300 bg-amber-50 p-3 text-sm text-amber-700">
+                          Cấu hình VietQR chưa đầy đủ. Vui lòng liên hệ admin.
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">
+                          Upload bằng chứng thanh toán
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleProofFileChange(e.target.files?.[0] ?? null)}
+                          className="w-full border border-slate-300 px-3 py-2 text-sm file:mr-3 file:border-0 file:bg-[#0f1f3d] file:px-3 file:py-2 file:text-white"
+                          disabled={isSubmitting}
+                        />
+                        {proofImage && <p className="mt-1 text-xs text-slate-500">Đã chọn: {proofImage.name}</p>}
+                      </div>
+
+                      <div className="border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+                        <p>Trạng thái: {isPremiumActive ? 'Đã kích hoạt' : isPremiumPending ? 'Đang chờ duyệt' : 'Chưa đăng ký'}</p>
+                        {latestRequest?.requestedAt && (
+                          <p className="mt-1">Yêu cầu gần nhất: {new Date(latestRequest.requestedAt).toLocaleString('vi-VN')}</p>
+                        )}
+                        {latestRequest?.reviewNote && <p className="mt-1">Ghi chú admin: {latestRequest.reviewNote}</p>}
+                      </div>
+
+                      {!isPremiumActive && (
+                        <button
+                          onClick={handleEnrollPremium}
+                          disabled={isSubmitting || (!paymentConfig.isActive && !isPremiumPending)}
+                          className="w-full bg-[#0f1f3d] px-4 py-3 text-sm font-semibold text-white hover:bg-[#0a1530] disabled:cursor-not-allowed disabled:bg-slate-400"
+                        >
+                          {isSubmitting ? 'Đang gửi đăng ký...' : isPremiumPending ? 'Gửi lại thông tin / bằng chứng' : 'Xác nhận đã chuyển khoản'}
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
         </div>
-      </section>
+
+        <section className="mt-6 border border-slate-200 bg-white">
+          <div className="border-b border-slate-200 bg-[#0f1f3d] px-5 py-3 text-sm font-semibold uppercase tracking-wide text-white">
+            Bảng thông tin chính sách
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px] border-collapse text-sm">
+              <thead>
+                <tr className="bg-slate-100 text-left text-slate-700">
+                  <th className="border border-slate-200 px-4 py-3">Tiêu chí</th>
+                  <th className="border border-slate-200 px-4 py-3">Hạng Thân Thiết</th>
+                  <th className="border border-slate-200 px-4 py-3">Hạng VIP</th>
+                  <th className="border border-slate-200 px-4 py-3">Hạng Vàng</th>
+                </tr>
+              </thead>
+              <tbody>
+                {POLICY_ROWS.map((row) => (
+                  <tr key={row.label}>
+                    <td className="border border-slate-200 px-4 py-3 font-semibold text-[#0f1f3d]">{row.label}</td>
+                    <td className="border border-slate-200 px-4 py-3 text-slate-700">{row.values[0]}</td>
+                    <td className="border border-slate-200 px-4 py-3 text-slate-700">{row.values[1]}</td>
+                    <td className="border border-slate-200 px-4 py-3 text-slate-700">{row.values[2]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

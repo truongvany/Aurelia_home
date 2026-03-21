@@ -107,8 +107,8 @@ export const addCartItem = async (input: AddCartItemInput) => {
 
   const existingIndex = cart.items.findIndex(
     (item) => item.productVariantId.toString() === input.productVariantId
-  );
-
+  );  
+  
   if (existingIndex >= 0) {
     const nextQuantity = cart.items[existingIndex].quantity + input.quantity;
     if (variant.stockQuantity < nextQuantity) {

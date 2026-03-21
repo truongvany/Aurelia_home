@@ -1,18 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check } from 'lucide-react';
+import { Check, Crown } from 'lucide-react';
 import { api } from '../lib/api';
 import { CartPayload, VoucherPayload } from '../types';
 import { formatVND } from '../utils/currency';
+import { useAuth } from '../contexts/AuthContext';
 
-const VIETQR_BANK_BIN = '970422';
-const VIETQR_ACCOUNT = '1903648271902';
-const VIETQR_ACCOUNT_NAME = 'AURELIA HOME';
+
 
 export default function CheckoutPage() {
+  const { user } = useAuth();
   const [cart, setCart] = useState<CartPayload | null>(null);
   const [vouchers, setVouchers] = useState<VoucherPayload[]>([]);
   const [order, setOrder] = useState<any | null>(null);
+  const [paymentConfig, setPaymentConfig] = useState<{
+    bankBin?: string;
+    bankName?: string;
+    accountNumber?: string;
+    accountName?: string;
+  } | null>(null);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -30,9 +36,14 @@ export default function CheckoutPage() {
   useEffect(() => {
     const fetchCheckoutData = async () => {
       try {
-        const [cartData, voucherData] = await Promise.all([api.getCart(), api.getVouchers()]);
+        const [cartData, voucherData, configData] = await Promise.all([
+             api.getCart(), 
+             api.getVouchers(),
+             api.getMembershipPaymentConfig().catch(() => null)
+        ]);
         setCart(cartData);
         setVouchers(voucherData);
+        if (configData) setPaymentConfig(configData);
       } catch (error) {
         console.error('Failed to load checkout data', error);
       }
@@ -62,9 +73,11 @@ export default function CheckoutPage() {
     : (cart?.finalAmount ?? Math.max(0, summarySubtotal - summaryDiscount) + summaryShippingFee);
 
   const qrAmount = Math.max(0, Math.round(summaryTotal));
-  const qrInfo = encodeURIComponent('Thanh toan don hang Aurelia Home');
-  const qrName = encodeURIComponent(VIETQR_ACCOUNT_NAME);
-  const vietQrImage = `https://img.vietqr.io/image/${VIETQR_BANK_BIN}-${VIETQR_ACCOUNT}-compact2.png?amount=${qrAmount}&addInfo=${qrInfo}&accountName=${qrName}`;
+  const qrInfo = encodeURIComponent('Thanh toan don hang King Man');
+  const qrBankBin = paymentConfig?.bankBin || '970422';
+  const qrAccount = paymentConfig?.accountNumber || '1903648271902';
+  const qrName = encodeURIComponent(paymentConfig?.accountName || 'KING MAN');
+  const vietQrImage = `https://img.vietqr.io/image/${qrBankBin}-${qrAccount}-compact2.png?amount=${qrAmount}&addInfo=${qrInfo}&accountName=${qrName}`;
 
   const translateOrderStatus = (status: string) => {
     switch (status) {
@@ -400,9 +413,9 @@ export default function CheckoutPage() {
                       referrerPolicy="no-referrer"
                     />
                     <div className="text-sm text-slate-600 space-y-1">
-                    <p><span className="font-medium text-charcoal">Ngân hàng:</span> MB Bank</p>
-                    <p><span className="font-medium text-charcoal">Số tài khoản:</span> {VIETQR_ACCOUNT}</p>
-                    <p><span className="font-medium text-charcoal">Chủ tài khoản:</span> {VIETQR_ACCOUNT_NAME}</p>
+                    <p><span className="font-medium text-charcoal">Ngân hàng:</span> {paymentConfig?.bankName || 'MB Bank'}</p>
+                    <p><span className="font-medium text-charcoal">Số tài khoản:</span> {paymentConfig?.accountNumber || '1903648271902'}</p>
+                    <p><span className="font-medium text-charcoal">Chủ tài khoản:</span> {paymentConfig?.accountName || 'KING MAN'}</p>
                     <p><span className="font-medium text-charcoal">Số tiền:</span> {formatVND(summaryTotal)}</p>
                     </div>
                   </div>
@@ -506,8 +519,11 @@ export default function CheckoutPage() {
                       <span>-{formatVND(summaryDiscount)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Phí vận chuyển</span>
-                      <span>{summaryShippingFee === 0 ? 'Miễn phí' : formatVND(summaryShippingFee)}</span>
+                      <span className="flex items-center gap-1">
+                        Phí vận chuyển 
+                        {user?.isMember && user?.memberStatus === 'active' && <span className="text-amber-500 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-amber-50 px-1.5 py-0.5 rounded"><Crown className="w-3 h-3"/> Premium</span>}
+                      </span>
+                      <span className={summaryShippingFee === 0 ? 'text-emerald-600 font-semibold' : ''}>{summaryShippingFee === 0 ? 'Miễn phí' : formatVND(summaryShippingFee)}</span>
                     </div>
                     <div className="flex justify-between text-base font-semibold">
                       <span>Tổng</span>
@@ -564,8 +580,11 @@ export default function CheckoutPage() {
                 <span>-{formatVND(summaryDiscount)}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-600">
-                <span>Phí vận chuyển</span>
-                <span>{summaryShippingFee === 0 ? 'Miễn phí' : formatVND(summaryShippingFee)}</span>
+                <span className="flex items-center gap-1">
+                  Phí vận chuyển 
+                  {user?.isMember && user?.memberStatus === 'active' && <span className="text-amber-500 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-amber-50 px-1.5 py-0.5 rounded"><Crown className="w-3 h-3"/> Premium</span>}
+                </span>
+                <span className={summaryShippingFee === 0 ? 'text-emerald-600 font-semibold' : ''}>{summaryShippingFee === 0 ? 'Miễn phí' : formatVND(summaryShippingFee)}</span>
               </div>
               <div className="border-t border-gray-200 pt-4 flex justify-between items-center">
                 <span className="font-serif font-bold text-charcoal">Tổng cộng</span>

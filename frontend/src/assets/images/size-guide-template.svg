@@ -2,7 +2,7 @@
   <rect width="1200" height="1600" fill="#F8FAFC"/>
   <rect x="70" y="70" width="1060" height="1460" rx="28" fill="white" stroke="#E2E8F0" stroke-width="4"/>
   <text x="120" y="170" font-family="Georgia, serif" font-size="58" fill="#0F172A" font-weight="700">SIZE GUIDE</text>
-  <text x="120" y="218" font-family="Arial, sans-serif" font-size="28" fill="#64748B">Aurelia Home - Bảng quy đổi kích thước</text>
+  <text x="120" y="218" font-family="Arial, sans-serif" font-size="28" fill="#64748B">King Man - Bảng quy đổi kích thước</text>
 
   <rect x="120" y="280" width="960" height="70" rx="12" fill="#0F172A"/>
   <text x="170" y="325" font-family="Arial, sans-serif" font-size="28" fill="white" font-weight="700">Size</text>

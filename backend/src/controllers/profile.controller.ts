@@ -4,6 +4,7 @@ import { sendSuccess } from "../utils/apiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import {
   enrollMembership,
+  getMembershipPaymentConfig,
   getMembershipProfile,
   getMyVouchers,
   getProfile,
@@ -49,9 +50,31 @@ export const getMyMembership = asyncHandler(async (req: Request, res: Response) 
   sendSuccess(res, membership, "Membership fetched");
 });
 
+export const getMyMembershipPaymentConfig = asyncHandler(async (_req: Request, res: Response) => {
+  const config = await getMembershipPaymentConfig();
+  sendSuccess(res, config, "Membership payment config fetched");
+});
+
 export const joinMembership = asyncHandler(async (req: Request, res: Response) => {
-  const membership = await enrollMembership(getUserId(req));
-  sendSuccess(res, membership, "Membership activated");
+  if (!req.file) {
+    throw new ApiError(400, "proofImage file is required");
+  }
+
+  const { uploadToCloudinary } = await import("../utils/cloudinaryUpload.js");
+  const uploadResult = (await uploadToCloudinary(req.file.buffer, req.file.originalname, {
+    folder: "kingman_membership/proofs"
+  })) as { secure_url: string };
+
+  const membership = await enrollMembership(getUserId(req), {
+    fullName: typeof req.body.fullName === "string" ? req.body.fullName : undefined,
+    phone: typeof req.body.phone === "string" ? req.body.phone : undefined,
+    address: typeof req.body.address === "string" ? req.body.address : undefined,
+    paymentTransferNote:
+      typeof req.body.paymentTransferNote === "string" ? req.body.paymentTransferNote : undefined,
+    proofImageUrl: uploadResult.secure_url
+  });
+
+  sendSuccess(res, membership, "Membership request submitted");
 });
 
 export const getVouchers = asyncHandler(async (req: Request, res: Response) => {
