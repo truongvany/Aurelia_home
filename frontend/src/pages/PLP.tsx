@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, Filter, ShoppingBag, Search } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, Filter, Heart, ShoppingBag, Search } from 'lucide-react';
 import { Product } from '../types';
 import { api } from '../lib/api';
 import { formatVND } from '../utils/currency';
 import PriceRangeSlider from '../components/PriceRangeSlider';
+import { isProductWishlisted, toggleWishlistProduct, getWishlistUpdatedEventName } from '../utils/wishlist';
 
 const ProductCardItem: React.FC<{ 
   product: Product; 
@@ -17,6 +18,29 @@ const ProductCardItem: React.FC<{
   addingToCartProductId, 
   imageRef 
 }) => {
+  const [isWishlisted, setIsWishlisted] = useState<boolean>(() => isProductWishlisted(product._id));
+  const [heartAnimate, setHeartAnimate] = useState(false);
+
+  // Sync khi wishlist thay đổi từ tab/trang khác
+  useEffect(() => {
+    const sync = () => setIsWishlisted(isProductWishlisted(product._id));
+    window.addEventListener(getWishlistUpdatedEventName(), sync);
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener(getWishlistUpdatedEventName(), sync);
+      window.removeEventListener('storage', sync);
+    };
+  }, [product._id]);
+
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlistProduct(product._id);
+    setIsWishlisted(isProductWishlisted(product._id));
+    setHeartAnimate(true);
+    setTimeout(() => setHeartAnimate(false), 600);
+  };
+
   const [selectedColor, setSelectedColor] = useState<string | null>(product.colors[0] ?? null);
 
   const getColorImage = (color?: string) => {
@@ -47,6 +71,24 @@ const ProductCardItem: React.FC<{
             -{product.discountPercent}%
           </div>
         )}
+        {/* Wishlist / Heart button */}
+        <button
+          type="button"
+          onClick={handleToggleWishlist}
+          aria-label={isWishlisted ? 'Bỏ yêu thích' : 'Yêu thích sản phẩm'}
+          className={`absolute top-2.5 right-2.5 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm border transition-all duration-200 shadow-sm opacity-0 group-hover:opacity-100 ${
+            isWishlisted
+              ? 'border-rose-300 opacity-100'
+              : 'border-slate-200 hover:border-rose-300'
+          } ${heartAnimate ? 'heart-pop' : ''}`}
+        >
+          <Heart
+            className={`h-[15px] w-[15px] transition-all duration-200 ${
+              isWishlisted ? 'fill-rose-500 text-rose-500' : 'fill-none text-slate-400 hover:text-rose-400'
+            }`}
+            strokeWidth={1.6}
+          />
+        </button>
         <Link to={`/product/${product._id}`} className="block">
           <img
             ref={imageRef}
@@ -465,6 +507,16 @@ export default function PLP() {
         }
         .cart-shake {
           animation: cartShake 0.45s ease-out !important;
+        }
+        @keyframes heartPop {
+          0%   { transform: scale(1); }
+          30%  { transform: scale(1.45); }
+          55%  { transform: scale(0.88); }
+          75%  { transform: scale(1.18); }
+          100% { transform: scale(1.05); }
+        }
+        .heart-pop {
+          animation: heartPop 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
         }
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;

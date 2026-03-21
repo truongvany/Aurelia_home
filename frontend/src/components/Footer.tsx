@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowUp, Facebook, Instagram, Mail, MapPin, Phone, Truck, Wallet } from 'lucide-react';
+import logo from '../assets/images/logo.png';
 
 export default function Footer() {
   return (
@@ -9,14 +10,14 @@ export default function Footer() {
           
           {/* Cột 1: Thông tin liên hệ */}
           <div>
-            <h3 className="text-[24px] font-serif font-bold text-[#0f1f3d] mb-4">KING MAN</h3>
+            <img src={logo} alt="King Man" className="h-14 w-auto mb-4" />
             <p className="text-[12px] text-slate-500 leading-relaxed mb-6">
               Hệ thống thời trang nam cao cấp, theo đuổi phong cách lịch lãm hiện đại và dịch vụ tư vấn cá nhân hóa.
             </p>
             <ul className="space-y-4 text-[12px] text-slate-500">
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-slate-400" />
-                <span className="leading-relaxed">Tầng 8, Tòa nhà 311-313 Trường Chinh, P. Phương Liệt, Hà Nội</span>
+                <span className="leading-relaxed">459 Tôn Đức Thắng, Hòa Khánh Nam, Liên Chiểu, Đà Nẵng</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-4 h-4 shrink-0 text-slate-400" />
