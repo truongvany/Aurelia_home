@@ -1,0 +1,1935 @@
+{
+    "success": true,
+    "message": "Products fetched",
+    "data": [
+        {
+            "_id": "69bd22cd6a783ef2fa071633",
+            "name": "Top: Giày Da Oxford",
+            "description": "Top bán chạy: Giày da oxford đen chính thức",
+            "price": 1200000,
+            "discountPercent": 0,
+            "category": "Top Sản Phẩm Bán Chạy",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061546/aurelia_products/gallery/ymxamn2m6op3itiz64f3.jpg",
+            "sizes": [
+                "M",
+                "L"
+            ],
+            "colors": [
+                "Đen",
+                "Nâu"
+            ],
+            "colorImages": {
+                "Đen": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061547/aurelia_products/variants/jykdm53qzwbpshewqihx.jpg",
+                "Nâu": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061548/aurelia_products/variants/gojoj6cjh2tlfrbeg83d.webp"
+            },
+            "inStock": true,
+            "slug": "top-giy-da-oxford"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071631",
+            "name": "Top: Quần Kaki Cơ Bản",
+            "description": "Top bán chạy: Quần kaki khaki cơ bản",
+            "price": 480000,
+            "discountPercent": 0,
+            "category": "Top Sản Phẩm Bán Chạy",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774060992/aurelia_products/gallery/rwriwsqwezw3m12outqk.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774060993/aurelia_products/variants/vpsv2j6fdshl2fo9do2f.jpg"
+            },
+            "inStock": true,
+            "slug": "top-qun-kaki-c-bn"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07162f",
+            "name": "Top: Áo Sơ Mi Dài Premium",
+            "description": "Top bán chạy: Áo sơ mi dài tay trắng premium",
+            "price": 450000,
+            "discountPercent": 0,
+            "category": "Top Sản Phẩm Bán Chạy",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061642/aurelia_products/gallery/fcp9qthn6egd7n7vxsyd.jpg",
+            "sizes": [
+                "M",
+                "L"
+            ],
+            "colors": [
+                "Đen",
+                "Xanh"
+            ],
+            "colorImages": {
+                "Đen": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061644/aurelia_products/variants/qymbtkgkzqudt2or72vm.jpg",
+                "Xanh": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061645/aurelia_products/variants/siql44powosku3wkxdsr.jpg"
+            },
+            "inStock": true,
+            "slug": "top-o-s-mi-di-premium"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07162d",
+            "name": "Quần Tây Sale Xanh Navy",
+            "description": "Quần tây xanh navy giảm 35%, chất lượng cao",
+            "price": 420000,
+            "discountPercent": 0,
+            "category": "Quần Âu Sale",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061718/aurelia_products/gallery/bvfpio3mfog0ragkwisx.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061720/aurelia_products/variants/dwqxmkcrchd7vul1rkfh.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-ty-sale-xanh-navy"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07162b",
+            "name": "Quần Tây Sale Đen",
+            "description": "Quần tây đen giảm 40%, lịch sự",
+            "price": 390000,
+            "discountPercent": 0,
+            "category": "Quần Âu Sale",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061778/aurelia_products/gallery/s1dtushrealfzwztxy0d.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061779/aurelia_products/variants/nx98cz5voobxppnlyskr.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-ty-sale-en"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071629",
+            "name": "Áo Polo Sale Đen",
+            "description": "Áo polo đen giảm 20%, sang trọng",
+            "price": 290000,
+            "discountPercent": 0,
+            "category": "Áo Polo Sale",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061823/aurelia_products/gallery/nulqjggdjhvj9acvibbj.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061825/aurelia_products/variants/vyh79zppken60m5g7012.jpg"
+            },
+            "inStock": true,
+            "slug": "o-polo-sale-en"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071627",
+            "name": "Áo Polo Sale Trắng",
+            "description": "Áo polo trắng giảm 25%, thoáng mát",
+            "price": 270000,
+            "discountPercent": 0,
+            "category": "Áo Polo Sale",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061869/aurelia_products/gallery/cuewgfzbotmyofikaunt.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Trắng"
+            ],
+            "colorImages": {
+                "Trắng": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061871/aurelia_products/variants/tsj8c7ntfglqyxf3t4dg.jpg"
+            },
+            "inStock": true,
+            "slug": "o-polo-sale-trng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071625",
+            "name": "Áo Polo Sale Xanh Navy",
+            "description": "Áo polo xanh navy giảm 30%, chất lượng cao",
+            "price": 280000,
+            "discountPercent": 0,
+            "category": "Áo Polo Sale",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061915/aurelia_products/gallery/hydgcnmzqbuac7z7yunt.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "#1e293b"
+            ],
+            "colorImages": {
+                "#1e293b": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061917/aurelia_products/variants/urvhubwhblu6gn0sqt8v.jpg"
+            },
+            "inStock": true,
+            "slug": "o-polo-sale-xanh-navy"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071623",
+            "name": "Tất Nam Chống Mùi",
+            "description": "Tất nam chống mùi, chất liệu đặc biệt",
+            "price": 85000,
+            "discountPercent": 0,
+            "category": "Tất Nam",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061972/aurelia_products/gallery/qddjjrzkkvmb9y0hqtle.png",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774061974/aurelia_products/variants/grz7hvhk9vvfd4x1p8iz.png"
+            },
+            "inStock": true,
+            "slug": "tt-nam-chng-mi"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071621",
+            "name": "Tất Nam Merino Wool",
+            "description": "Tất nam sợi merino wool, ấm áp cho mùa đông",
+            "price": 120000,
+            "discountPercent": 0,
+            "category": "Tất Nam",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774062019/aurelia_products/gallery/qz5wgyxhphz5oqckm1vd.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Be"
+            ],
+            "colorImages": {
+                "Be": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774062020/aurelia_products/variants/f9ctu4k38x96faraqkld.jpg"
+            },
+            "inStock": true,
+            "slug": "tt-nam-merino-wool"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07161f",
+            "name": "Tất Nam Cotton Xám",
+            "description": "Tất nam cotton xám, dễ phối",
+            "price": 52000,
+            "discountPercent": 0,
+            "category": "Tất Nam",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774062119/aurelia_products/gallery/vu842u9hb0yjo2ysdz5j.png",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "#1e293b"
+            ],
+            "colorImages": {
+                "#1e293b": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774062120/aurelia_products/variants/jdndg5tnps1xov9aolee.png"
+            },
+            "inStock": true,
+            "slug": "tt-nam-cotton-xm"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07161d",
+            "name": "Tất Nam Cotton Xanh Navy",
+            "description": "Tất nam cotton xanh navy, dù và thoáng",
+            "price": 55000,
+            "discountPercent": 0,
+            "category": "Tất Nam",
+            "imageUrl": "https://1557691689.e.cdneverest.net/fast/0x0/filters:format(webp)/static.5sfashion.vn/storage/product_color/otFOz8d92wCPb8rbrdgWFGf5OROdjcVs.webp",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://1557691689.e.cdneverest.net/fast/0x0/filters:format(webp)/static.5sfashion.vn/storage/product_color/otFOz8d92wCPb8rbrdgWFGf5OROdjcVs.webp"
+            },
+            "inStock": true,
+            "slug": "tt-nam-cotton-xanh-navy"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07161b",
+            "name": "Tất Nam Cotton Trắng",
+            "description": "Tất nam cotton trắng sạch sẽ",
+            "price": 50000,
+            "discountPercent": 0,
+            "category": "Tất Nam",
+            "imageUrl": "https://product.hstatic.net/1000308371/product/upload_24dd4f467bd2439c9b8d0e206ce6a0ac_master.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Trắng"
+            ],
+            "colorImages": {
+                "Trắng": "https://product.hstatic.net/1000308371/product/upload_24dd4f467bd2439c9b8d0e206ce6a0ac_master.jpg"
+            },
+            "inStock": true,
+            "slug": "tt-nam-cotton-trng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071619",
+            "name": "Tất Nam Cotton Đen",
+            "description": "Tất nam cotton đen, thoáng mát, chất lượng cao",
+            "price": 50000,
+            "discountPercent": 0,
+            "category": "Tất Nam",
+            "imageUrl": "https://product.hstatic.net/1000308371/product/upload_15d9a3178e194ed5a30e64f711b5fc6d_master.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://product.hstatic.net/1000308371/product/upload_15d9a3178e194ed5a30e64f711b5fc6d_master.jpg"
+            },
+            "inStock": true,
+            "slug": "tt-nam-cotton-en"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071617",
+            "name": "Mũ Fedora Đen Sang Trọng",
+            "description": "Mũ fedora đen, sang trọng cho dạo phố",
+            "price": 290000,
+            "discountPercent": 0,
+            "category": "Mũ",
+            "imageUrl": "https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-ltyw6sdvxmhrca",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-ltyw6sdvxmhrca"
+            },
+            "inStock": true,
+            "slug": "m-fedora-en-sang-trng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071615",
+            "name": "Mũ Fedora Nâu Cổ Điển",
+            "description": "Mũ fedora nâu cổ điển, lịch lãm",
+            "price": 280000,
+            "discountPercent": 0,
+            "category": "Mũ",
+            "imageUrl": "https://product.hstatic.net/1000111569/product/2095c285f07b55250c6a153_38e0aabb3af44ccfb652bc340ade6c38_large.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://product.hstatic.net/1000111569/product/2095c285f07b55250c6a153_38e0aabb3af44ccfb652bc340ade6c38_large.jpg"
+            },
+            "inStock": true,
+            "slug": "m-fedora-nu-c-in"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071613",
+            "name": "Mũ Beanie Đen Sang Trọng",
+            "description": "Mũ beanie đen, sang trọng và ấm áp",
+            "price": 160000,
+            "discountPercent": 0,
+            "category": "Mũ",
+            "imageUrl": "https://bizweb.dktcdn.net/thumb/1024x1024/100/347/092/products/8b76b18b1b-sp-15189333.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://bizweb.dktcdn.net/thumb/1024x1024/100/347/092/products/8b76b18b1b-sp-15189333.jpg"
+            },
+            "inStock": true,
+            "slug": "m-beanie-en-sang-trng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071611",
+            "name": "Mũ Beanie Xám Ấm Áp",
+            "description": "Mũ beanie xám, ấm áp cho mùa đông",
+            "price": 150000,
+            "discountPercent": 0,
+            "category": "Mũ",
+            "imageUrl": "https://zerdio.com.vn/wp-content/uploads/2021/12/mu-len-beanie-ngan-ml021-9-247x247.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám"
+            ],
+            "colorImages": {
+                "Xám": "https://zerdio.com.vn/wp-content/uploads/2021/12/mu-len-beanie-ngan-ml021-9-247x247.jpg"
+            },
+            "inStock": true,
+            "slug": "m-beanie-xm-m-p"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07160f",
+            "name": "Mũ Lưỡi Trai Đen Cổ Điển",
+            "description": "Mũ lưỡi trai đen cổ điển, bền bỉ",
+            "price": 190000,
+            "discountPercent": 0,
+            "category": "Mũ",
+            "imageUrl": "https://nonthaitri.vn/wp-content/uploads/2025/05/non-luoi-trai-unisex-Thai-Tri-Forward-%E2%80%93-thiet-ke-tinh-gian-nhung-an-tuong-4.png",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://nonthaitri.vn/wp-content/uploads/2025/05/non-luoi-trai-unisex-Thai-Tri-Forward-%E2%80%93-thiet-ke-tinh-gian-nhung-an-tuong-4.png"
+            },
+            "inStock": true,
+            "slug": "m-li-trai-en-c-in"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07160d",
+            "name": "Mũ Lưỡi Trai Xanh Navy",
+            "description": "Mũ lưỡi trai xanh navy, phù hợp cả trang phục công sở",
+            "price": 180000,
+            "discountPercent": 0,
+            "category": "Mũ",
+            "imageUrl": "https://product.hstatic.net/200000255805/product/e-ball-cap-ny-32cp77011-50n-mau-xanh-navy-5f64287231ae3-18092020102434_219920c38b53449fa92c4886e2eb57be_master.jpeg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://product.hstatic.net/200000255805/product/e-ball-cap-ny-32cp77011-50n-mau-xanh-navy-5f64287231ae3-18092020102434_219920c38b53449fa92c4886e2eb57be_master.jpeg"
+            },
+            "inStock": true,
+            "slug": "m-li-trai-xanh-navy"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07160b",
+            "name": "Giày Da Chelsea Đen Sang Trọng",
+            "description": "Giày da chelsea đen, sang trọng hiện đại",
+            "price": 1300000,
+            "discountPercent": 0,
+            "category": "Giày Da",
+            "imageUrl": "https://bizweb.dktcdn.net/100/062/136/products/gn441.jpg?v=1694250178703",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://bizweb.dktcdn.net/100/062/136/products/gn441.jpg?v=1694250178703"
+            },
+            "inStock": true,
+            "slug": "giy-da-chelsea-en-sang-trng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071609",
+            "name": "Giày Da Slip-on Xanh Navy",
+            "description": "Giày da slip-on xanh navy, dễ mang",
+            "price": 900000,
+            "discountPercent": 0,
+            "category": "Giày Da",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpuFJBXjc2VAeBNfJjc-nDILakYl9HF-Dd3g&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpuFJBXjc2VAeBNfJjc-nDILakYl9HF-Dd3g&s"
+            },
+            "inStock": true,
+            "slug": "giy-da-slip-on-xanh-navy"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071607",
+            "name": "Giày Da Derby Nâu Cổ Điển",
+            "description": "Giày da derby nâu, kiểu cổ điển thoải mái",
+            "price": 1050000,
+            "discountPercent": 0,
+            "category": "Giày Da",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774062091/aurelia_products/gallery/el8likujdyisowgeijyl.webp",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774062092/aurelia_products/variants/hjznkiw9mr6zhm7oyaab.webp"
+            },
+            "inStock": true,
+            "slug": "giy-da-derby-nu-c-in"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071605",
+            "name": "Giày Da Lace-up Đen Thường Ngày",
+            "description": "Giày da buộc dây đen, phù hợp công sở hàng ngày",
+            "price": 950000,
+            "discountPercent": 0,
+            "category": "Giày Da",
+            "imageUrl": "https://navy.vn/wp-content/uploads/2025/10/%E4%B8%BB%E5%9B%BE-5-7.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://navy.vn/wp-content/uploads/2025/10/%E4%B8%BB%E5%9B%BE-5-7.jpg"
+            },
+            "inStock": true,
+            "slug": "giy-da-lace-up-en-thng-ngy"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071603",
+            "name": "Giày Da Loafer Nâu Cổ Điển",
+            "description": "Giày da loafer nâu, kiểu cổ điển lịch sự",
+            "price": 1100000,
+            "discountPercent": 0,
+            "category": "Giày Da",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbXiFiBOjRLlOWVhnH7JpnKLCeesvoOwLFLA&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbXiFiBOjRLlOWVhnH7JpnKLCeesvoOwLFLA&s"
+            },
+            "inStock": true,
+            "slug": "giy-da-loafer-nu-c-in"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071601",
+            "name": "Giày Da Oxford Đen Chính Thức",
+            "description": "Giày da oxford đen, chính thức, phù hợp tiệc tối",
+            "price": 1200000,
+            "discountPercent": 0,
+            "category": "Giày Da",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9dOR9kXPpb3HKTuPns-F9il53LuIOb9AnIg&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9dOR9kXPpb3HKTuPns-F9il53LuIOb9AnIg&s"
+            },
+            "inStock": true,
+            "slug": "giy-da-oxford-en-chnh-thc"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715ff",
+            "name": "Dây Lưng Da Hạt Hoa Cương",
+            "description": "Dây lưng da chất lượng cao với họa tiết hoa cương",
+            "price": 360000,
+            "discountPercent": 30,
+            "category": "Dây Lưng Nam",
+            "imageUrl": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774008433/aurelia_products/gallery/puuxo3ti5mzliomjtr6g.jpg",
+            "sizes": [
+                "M",
+                "L"
+            ],
+            "colors": [
+                "Đen",
+                "Nâu"
+            ],
+            "colorImages": {
+                "Đen": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774008722/aurelia_products/variants/p6lvfkaipkeqdixuevca.jpg",
+                "Nâu": "https://res.cloudinary.com/dg2jih9x0/image/upload/v1774008612/aurelia_products/variants/vmiq193abaqa8iloh4wn.jpg"
+            },
+            "inStock": true,
+            "slug": "dy-lng-da-ht-hoa-cng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715fd",
+            "name": "Dây Lưng Da Khóa Tự Động",
+            "description": "Dây lưng da bò khóa tự động, tiện lợi",
+            "price": 350000,
+            "discountPercent": 0,
+            "category": "Dây Lưng Nam",
+            "imageUrl": "https://timan.vn/upload/products/122023/that-lung-nam-zctl54-cao-cap.png",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://timan.vn/upload/products/122023/that-lung-nam-zctl54-cao-cap.png"
+            },
+            "inStock": true,
+            "slug": "dy-lng-da-kha-t-ng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715fb",
+            "name": "Dây Lưng Nylon Xanh Navy",
+            "description": "Dây lưng nylon xanh navy, dễ vệ sinh",
+            "price": 190000,
+            "discountPercent": 0,
+            "category": "Dây Lưng Nam",
+            "imageUrl": "https://down-vn.img.susercontent.com/file/sg-11134201-22110-qbfgxu1ppejv39",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "#1e293b"
+            ],
+            "colorImages": {
+                "#1e293b": "https://down-vn.img.susercontent.com/file/sg-11134201-22110-qbfgxu1ppejv39"
+            },
+            "inStock": true,
+            "slug": "dy-lng-nylon-xanh-navy"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715f9",
+            "name": "Dây Lưng Nylon Đen Thoải Mái",
+            "description": "Dây lưng nylon đen, thoải mái cho công sở",
+            "price": 180000,
+            "discountPercent": 0,
+            "category": "Dây Lưng Nam",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRe0jbOeVfLCQLxYnHyZW64EvRY4vNBsuM_yA&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRe0jbOeVfLCQLxYnHyZW64EvRY4vNBsuM_yA&s"
+            },
+            "inStock": true,
+            "slug": "dy-lng-nylon-en-thoi-mi"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715f7",
+            "name": "Dây Lưng Da Nâu Cổ Điển",
+            "description": "Dây lưng da nâu cổ điển, bền bỉ",
+            "price": 330000,
+            "discountPercent": 0,
+            "category": "Dây Lưng Nam",
+            "imageUrl": "https://bizweb.dktcdn.net/100/360/581/products/that-lung-da-nam-cong-so-lg34-mau-nau-1.jpg?v=1730881105000",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://bizweb.dktcdn.net/100/360/581/products/that-lung-da-nam-cong-so-lg34-mau-nau-1.jpg?v=1730881105000"
+            },
+            "inStock": true,
+            "slug": "dy-lng-da-nu-c-in"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715f5",
+            "name": "Dây Lưng Da Đen Sang Trọng",
+            "description": "Dây lưng da bò đen, khóa kim loại sang trọng",
+            "price": 320000,
+            "discountPercent": 0,
+            "category": "Dây Lưng Nam",
+            "imageUrl": "https://lavatino.com/wp-content/uploads/2020/01/303cfa6cdac6799820d7.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://lavatino.com/wp-content/uploads/2020/01/303cfa6cdac6799820d7.jpg"
+            },
+            "inStock": true,
+            "slug": "dy-lng-da-en-sang-trng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715f3",
+            "name": "Quần Short Xanh Navy",
+            "description": "Quần short xanh navy, sang trọng",
+            "price": 310000,
+            "discountPercent": 0,
+            "category": "Quần Short",
+            "imageUrl": "https://static.hotdeal.vn/images/1025/1025430/400x500/261078-quan-short-nam-nang-dong-261067-vn-2-3.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh Navy"
+            ],
+            "colorImages": {
+                "Xanh Navy": "https://static.hotdeal.vn/images/1025/1025430/400x500/261078-quan-short-nam-nang-dong-261067-vn-2-3.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-short-xanh-navy"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715f1",
+            "name": "Quần Short Nâu Sáng",
+            "description": "Quần short nâu sáng, dễ phối",
+            "price": 300000,
+            "discountPercent": 0,
+            "category": "Quần Short",
+            "imageUrl": "https://4menshop.com/images/thumbs/2019/08/quan-short-kaki-phoi-soc-den-190-14627.JPG",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://4menshop.com/images/thumbs/2019/08/quan-short-kaki-phoi-soc-den-190-14627.JPG"
+            },
+            "inStock": true,
+            "slug": "qun-short-nu-sng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715ef",
+            "name": "Quần Short Đen Cổ Điển",
+            "description": "Quần short đen cổ điển, chính thức",
+            "price": 290000,
+            "discountPercent": 0,
+            "category": "Quần Short",
+            "imageUrl": "https://4men.com.vn/thumbs/2017/04/quan-short-kaki-den-qs94-6710-p.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://4men.com.vn/thumbs/2017/04/quan-short-kaki-den-qs94-6710-p.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-short-en-c-in"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715ed",
+            "name": "Quần Short Kaki Khaki",
+            "description": "Quần short kaki khaki, thoáng mát cho mùa hè",
+            "price": 280000,
+            "discountPercent": 0,
+            "category": "Quần Short",
+            "imageUrl": "https://cdn.hstatic.net/products/200000163591/6_157890d6ec2c4acfab6c869bb6193b7f_master.png",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://cdn.hstatic.net/products/200000163591/6_157890d6ec2c4acfab6c869bb6193b7f_master.png"
+            },
+            "inStock": true,
+            "slug": "qun-short-kaki-khaki"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715eb",
+            "name": "Quần Jeans Ripped Blue Trẻ Trung",
+            "description": "Quần jeans có ripped, phong cách trẻ trung",
+            "price": 420000,
+            "discountPercent": 0,
+            "category": "Quần Jeans",
+            "imageUrl": "https://product.hstatic.net/1000370106/product/14.3_d1803a770f15447197c38d67ba5ed5d5_master.jpeg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://product.hstatic.net/1000370106/product/14.3_d1803a770f15447197c38d67ba5ed5d5_master.jpeg"
+            },
+            "inStock": true,
+            "slug": "qun-jeans-ripped-blue-tr-trung"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715e9",
+            "name": "Quần Jeans Xanh Trung Bình",
+            "description": "Quần jeans xanh trung bình, dễ phối",
+            "price": 385000,
+            "discountPercent": 0,
+            "category": "Quần Jeans",
+            "imageUrl": "https://image.msscdn.net/thumbnails/images/goods_img/20250521/5135533/5135533_17478119979704_big.png",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://image.msscdn.net/thumbnails/images/goods_img/20250521/5135533/5135533_17478119979704_big.png"
+            },
+            "inStock": true,
+            "slug": "qun-jeans-xanh-trung-bnh"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715e7",
+            "name": "Quần Jeans Đen Sang Trọng",
+            "description": "Quần jeans đen sang trọng, chất lượng cao",
+            "price": 390000,
+            "discountPercent": 0,
+            "category": "Quần Jeans",
+            "imageUrl": "https://4men.com.vn/images/thumbs/2018/06/quan-jean-den-qj1394-7744-slide-products-5b179e771b24c.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://4men.com.vn/images/thumbs/2018/06/quan-jean-den-qj1394-7744-slide-products-5b179e771b24c.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-jeans-en-sang-trng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715e5",
+            "name": "Quần Jeans Xanh Nhạt Hiện Đại",
+            "description": "Quần jeans xanh nhạt, kiểu dáng hiện đại",
+            "price": 400000,
+            "discountPercent": 0,
+            "category": "Quần Jeans",
+            "imageUrl": "https://badass.vn/wp-content/uploads/2024/06/QJDTK502-1.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://badass.vn/wp-content/uploads/2024/06/QJDTK502-1.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-jeans-xanh-nht-hin-i"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715e3",
+            "name": "Quần Jeans Xanh Đậm Cơ Bản",
+            "description": "Quần jeans xanh đậm, cơ bản, bền bỉ",
+            "price": 380000,
+            "discountPercent": 0,
+            "category": "Quần Jeans",
+            "imageUrl": "https://4men.com.vn/images/thumbs/2015/08/quan-jean-xanh-den-qj1236-4866-slide-1.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://4men.com.vn/images/thumbs/2015/08/quan-jean-xanh-den-qj1236-4866-slide-1.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-jeans-xanh-m-c-bn"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715e1",
+            "name": "Quần Chino Kem Vàng Nhẹ",
+            "description": "Quần chino kem vàng nhẹ, sang trọng cho mùa hè",
+            "price": 435000,
+            "discountPercent": 0,
+            "category": "Quần Ngô Kaki",
+            "imageUrl": "https://4men.com.vn/thumbs/2016/08/quan-tay-vang-kem-co-gian-qt46-4081-p.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Vàng Kem"
+            ],
+            "colorImages": {
+                "Vàng Kem": "https://4men.com.vn/thumbs/2016/08/quan-tay-vang-kem-co-gian-qt46-4081-p.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-chino-kem-vng-nh"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715df",
+            "name": "Quần Chino Đen Thanh Lịch",
+            "description": "Quần chino đen, kiểu dáng thanh lịch",
+            "price": 450000,
+            "discountPercent": 0,
+            "category": "Quần Ngô Kaki",
+            "imageUrl": "https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-lkj3m9vf9cbg22",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-lkj3m9vf9cbg22"
+            },
+            "inStock": true,
+            "slug": "qun-chino-en-thanh-lch"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715dd",
+            "name": "Quần Chino Ghi Xám Trung Tính",
+            "description": "Quần chino ghi xám, dễ phối, đa năng",
+            "price": 430000,
+            "discountPercent": 0,
+            "category": "Quần Ngô Kaki",
+            "imageUrl": "https://aeonmall-review-rikkei.cdn.vccloud.vn/public/image/ecommerce/products/GjO1XMGmKhp5llDwTouUdT1UZTNICDHDIwuSkaCM.webp",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám"
+            ],
+            "colorImages": {
+                "Xám": "https://aeonmall-review-rikkei.cdn.vccloud.vn/public/image/ecommerce/products/GjO1XMGmKhp5llDwTouUdT1UZTNICDHDIwuSkaCM.webp"
+            },
+            "inStock": true,
+            "slug": "qun-chino-ghi-xm-trung-tnh"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715db",
+            "name": "Quần Chino Nâu Ấm Áp",
+            "description": "Quần chino nâu ấm áp, phong cách casual nhưng lịch sự",
+            "price": 440000,
+            "discountPercent": 0,
+            "category": "Quần Ngô Kaki",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShgRyGg1Pbhp9yMtA5xtHZGHt4dkgxi9YtpQ&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShgRyGg1Pbhp9yMtA5xtHZGHt4dkgxi9YtpQ&s"
+            },
+            "inStock": true,
+            "slug": "qun-chino-nu-m-p"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715d9",
+            "name": "Quần Chino Khaki Cơ Bản",
+            "description": "Quần chino khaki cơ bản, vải đặc, bền bỉ",
+            "price": 420000,
+            "discountPercent": 0,
+            "category": "Quần Ngô Kaki",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZ0IB7qbAbq65vRWoUcKWluT2xtiqnRUdh4g&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZ0IB7qbAbq65vRWoUcKWluT2xtiqnRUdh4g&s"
+            },
+            "inStock": true,
+            "slug": "qun-chino-khaki-c-bn"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715d7",
+            "name": "Quần Kaki Xanh Navy Cổ Điển",
+            "description": "Quần kaki xanh navy cổ điển, bền bỉ",
+            "price": 540000,
+            "discountPercent": 0,
+            "category": "Quần Kaki",
+            "imageUrl": "https://pos.nvncdn.com/5048a3-93414/ps/20220705_P8FNLPSvXFwAjwGbNMeSIpEF.jpg?v=1673664633",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://pos.nvncdn.com/5048a3-93414/ps/20220705_P8FNLPSvXFwAjwGbNMeSIpEF.jpg?v=1673664633"
+            },
+            "inStock": true,
+            "slug": "qun-kaki-xanh-navy-c-in"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715d5",
+            "name": "Quần Kaki Đen Chính Thức",
+            "description": "Quần kaki đen chính thức, lịch sự công sở",
+            "price": 530000,
+            "discountPercent": 0,
+            "category": "Quần Kaki",
+            "imageUrl": "https://cdn.santino.com.vn/storage/upload/news/2023/07/quan-kaki-nam-den-02.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://cdn.santino.com.vn/storage/upload/news/2023/07/quan-kaki-nam-den-02.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-kaki-en-chnh-thc"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715d3",
+            "name": "Quần Kaki Kem Trắng Nhẹ",
+            "description": "Quần kaki kem trắng nhẹ nhàng, phù hợp mùa hè",
+            "price": 510000,
+            "discountPercent": 0,
+            "category": "Quần Kaki",
+            "imageUrl": "https://namfashion.com/home/wp-content/uploads/2024/12/quan-kaki-nam-tron-ong-xuong-musinsa-cao-cap-xuat-khau-18.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Trắng Kem"
+            ],
+            "colorImages": {
+                "Trắng Kem": "https://namfashion.com/home/wp-content/uploads/2024/12/quan-kaki-nam-tron-ong-xuong-musinsa-cao-cap-xuat-khau-18.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-kaki-kem-trng-nh"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715d1",
+            "name": "Quần Kaki Ghi Xám Thanh Lịch",
+            "description": "Quần kaki ghi xám, kiểu dáng thanh lịch",
+            "price": 520000,
+            "discountPercent": 0,
+            "category": "Quần Kaki",
+            "imageUrl": "https://aeonmall-review-rikkei.cdn.vccloud.vn/public/image/ecommerce/products/GjO1XMGmKhp5llDwTouUdT1UZTNICDHDIwuSkaCM.webp",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám"
+            ],
+            "colorImages": {
+                "Xám": "https://aeonmall-review-rikkei.cdn.vccloud.vn/public/image/ecommerce/products/GjO1XMGmKhp5llDwTouUdT1UZTNICDHDIwuSkaCM.webp"
+            },
+            "inStock": true,
+            "slug": "qun-kaki-ghi-xm-thanh-lch"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715cf",
+            "name": "Quần Kaki Nâu Sáng Dễ Dàng",
+            "description": "Quần kaki nâu sáng, dễ mix & match",
+            "price": 500000,
+            "discountPercent": 0,
+            "category": "Quần Kaki",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQz8QzsIc1IiqCh-VSdrQHRG5JZp25g8JHjJA&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQz8QzsIc1IiqCh-VSdrQHRG5JZp25g8JHjJA&s"
+            },
+            "inStock": true,
+            "slug": "qun-kaki-nu-sng-d-dng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715cd",
+            "name": "Quần Kaki Khaki Cơ Bản",
+            "description": "Quần kaki khaki cơ bản, công sở thoáng mát",
+            "price": 480000,
+            "discountPercent": 0,
+            "category": "Quần Kaki",
+            "imageUrl": "https://product.hstatic.net/200000887901/product/quan-kaki-nam-aristino-akkr0309__6__bd6d1374533f43b0ae15103ddca71d78_0d32bfbce25b4893b662914aa676c7de.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://product.hstatic.net/200000887901/product/quan-kaki-nam-aristino-akkr0309__6__bd6d1374533f43b0ae15103ddca71d78_0d32bfbce25b4893b662914aa676c7de.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-kaki-khaki-c-bn"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715cb",
+            "name": "Quần Tây Crem Vàng Nhẹ",
+            "description": "Quần tây crem vàng nhẹ, sang trọng cho mùa hè",
+            "price": 690000,
+            "discountPercent": 0,
+            "category": "Quần Tây",
+            "imageUrl": "https://4menshop.com/images/thumbs/2016/08/quan-tay-vang-kem-co-gian-phoi-tui-qt43-7279.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://4menshop.com/images/thumbs/2016/08/quan-tay-vang-kem-co-gian-phoi-tui-qt43-7279.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-ty-crem-vng-nh"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715c9",
+            "name": "Quần Tây Nâu Ấm Áp",
+            "description": "Quần tây nâu ấm áp, phù hợp cho phong cách casual-formal",
+            "price": 670000,
+            "discountPercent": 0,
+            "category": "Quần Tây",
+            "imageUrl": "https://4men.com.vn/thumbs/2017/01/quan-tay-nau-qt62-6126-p.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://4men.com.vn/thumbs/2017/01/quan-tay-nau-qt62-6126-p.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-ty-nu-m-p"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715c7",
+            "name": "Quần Tây Kep Ghi Xám",
+            "description": "Quần tây có kep ghi xám, hiện đại thanh lịch",
+            "price": 720000,
+            "discountPercent": 0,
+            "category": "Quần Tây",
+            "imageUrl": "https://4men.com.vn/images/2016/06/quan-tay-xam-co-gian-phoi-tui-qt433673-4681-1555498697.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám"
+            ],
+            "colorImages": {
+                "Xám": "https://4men.com.vn/images/2016/06/quan-tay-xam-co-gian-phoi-tui-qt433673-4681-1555498697.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-ty-kep-ghi-xm"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715c5",
+            "name": "Quần Tây Ghi Xám Trung Lập",
+            "description": "Quần tây ghi xám, dễ phối, chất lượng cao",
+            "price": 660000,
+            "discountPercent": 0,
+            "category": "Quần Tây",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOb4tk9ZzekVUWW9F7PylBgjbrTrAMaLWa7w&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám"
+            ],
+            "colorImages": {
+                "Xám": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOb4tk9ZzekVUWW9F7PylBgjbrTrAMaLWa7w&s"
+            },
+            "inStock": true,
+            "slug": "qun-ty-ghi-xm-trung-lp"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715c3",
+            "name": "Quần Tây Xanh Navy Lịch Lãm",
+            "description": "Quần tây xanh navy, dáng vừa vặn, lịch lãm",
+            "price": 680000,
+            "discountPercent": 0,
+            "category": "Quần Tây",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZFMMURERm26UvhQb_JhnK5UHMXKR7vgjFjQ&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh Navy"
+            ],
+            "colorImages": {
+                "Xanh Navy": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZFMMURERm26UvhQb_JhnK5UHMXKR7vgjFjQ&s"
+            },
+            "inStock": true,
+            "slug": "qun-ty-xanh-navy-lch-lm"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715c1",
+            "name": "Quần Tây Đen Công Sở Cơ Bản",
+            "description": "Quần tây đen chất lượng, phù hợp công sở",
+            "price": 650000,
+            "discountPercent": 0,
+            "category": "Quần Tây",
+            "imageUrl": "https://vestondep.vn/upload/product/may-dong-phuc-quan-tay-nam-cong-so-mau-xam-den-tai-TPHCM-Mon-Amie-3210.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://vestondep.vn/upload/product/may-dong-phuc-quan-tay-nam-cong-so-mau-xam-den-tai-TPHCM-Mon-Amie-3210.jpg"
+            },
+            "inStock": true,
+            "slug": "qun-ty-en-cng-s-c-bn"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715bf",
+            "name": "Áo Vest Nâu Vàng Châu Âu",
+            "description": "Áo vest nâu vàng kiểu châu Âu, sang trọng",
+            "price": 2700000,
+            "discountPercent": 0,
+            "category": "Áo Vest",
+            "imageUrl": "https://4men.com.vn/thumbs/2016/06/ao-vest-mau-vang-kem-av1089-5685-p.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://4men.com.vn/thumbs/2016/06/ao-vest-mau-vang-kem-av1089-5685-p.jpg"
+            },
+            "inStock": true,
+            "slug": "o-vest-nu-vng-chu-u"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715bd",
+            "name": "Áo Vest Ghi Xám Hiện Đại",
+            "description": "Áo vest ghi xám, dáng slim modern, phong cách thanh niên",
+            "price": 2600000,
+            "discountPercent": 0,
+            "category": "Áo Vest",
+            "imageUrl": "https://lapier.vn/wp-content/uploads/2023/03/ao-vest-1-cuc-ghi-xam-22-2.png",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://lapier.vn/wp-content/uploads/2023/03/ao-vest-1-cuc-ghi-xam-22-2.png"
+            },
+            "inStock": true,
+            "slug": "o-vest-ghi-xm-hin-i"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715bb",
+            "name": "Áo Vest Đen Ba Nút Sang Trọng",
+            "description": "Áo vest đen ba nút suôn, chất liệu cao cấp",
+            "price": 2800000,
+            "discountPercent": 0,
+            "category": "Áo Vest",
+            "imageUrl": "https://cdn.hstatic.net/products/200000053174/kien_-__nh_thump_website__43__70a19fc8fbc348cdbc4fadd9048771c0_master.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://cdn.hstatic.net/products/200000053174/kien_-__nh_thump_website__43__70a19fc8fbc348cdbc4fadd9048771c0_master.jpg"
+            },
+            "inStock": true,
+            "slug": "o-vest-en-ba-nt-sang-trng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715b9",
+            "name": "Áo Vest Xanh Navy Hai Nút",
+            "description": "Áo vest xanh navy hai nút, kiểu cổ điển lịch sự",
+            "price": 2500000,
+            "discountPercent": 0,
+            "category": "Áo Vest",
+            "imageUrl": "https://umvestnam.com/images/stories/virtuemart/product/bo-vest-xanh-navy-6-cuc-3.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://umvestnam.com/images/stories/virtuemart/product/bo-vest-xanh-navy-6-cuc-3.jpg"
+            },
+            "inStock": true,
+            "slug": "o-vest-xanh-navy-hai-nt"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715b7",
+            "name": "Áo Thun Cổ Polo Đen",
+            "description": "Áo thun kiểu polo đen sang trọng, tôn dáng",
+            "price": 325000,
+            "discountPercent": 0,
+            "category": "Áo Thun",
+            "imageUrl": "https://product.hstatic.net/200000690725/product/7_4d50f92cb2ff4039b3f7cfbc1f0509f6.png",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://product.hstatic.net/200000690725/product/7_4d50f92cb2ff4039b3f7cfbc1f0509f6.png"
+            },
+            "inStock": true,
+            "slug": "o-thun-c-polo-en"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715b5",
+            "name": "Áo Thun Cổ Polo Trắng",
+            "description": "Áo thun kiểu polo trắng sạch sẽ, lịch sự",
+            "price": 315000,
+            "discountPercent": 0,
+            "category": "Áo Thun",
+            "imageUrl": "https://4men.com.vn/thumbs/2018/08/ao-thun-polo-at780-mau-trang-9609-p.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Trắng"
+            ],
+            "colorImages": {
+                "Trắng": "https://4men.com.vn/thumbs/2018/08/ao-thun-polo-at780-mau-trang-9609-p.jpg"
+            },
+            "inStock": true,
+            "slug": "o-thun-c-polo-trng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715b3",
+            "name": "Áo Thun Cổ Polo Xanh",
+            "description": "Áo thun kiểu polo xanh lá cây, công sở nhưng vẫn thoáng",
+            "price": 320000,
+            "discountPercent": 0,
+            "category": "Áo Thun",
+            "imageUrl": "https://www.chapi.vn/img/product/2023/3/7/ao-thun-polo-ngan-tay-nam-vien-co-hntp-11-new.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://www.chapi.vn/img/product/2023/3/7/ao-thun-polo-ngan-tay-nam-vien-co-hntp-11-new.jpg"
+            },
+            "inStock": true,
+            "slug": "o-thun-c-polo-xanh"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715b1",
+            "name": "Áo Thun Ghi Xám Neutralhigh",
+            "description": "Áo thun ghi xám chất lượng cao, phù hợp mọi phong cách",
+            "price": 235000,
+            "discountPercent": 0,
+            "category": "Áo Thun",
+            "imageUrl": "https://4menshop.com/images/thumbs/2019/10/ao-thun-regular-xanh-ngoc-at848-14714.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám"
+            ],
+            "colorImages": {
+                "Xám": "https://4menshop.com/images/thumbs/2019/10/ao-thun-regular-xanh-ngoc-at848-14714.jpg"
+            },
+            "inStock": true,
+            "slug": "o-thun-ghi-xm-neutralhigh"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715af",
+            "name": "Áo Thun Cotton Xanh Navy",
+            "description": "Áo thun xanh navy dịu nhỏ, quần jean hay khaki đều tịp",
+            "price": 240000,
+            "discountPercent": 0,
+            "category": "Áo Thun",
+            "imageUrl": "https://down-vn.img.susercontent.com/file/vn-11134207-7ra0g-m87rnmkgwbrbe3",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://down-vn.img.susercontent.com/file/vn-11134207-7ra0g-m87rnmkgwbrbe3"
+            },
+            "inStock": true,
+            "slug": "o-thun-cotton-xanh-navy"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715ad",
+            "name": "Áo Thun Cotton Đen Cơ Bản",
+            "description": "Áo thun đen cơ bản, chất lượng cao, bền bỉ",
+            "price": 230000,
+            "discountPercent": 0,
+            "category": "Áo Thun",
+            "imageUrl": "https://4men.com.vn/images/2016/05/ao-thun-co-tron-den-tron-at5933265-4635-1669859222.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://4men.com.vn/images/2016/05/ao-thun-co-tron-den-tron-at5933265-4635-1669859222.jpg"
+            },
+            "inStock": true,
+            "slug": "o-thun-cotton-en-c-bn"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715ab",
+            "name": "Áo Thun Cotton Trắng Trơn",
+            "description": "Áo thun cotton 100% trắng trơn, thoáng mát",
+            "price": 220000,
+            "discountPercent": 0,
+            "category": "Áo Thun",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2feEh5peVEYR9_SzJmTACERiqVflDtrhTqg&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Trắng"
+            ],
+            "colorImages": {
+                "Trắng": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2feEh5peVEYR9_SzJmTACERiqVflDtrhTqg&s"
+            },
+            "inStock": true,
+            "slug": "o-thun-cotton-trng-trn"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715a9",
+            "name": "Áo Khoác Denim Xanh Đậm",
+            "description": "Áo khoác denim xanh đậm kinh điển, dễ phối",
+            "price": 890000,
+            "discountPercent": 0,
+            "category": "Áo Khoác",
+            "imageUrl": "https://img.lazcdn.com/g/p/c1592019002bc499028a044117838b5b.jpg_720x720q80.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://img.lazcdn.com/g/p/c1592019002bc499028a044117838b5b.jpg_720x720q80.jpg"
+            },
+            "inStock": true,
+            "slug": "o-khoc-denim-xanh-m"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715a7",
+            "name": "Áo Khoác Bomber Đen Hiện Đại",
+            "description": "Áo khoác bomber đen kiểu hiện đại năng động",
+            "price": 1100000,
+            "discountPercent": 0,
+            "category": "Áo Khoác",
+            "imageUrl": "https://namfashion.com/home/wp-content/uploads/2023/11/z4881810981822_4ab140e231c69429c5ec16373725ec8d.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://namfashion.com/home/wp-content/uploads/2023/11/z4881810981822_4ab140e231c69429c5ec16373725ec8d.jpg"
+            },
+            "inStock": true,
+            "slug": "o-khoc-bomber-en-hin-i"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715a5",
+            "name": "Áo Khoác Harrington Xanh Navy",
+            "description": "Áo khoác Harrington xanh navy cổ điển, bền bỉ",
+            "price": 950000,
+            "discountPercent": 0,
+            "category": "Áo Khoác",
+            "imageUrl": "https://www.harringtonjacketstore.co.uk/cdn/shop/products/Jackets_PMP_Web20140116-21.jpg?v=1638994646&width=1946",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://www.harringtonjacketstore.co.uk/cdn/shop/products/Jackets_PMP_Web20140116-21.jpg?v=1638994646&width=1946"
+            },
+            "inStock": true,
+            "slug": "o-khoc-harrington-xanh-navy"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715a3",
+            "name": "Áo Khoác Cardigan Xám Nhẹ Nhàng",
+            "description": "Áo khoác cardigan xám, chất liệu mềm mại thoải mái",
+            "price": 850000,
+            "discountPercent": 0,
+            "category": "Áo Khoác",
+            "imageUrl": "https://4men.com.vn/thumbs/2016/12/ao-khoac-cardigan-xam-chuot-ac088-5735-p.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám"
+            ],
+            "colorImages": {
+                "Xám": "https://4men.com.vn/thumbs/2016/12/ao-khoac-cardigan-xam-chuot-ac088-5735-p.jpg"
+            },
+            "inStock": true,
+            "slug": "o-khoc-cardigan-xm-nh-nhng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa0715a1",
+            "name": "Áo Khoác Tweed Nâu Retro",
+            "description": "Áo khoác tweed nâu kiểu dáng cổ điển, phong cách British",
+            "price": 1450000,
+            "discountPercent": 0,
+            "category": "Áo Khoác",
+            "imageUrl": "https://hmkeyewear.com/wp-content/uploads/2024/11/phong-cach-retro-nam-1.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://hmkeyewear.com/wp-content/uploads/2024/11/phong-cach-retro-nam-1.jpg"
+            },
+            "inStock": true,
+            "slug": "o-khoc-tweed-nu-retro"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07159f",
+            "name": "Áo Khoác Blazer Ghi Xám Trung Tính",
+            "description": "Áo khoác blazer ghi xám dễ phối, hiện đại",
+            "price": 1250000,
+            "discountPercent": 0,
+            "category": "Áo Khoác",
+            "imageUrl": "https://product.hstatic.net/200000887901/product/img-xam-ao-khoac-blazer-nam-aristino-business-ramie-1bz01003__1__294677914a8541009edb4a1d1b887f3b.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám"
+            ],
+            "colorImages": {
+                "Xám": "https://product.hstatic.net/200000887901/product/img-xam-ao-khoac-blazer-nam-aristino-business-ramie-1bz01003__1__294677914a8541009edb4a1d1b887f3b.jpg"
+            },
+            "inStock": true,
+            "slug": "o-khoc-blazer-ghi-xm-trung-tnh"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07159d",
+            "name": "Áo Khoác Blazer Đen Sang Trọng",
+            "description": "Áo khoác blazer đen cao cấp, dáng tinh tế",
+            "price": 1350000,
+            "discountPercent": 0,
+            "category": "Áo Khoác",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ02kJ25EFWt5W11Ha_7tUM8MJOcVMsigt54w&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ02kJ25EFWt5W11Ha_7tUM8MJOcVMsigt54w&s"
+            },
+            "inStock": true,
+            "slug": "o-khoc-blazer-en-sang-trng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07159b",
+            "name": "Áo Khoác Blazer Xanh Navy Cơi Bản",
+            "description": "Áo khoác blazer xanh navy chính thức, phù hợp lịch sự",
+            "price": 1200000,
+            "discountPercent": 0,
+            "category": "Áo Khoác",
+            "imageUrl": "https://cdn.hstatic.net/products/200000887901/080a5940_7e0842b517054faeac1d4a1645558af3.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://cdn.hstatic.net/products/200000887901/080a5940_7e0842b517054faeac1d4a1645558af3.jpg"
+            },
+            "inStock": true,
+            "slug": "o-khoc-blazer-xanh-navy-ci-bn"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071599",
+            "name": "Áo Sơ Mi Ngắn Tay Đỏ Tươi",
+            "description": "Áo sơ mi ngắn tay đỏ tươi tràn năng lượng",
+            "price": 410000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Ngắn",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHwd208xX6NoVEHDougXXaqW2q8fscI3EkYQ&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đỏ"
+            ],
+            "colorImages": {
+                "Đỏ": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHwd208xX6NoVEHDougXXaqW2q8fscI3EkYQ&s"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-ngn-tay-ti"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071597",
+            "name": "Áo Sơ Mi Ngắn Tay Kem Retro",
+            "description": "Áo sơ mi ngắn tay màu kem phong cách retro",
+            "price": 400000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Ngắn",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ945y5gXHN7JyBILVyMjBlsIafNA02jG2sYQ&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Kem"
+            ],
+            "colorImages": {
+                "Kem": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ945y5gXHN7JyBILVyMjBlsIafNA02jG2sYQ&s"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-ngn-tay-kem-retro"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071595",
+            "name": "Áo Sơ Mi Ngắn Tay Hoa Nhỏ Tinh Tế",
+            "description": "Áo sơ mi ngắn tay họa tiết hoa nhỏ nhẹ nhàng",
+            "price": 430000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Ngắn",
+            "imageUrl": "https://pos.nvncdn.com/492284-9176/ps/20241110_IoueJC56d5.jpeg?v=1731227504",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Nâu"
+            ],
+            "colorImages": {
+                "Nâu": "https://pos.nvncdn.com/492284-9176/ps/20241110_IoueJC56d5.jpeg?v=1731227504"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-ngn-tay-hoa-nh-tinh-t"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071593",
+            "name": "Áo Sơ Mi Ngắn Tay Ghi Trắng Thoáng Mát",
+            "description": "Áo sơ mi ngắn tay ghi trắng, thấm hút tốt",
+            "price": 370000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Ngắn",
+            "imageUrl": "https://cdn.hstatic.net/products/200000341513/w1_6e5c8e2df469485384c27c61c4e9a127_grande.png",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Trắng"
+            ],
+            "colorImages": {
+                "Trắng": "https://cdn.hstatic.net/products/200000341513/w1_6e5c8e2df469485384c27c61c4e9a127_grande.png"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-ngn-tay-ghi-trng-thong-mt"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071591",
+            "name": "Áo Sơ Mi Ngắn Tay Xám Phong Cách",
+            "description": "Áo sơ mi ngắn tay xám phong cách đơn giản",
+            "price": 390000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Ngắn",
+            "imageUrl": "https://bizweb.dktcdn.net/100/524/840/products/ws25ss29p-3-05eeaf66-9951-4b25-8fe4-b7b77a298dfc-5a8d6778-8deb-4334-aa09-d1522242e217.jpg?v=1762311916260",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám"
+            ],
+            "colorImages": {
+                "Xám": "https://bizweb.dktcdn.net/100/524/840/products/ws25ss29p-3-05eeaf66-9951-4b25-8fe4-b7b77a298dfc-5a8d6778-8deb-4334-aa09-d1522242e217.jpg?v=1762311916260"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-ngn-tay-xm-phong-cch"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07158f",
+            "name": "Áo Sơ Mi Ngắn Tay Sọc Đôi",
+            "description": "Áo sơ mi ngắn tay với sọc đôi tinh tế, hiện đại",
+            "price": 410000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Ngắn",
+            "imageUrl": "https://4menshop.com/images/thumbs/2020/11/ao-so-mi-soc-ngan-tay-asm024-15696-slide-products-5fa134c72e675.png",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám Đen"
+            ],
+            "colorImages": {
+                "Xám Đen": "https://4menshop.com/images/thumbs/2020/11/ao-so-mi-soc-ngan-tay-asm024-15696-slide-products-5fa134c72e675.png"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-ngn-tay-sc-i"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07158d",
+            "name": "Áo Sơ Mi Ngắn Tay Đen Thanh Lịch",
+            "description": "Áo sơ mi ngắn tay đen, dáng vừa phù hợp công sở",
+            "price": 420000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Ngắn",
+            "imageUrl": "https://dongphuchaianh.vn/wp-content/uploads/2022/08/ao-so-mi-ngan-tay-nam-dep-nhat-hien-nay-form-rong.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://dongphuchaianh.vn/wp-content/uploads/2022/08/ao-so-mi-ngan-tay-nam-dep-nhat-hien-nay-form-rong.jpg"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-ngn-tay-en-thanh-lch"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07158b",
+            "name": "Áo Sơ Mi Ngắn Tay Xanh Navy",
+            "description": "Áo sơ mi ngắn tay xanh navy bản dệt chất lượng",
+            "price": 400000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Ngắn",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjgoVHByFzO6RLWCQs-GtKQSHrO4Gl6mpVSw&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjgoVHByFzO6RLWCQs-GtKQSHrO4Gl6mpVSw&s"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-ngn-tay-xanh-navy"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071589",
+            "name": "Áo Sơ Mi Ngắn Tay Trắng Công Sở",
+            "description": "Áo sơ mi ngắn tay trắng, thoáng mát, phù hợp mùa hè",
+            "price": 380000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Ngắn",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR249bcFu52CQEjR4LONzInIFLP0CEL1rE7OQ&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Trắng"
+            ],
+            "colorImages": {
+                "Trắng": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR249bcFu52CQEjR4LONzInIFLP0CEL1rE7OQ&s"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-ngn-tay-trng-cng-s"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071587",
+            "name": "Áo Sơ Mi Dài Tay Oxford Xanh Đậm",
+            "description": "Áo sơ mi Oxford xanh đậm chất lượng cao, bền bỉ",
+            "price": 550000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Dài",
+            "imageUrl": "https://4menshop.com/images/thumbs/2024/09/ao-so-mi-vai-oxford-tron-signature-form-regular-sm157-mau-xanh-bien-18722.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://4menshop.com/images/thumbs/2024/09/ao-so-mi-vai-oxford-tron-signature-form-regular-sm157-mau-xanh-bien-18722.jpg"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-di-tay-oxford-xanh-m"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071585",
+            "name": "Áo Sơ Mi Dài Tay Kem Vintage",
+            "description": "Áo sơ mi màu kem vintage, phù hợp với phong cách retro",
+            "price": 500000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Dài",
+            "imageUrl": "https://lados.vn/wp-content/uploads/2024/11/1-socden-ld8161-jpg.webp",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Kem"
+            ],
+            "colorImages": {
+                "Kem": "https://lados.vn/wp-content/uploads/2024/11/1-socden-ld8161-jpg.webp"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-di-tay-kem-vintage"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071583",
+            "name": "Áo Sơ Mi Dài Tay Ghi Xám Neutral",
+            "description": "Áo sơ mi ghi xám trung tính, dễ phối đồ",
+            "price": 470000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Dài",
+            "imageUrl": "https://cdn.hstatic.net/products/200000053174/1smdh602ghx__2_-1080x1080_48d8ba7165de49b293f7b1e48866140d_master.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám"
+            ],
+            "colorImages": {
+                "Xám": "https://cdn.hstatic.net/products/200000053174/1smdh602ghx__2_-1080x1080_48d8ba7165de49b293f7b1e48866140d_master.jpg"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-di-tay-ghi-xm-neutral"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071581",
+            "name": "Áo Sơ Mi Dài Tay Đỏ Bordeaux Quý Phái",
+            "description": "Áo sơ mi đỏ bordeaux cao cấp, tôn da và lịch lãm",
+            "price": 540000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Dài",
+            "imageUrl": "https://winmart.onl/assets/media/images/products/06055/oemasmn195_1104_224647_doqqpa.png",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đỏ Đô"
+            ],
+            "colorImages": {
+                "Đỏ Đô": "https://winmart.onl/assets/media/images/products/06055/oemasmn195_1104_224647_doqqpa.png"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-di-tay-bordeaux-qu-phi"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07157f",
+            "name": "Áo Sơ Mi Dài Tay Hoa Văn Tinh Tế",
+            "description": "Áo sơ mi họa tiết hoa nhỏ, phong cách châu Âu",
+            "price": 530000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Dài",
+            "imageUrl": "https://cdn.santino.com.vn/storage/upload/news/2023/07/ao-so-mi-nam-dai-tay-hoa-tiet-08.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://cdn.santino.com.vn/storage/upload/news/2023/07/ao-so-mi-nam-dai-tay-hoa-tiet-08.jpg"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-di-tay-hoa-vn-tinh-t"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07157d",
+            "name": "Áo Sơ Mi Dài Tay Xám Xanh Lịch Lãm",
+            "description": "Áo sơ mi xám xanh phối màu tinh tế, kiểu dáng thanh lịch",
+            "price": 510000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Dài",
+            "imageUrl": "https://file.hstatic.net/200000887901/file/ntc_7189x900x900x4.webp",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám"
+            ],
+            "colorImages": {
+                "Xám": "https://file.hstatic.net/200000887901/file/ntc_7189x900x900x4.webp"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-di-tay-xm-xanh-lch-lm"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa07157b",
+            "name": "Áo Sơ Mi Dài Tay Sọc Xanh Trắng",
+            "description": "Áo sơ mi sọc xanh trắng hiện đại, dáng vừa vặn",
+            "price": 490000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Dài",
+            "imageUrl": "https://product.hstatic.net/1000333436/product/1_e9633c6ee2ff4ab8929a2d775177afb3_master.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xám"
+            ],
+            "colorImages": {
+                "Xám": "https://product.hstatic.net/1000333436/product/1_e9633c6ee2ff4ab8929a2d775177afb3_master.jpg"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-di-tay-sc-xanh-trng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071579",
+            "name": "Áo Sơ Mi Dài Tay Đen Sang Trọng",
+            "description": "Áo sơ mi đen chất lượng cao, thích hợp cho tiệc tối",
+            "price": 520000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Dài",
+            "imageUrl": "https://product.hstatic.net/1000388805/product/ao-so-mi-nam-den-dai-tay4_c6dc3e362e974252b87d3e2667f96de6.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Đen"
+            ],
+            "colorImages": {
+                "Đen": "https://product.hstatic.net/1000388805/product/ao-so-mi-nam-den-dai-tay4_c6dc3e362e974252b87d3e2667f96de6.jpg"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-di-tay-en-sang-trng"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071577",
+            "name": "Áo Sơ Mi Dài Tay Xanh Navy Đơn Giản",
+            "description": "Áo sơ mi xanh navy chính hãng, co giãn thoải mái",
+            "price": 480000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Dài",
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3WDH19jaaKNOYh5kEVHItVtdsP9Bm3NALwA&s",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Xanh"
+            ],
+            "colorImages": {
+                "Xanh": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3WDH19jaaKNOYh5kEVHItVtdsP9Bm3NALwA&s"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-di-tay-xanh-navy-n-gin"
+        },
+        {
+            "_id": "69bd22cd6a783ef2fa071575",
+            "name": "Áo Sơ Mi Dài Tay Trắng Trơn Premium",
+            "description": "Áo sơ mi dài tay trắng trơn, chất liệu cotton 100%, phù hợp cho công sở",
+            "price": 450000,
+            "discountPercent": 0,
+            "category": "Áo Sơ Mi Dài",
+            "imageUrl": "https://salt.tikicdn.com/cache/550x550/ts/product/f5/85/5e/a0101e25add6081d4c8e0182e38bfda1.jpg",
+            "sizes": [
+                "M"
+            ],
+            "colors": [
+                "Trắng"
+            ],
+            "colorImages": {
+                "Trắng": "https://salt.tikicdn.com/cache/550x550/ts/product/f5/85/5e/a0101e25add6081d4c8e0182e38bfda1.jpg"
+            },
+            "inStock": true,
+            "slug": "o-s-mi-di-tay-trng-trn-premium"
+        }
+    ]
+}
