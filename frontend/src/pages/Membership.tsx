@@ -241,14 +241,18 @@ export default function Membership() {
             </div>
 
             <div className="space-y-4 p-5">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Điểm Rewards</p>
-                  <p className="mt-2 text-2xl font-bold text-[#0f1f3d]">{points.toLocaleString('vi-VN')}</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="border border-slate-200 bg-slate-50 p-3 flex flex-col justify-between">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Mã khách hàng</p>
+                  <p className="mt-2 text-xl font-bold text-[#0f1f3d]">{user?.customerCode || '...'}</p>
                 </div>
-                <div className="border border-slate-200 bg-slate-50 p-3">
+                <div className="border border-slate-200 bg-slate-50 p-3 flex flex-col justify-between">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Điểm Rewards</p>
+                  <p className="mt-2 text-xl font-bold text-[#0f1f3d]">{points.toLocaleString('vi-VN')}</p>
+                </div>
+                <div className="border border-slate-200 bg-slate-50 p-3 flex flex-col justify-between">
                   <p className="text-xs uppercase tracking-wide text-slate-500">Hạng hiện tại</p>
-                  <p className="mt-2 text-2xl font-bold text-[#0f1f3d]">{currentTier.name}</p>
+                  <p className="mt-2 text-xl font-bold text-[#0f1f3d]">{currentTier.name}</p>
                 </div>
               </div>
 
@@ -262,6 +266,80 @@ export default function Membership() {
                   <p>Bạn đang ở hạng cao nhất trong chương trình Rewards.</p>
                 )}
               </div>
+
+              {isAuthenticated && (
+                <div className="border border-slate-200 bg-white p-5 space-y-4">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-[#0f1f3d]">Đổi điểm nhận ưu đãi</p>
+                  <p className="text-xs text-slate-500">Mã ưu đãi sẽ tự động thêm vào kho Voucher của bạn rành riêng cho mã khách hàng gốc.</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      { type: 'freeship', name: 'Free Ship TOÀN QUỐC', points: 300 },
+                      { type: 'discount_10', name: 'Giảm 10% Đơn hàng', points: 1500 },
+                      { type: 'discount_20', name: 'Giảm 20% Đơn hàng', points: 3000 }
+                    ].map((item) => (
+                      <div key={item.type} className="flex h-24 bg-white border border-red-600 relative shrink-0 hover:shadow-md transition-shadow">
+                        
+                        {/* Perforated left edge ticket stub */}
+                        <div className="w-6 bg-red-600 flex flex-col justify-evenly items-center shrink-0">
+                          <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                          <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                          <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                          <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                          <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                          <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                          <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                        </div>
+
+                        {/* Main content */}
+                        <div className="flex-1 px-4 py-3 flex flex-col justify-center">
+                          <p className="text-[13px] font-bold text-[#0f1f3d] uppercase tracking-wide leading-tight">{item.name}</p>
+                          <p className="text-xs text-red-600 font-bold mt-1">🏷 {item.points} ĐIỂM</p>
+                        </div>
+
+                        {/* Dashed separator with physical notches */}
+                        <div className="w-0 border-l border-dashed border-red-300 relative shrink-0 my-2">
+                          {/* Top notch */}
+                          <div className="absolute -top-[9px] -left-[6px] w-[12px] h-[6px] bg-white border border-t-0 border-red-600 rounded-b-full z-10"></div>
+                          {/* Bottom notch */}
+                          <div className="absolute -bottom-[9px] -left-[6px] w-[12px] h-[6px] bg-white border border-b-0 border-red-600 rounded-t-full z-10"></div>
+                        </div>
+
+                        {/* Button Area */}
+                        <div className="w-[88px] px-2 flex items-center justify-center shrink-0 bg-red-50/30">
+                          <button
+                            onClick={async () => {
+                              if (points < item.points) {
+                                alert(`Bạn không đủ ${item.points} điểm để đổi quà này!`);
+                                return;
+                              }
+                              if (window.confirm(`Xác nhận đổi ${item.points} điểm lấy ${item.name}?`)) {
+                                try {
+                                  await api.exchangePointsForVoucher(item.type);
+                                  alert("Đổi mã thành công! Bạn có thể xem trong kho Voucher.");
+                                  await refreshMe(); // update points locally
+                                } catch(e: any) {
+                                  alert(e.message || "Lỗi khi đổi điểm");
+                                }
+                              }
+                            }}
+                            disabled={points < item.points}
+                            className={`w-full py-2.5 px-0.5 text-[10px] font-bold uppercase tracking-wider rounded-none transition-colors ${
+                               points >= item.points ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                            }`}
+                          >
+                            Đổi ngay
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-right">
+                    <Link to="/profile/vouchers" className="text-xs font-semibold text-[#0f1f3d] hover:underline uppercase tracking-wide">
+                      Xem kho Voucher của bạn &rarr;
+                    </Link>
+                  </div>
+                </div>
+              )}
 
               {!isAuthenticated && (
                 <div className="border border-slate-200 bg-slate-50 p-4">
@@ -364,12 +442,21 @@ export default function Membership() {
                         {proofImage && <p className="mt-1 text-xs text-slate-500">Đã chọn: {proofImage.name}</p>}
                       </div>
 
-                      <div className="border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
-                        <p>Trạng thái: {isPremiumActive ? 'Đã kích hoạt' : isPremiumPending ? 'Đang chờ duyệt' : 'Chưa đăng ký'}</p>
+                      <div className={`border p-3 text-sm ${isPremiumActive ? 'border-emerald-500 bg-emerald-50 text-emerald-900 rounded-md shadow-sm' : 'border-slate-200 bg-slate-50 text-slate-700'}`}>
+                        <div className="flex items-center gap-2">
+                          <span className={`font-semibold ${isPremiumActive ? 'text-emerald-700' : ''}`}>Trạng thái:</span>
+                          {isPremiumActive ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wide">
+                              Đã kích hoạt (Thanh toán thành công)
+                            </span>
+                          ) : (
+                            <span>{isPremiumPending ? 'Đang chờ duyệt' : 'Chưa đăng ký'}</span>
+                          )}
+                        </div>
                         {latestRequest?.requestedAt && (
-                          <p className="mt-1">Yêu cầu gần nhất: {new Date(latestRequest.requestedAt).toLocaleString('vi-VN')}</p>
+                          <p className={`mt-2 ${isPremiumActive ? 'text-emerald-700/80' : ''}`}>Yêu cầu gần nhất: {new Date(latestRequest.requestedAt).toLocaleString('vi-VN')}</p>
                         )}
-                        {latestRequest?.reviewNote && <p className="mt-1">Ghi chú admin: {latestRequest.reviewNote}</p>}
+                        {latestRequest?.reviewNote && <p className={`mt-1 ${isPremiumActive ? 'text-emerald-700/80' : ''}`}>Ghi chú admin: {latestRequest.reviewNote}</p>}
                       </div>
 
                       {!isPremiumActive && (

@@ -190,16 +190,13 @@ export default function PDP() {
       );
     }
 
-    if (selectedVariantByColor && selectedVariantByColor.size) {
-      setSelectedSize(selectedVariantByColor.size);
-    }
-
     const nextImage =
       toAbsoluteImageUrl(selectedVariantByColor?.imageUrl) || resolveColorImage(product, selectedColor);
 
     if (nextImage) {
       setSelectedImage(nextImage);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product, selectedColor]);
 
   useEffect(() => {

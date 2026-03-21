@@ -1092,7 +1092,8 @@ export const getAdminOrderDetail = async (orderId: string) => {
           provider: payment.provider,
           amount: payment.amount,
           currency: payment.currency,
-          transactionRef: payment.transactionRef
+          transactionRef: payment.transactionRef,
+          proofImageUrl: payment.proofImageUrl
         }
       : null,
     items: order.items
@@ -1119,6 +1120,21 @@ export const updateAdminOrderStatus = async (
 
     order.status = status;
     await order.save();
+
+    // Sync payment status if needed
+    if (status === "paid") {
+      const payment = await PaymentModel.findOne({ orderId: order._id }).sort({ createdAt: -1 });
+      if (payment && payment.status !== "paid") {
+        payment.status = "paid";
+        await payment.save();
+      }
+    } else if (status === "cancelled") {
+      const payment = await PaymentModel.findOne({ orderId: order._id }).sort({ createdAt: -1 });
+      if (payment && payment.status !== "paid") {
+        payment.status = "failed";
+        await payment.save();
+      }
+    }
   }
 
   await writeAudit(actorUserId, "admin.order.status.update", "order", order._id.toString(), {

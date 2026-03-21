@@ -26,7 +26,7 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'vietqr' | 'cod'>('vietqr');
   const [placedPaymentMethod, setPlacedPaymentMethod] = useState<'vietqr' | 'cod' | null>(null);
-  const [isQrConfirmed, setIsQrConfirmed] = useState(false);
+  const [proofImage, setProofImage] = useState<File | null>(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isPlaced, setIsPlaced] = useState(false);
   const [couponCodeInput, setCouponCodeInput] = useState('');
@@ -122,8 +122,8 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (paymentMethod === 'vietqr' && !isQrConfirmed) {
-      alert('Vui lòng xác nhận đã chuyển khoản VietQR trước khi đặt hàng.');
+    if (paymentMethod === 'vietqr' && !proofImage) {
+      alert('Vui lòng upload ảnh chụp màn hình chuyển khoản (bằng chứng thanh toán) để xác nhận đặt hàng.');
       return;
     }
 
@@ -133,7 +133,8 @@ export default function CheckoutPage() {
       setIsPlacingOrder(true);
       const orderCreated = await api.placeOrder({
         shippingAddress,
-        couponCode: cart?.appliedCouponCode || undefined
+        couponCode: cart?.appliedCouponCode || undefined,
+        proofImage: paymentMethod === 'vietqr' ? proofImage : undefined
       });
       setOrder(orderCreated);
       setPlacedPaymentMethod(paymentMethod);
@@ -420,14 +421,24 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <label className="mt-4 flex items-center gap-2 text-sm text-slate-700">
+                  <div className="mt-5 border-t border-slate-200 pt-5">
+                    <p className="text-sm font-semibold text-charcoal mb-2">Upload bằng chứng thanh toán (Bắt buộc)</p>
+                    <p className="text-xs text-slate-500 mb-3">Vui lòng tải lên ảnh chụp màn hình chuyển khoản thành công để admin duyệt đơn hàng.</p>
                     <input
-                      type="checkbox"
-                      checked={isQrConfirmed}
-                      onChange={(e) => setIsQrConfirmed(e.target.checked)}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file && file.size > 5 * 1024 * 1024) {
+                           alert('Kích thước ảnh tối đa là 5MB.');
+                           return;
+                        }
+                        setProofImage(file || null);
+                      }}
+                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-bold file:bg-[#0f1f3d] file:text-white hover:file:bg-slate-800"
                     />
-                    Tôi đã chuyển khoản qua VietQR
-                  </label>
+                    {proofImage && <p className="mt-2 text-xs font-semibold text-emerald-600">✓ Đã chọn: {proofImage.name}</p>}
+                  </div>
                 </div>
               )}
 
@@ -437,7 +448,7 @@ export default function CheckoutPage() {
                 disabled={
                   isPlacingOrder ||
                   (cart?.items.length ?? 0) === 0 ||
-                  (paymentMethod === 'vietqr' && !isQrConfirmed)
+                  (paymentMethod === 'vietqr' && !proofImage)
                 }
                 className="w-full bg-charcoal text-white py-4 font-medium uppercase tracking-widest hover:bg-gold transition-colors mt-8 disabled:opacity-60"
               >

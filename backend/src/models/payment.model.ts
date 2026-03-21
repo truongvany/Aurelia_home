@@ -10,7 +10,8 @@ const paymentSchema = new Schema(
     finalAmount: { type: Number, required: true, min: 0 },
     currency: { type: String, default: "USD" },
     status: { type: String, enum: ["pending", "paid", "failed"], default: "pending" },
-    transactionRef: { type: String, default: "" }
+    transactionRef: { type: String, default: "" },
+    proofImageUrl: { type: String, default: "" }
   },
   {
     timestamps: true,

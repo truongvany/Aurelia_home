@@ -4,6 +4,7 @@ const userSchema = new Schema(
   {
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String, required: true },
+    customerCode: { type: String, unique: true, sparse: true },
     firstName: { type: String, trim: true },
     lastName: { type: String, trim: true },
     phone: { type: String, trim: true },
@@ -34,6 +35,13 @@ const userSchema = new Schema(
     collection: "users"
   }
 );
+
+userSchema.pre("save", function (next) {
+  if (this.isNew && !this.customerCode) {
+    this.customerCode = "KM-" + this._id.toString().slice(-6).toUpperCase();
+  }
+  next();
+});
 
 export type UserDocument = InferSchemaType<typeof userSchema>;
 export const UserModel = model("User", userSchema);

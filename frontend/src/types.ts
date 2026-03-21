@@ -25,6 +25,7 @@ export interface User {
   memberSince?: string | null;
   points?: number;
   tier?: 'Mới' | 'Bạc' | 'Vàng' | 'Kim cương';
+  customerCode?: string;
 }
 
 export interface MembershipPayload {

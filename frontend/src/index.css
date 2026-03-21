@@ -45,3 +45,16 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Fix bold hover jitter */
+.nav-text-anim {
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  -webkit-text-stroke: 0px transparent;
+}
+.nav-text-anim-active {
+  -webkit-text-stroke: 0.6px currentColor;
+}
+.group:hover .nav-text-anim {
+  -webkit-text-stroke: 0.6px currentColor;
+}

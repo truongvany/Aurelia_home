@@ -167,7 +167,7 @@ export default function Profile() {
                     <Star className="w-3.5 h-3.5 text-slate-400" />
                     <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Điểm tích lũy</p>
                   </div>
-                  <p className="text-[15px] font-bold text-slate-900">{(profile?.user.points || 0).toLocaleString()} pt</p>
+                  <p className="text-[15px] font-bold text-slate-900">{(profile?.user.points || 0).toLocaleString()} Điểm</p>
                 </div>
               </div>
 
@@ -282,60 +282,79 @@ export default function Profile() {
               </div>
 
               {orders.length === 0 ? (
-                <div className="p-12 text-center flex flex-col items-center justify-center space-y-4">
-                  <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-2">
-                    <Package className="h-10 w-10 text-slate-300" />
+                <div className="p-12 text-center flex flex-col items-center justify-center space-y-4 bg-white">
+                  <div className="w-16 h-16 border border-slate-200 rounded-full flex items-center justify-center mb-2">
+                    <Package className="h-8 w-8 text-slate-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-800">Chưa có đơn hàng nào</h3>
+                  <h3 className="text-base font-semibold text-slate-800">Chưa có đơn hàng nào</h3>
                   <p className="text-slate-500 max-w-sm mx-auto text-sm">Bạn chưa từng mua sắm tại King Man. Hãy khám phá ngay các bộ sưu tập thời trang tinh tế của chúng tôi.</p>
-                  <Link to="/shop" className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-charcoal text-white rounded-lg hover:bg-slate-800 transition-colors font-medium">
-                    <ShoppingBag className="w-5 h-5" />
+                  <Link to="/shop" className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-[#0f1f3d] text-white text-[11px] uppercase tracking-widest font-bold hover:bg-slate-800 transition-colors">
+                    <ShoppingBag className="w-4 h-4" />
                     Mua sắm ngay
                   </Link>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-slate-100 max-h-[750px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
                   {orders.map((order) => (
                     <Link
                       key={order._id}
                       to={`/orders/${order._id}`}
-                      className="block p-6 hover:bg-slate-50 transition-colors group"
+                      className="block p-5 bg-white hover:bg-slate-50 transition-colors group"
                     >
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                        <div>
-                          <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-1">Mã đơn hàng</p>
-                          <p className="font-mono text-lg font-bold text-charcoal">#{order._id.slice(-8).toUpperCase()}</p>
-                        </div>
-                        <div className="flex items-center gap-3 md:text-right">
-                          <span className={`inline-flex items-center px-3 py-1 text-xs uppercase tracking-widest font-bold rounded-full border ${
-                              order.status === 'delivered'
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                : order.status === 'cancelled'
-                                  ? 'bg-rose-50 text-rose-700 border-rose-200'
-                                  : 'bg-amber-50 text-amber-700 border-amber-200'
-                            }`}
-                          >
-                            {translateOrderStatus(order.status)}
-                          </span>
-                        </div>
-                      </div>
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex-1 w-full min-w-0">
+                          <div className="flex items-center gap-3 mb-3">
+                             <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Mã đơn</p>
+                             <p className="font-mono text-sm font-bold text-[#0f1f3d]">#{order._id.slice(-8).toUpperCase()}</p>
+                             <span className={`px-2.5 py-0.5 text-[9px] uppercase tracking-widest font-bold border rounded-none ${
+                                order.status === 'delivered'
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                  : order.status === 'cancelled'
+                                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                               }`}
+                             >
+                               {translateOrderStatus(order.status)}
+                             </span>
+                          </div>
 
-                      <div className="flex flex-col md:flex-row gap-6 mt-4 items-start md:items-center">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-800 line-clamp-2">
-                            {(order.items ?? []).map((item) => item.name).join(', ') || 'Sản phẩm của King Man'}
-                          </p>
-                          <p className="text-xs text-slate-500 mt-2 flex items-center gap-1.5">
+                          <div className="mb-2.5">
+                            <p className="text-[13px] font-semibold text-[#0f1f3d] line-clamp-1">
+                              {order.items?.[0]?.name || 'Sản phẩm của King Man'}
+                              {order.items && order.items.length > 1 && (
+                                <span className="text-slate-500 font-medium"> và {order.items.length - 1} sản phẩm khác</span>
+                              )}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent pb-2 mb-2">
+                            {order.items?.map((item: any, idx: number) => (
+                              <div key={`${item.productId}-${idx}`} className="shrink-0 group/img relative">
+                                <img 
+                                  src={item.imageUrl || item.productImageUrl} 
+                                  alt={item.name} 
+                                  className="w-14 h-16 object-cover border border-slate-200 shrink-0" 
+                                  referrerPolicy="no-referrer" 
+                                />
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                                  <span className="text-white text-[10px] font-bold">x{item.quantity}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <p className="text-[11px] text-slate-500 flex items-center gap-1.5 font-medium">
                             <Clock className="w-3.5 h-3.5" />
                             {new Date(order.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}
                           </p>
                         </div>
-                        <div className="w-full md:w-auto p-4 bg-slate-50 border border-slate-100 flex items-center justify-between md:justify-end gap-6 group-hover:bg-white group-hover:border-slate-200 transition-colors">
+                        
+                        <div className="w-full md:w-auto shrink-0 flex items-center justify-between md:justify-end gap-6 text-right px-4 py-3 bg-white border border-slate-200 group-hover:border-slate-300 transition-colors">
                           <div className="text-left md:text-right">
-                            <p className="text-xs text-slate-500 uppercase font-semibold mb-0.5">Tổng tiền</p>
-                            <p className="text-lg font-bold text-charcoal">{formatVND(order.totalAmount)}</p>
+                            <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">Tổng tiền</p>
+                            <p className="text-base font-bold text-[#0f1f3d]">{formatVND(order.totalAmount)}</p>
                           </div>
-                          <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-charcoal transition-colors hidden md:block" />
+                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-amber-600 transition-colors hidden md:block" />
                         </div>
                       </div>
                     </Link>

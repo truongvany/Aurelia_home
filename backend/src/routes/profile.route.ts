@@ -7,7 +7,8 @@ import {
   getVouchers,
   joinMembership,
   patchMyProfile,
-  patchStyleProfile
+  patchStyleProfile,
+  exchangeVoucher
 } from "../controllers/profile.controller.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 
@@ -34,5 +35,6 @@ router.get("/membership", getMyMembership);
 router.get("/membership/payment-config", getMyMembershipPaymentConfig);
 router.post("/membership/enroll", upload.single("proofImage"), joinMembership);
 router.get("/vouchers", getVouchers);
+router.post("/vouchers/exchange", exchangeVoucher);
 
 export default router;

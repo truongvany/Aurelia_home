@@ -424,6 +424,11 @@ export const api = {
     });
   },
   getVouchers: () => request<VoucherPayload[]>("/profile/vouchers"),
+  exchangePointsForVoucher: (exchangeType: string) =>
+    request<VoucherPayload>("/profile/vouchers/exchange", {
+      method: "POST",
+      body: JSON.stringify({ exchangeType })
+    }),
   updateProfile: (input: { firstName?: string; lastName?: string; phone?: string }) =>
     request<ProfilePayload["user"]>("/profile", {
       method: "PATCH",
@@ -477,14 +482,27 @@ export const api = {
       return payload;
     }),
 
-  placeOrder: (input: { shippingAddress: string; billingAddress?: string; couponCode?: string }) =>
-    request<OrderPayload>("/orders", {
+  placeOrder: (input: { shippingAddress: string; billingAddress?: string; couponCode?: string; proofImage?: File | null }) => {
+    const formData = new FormData();
+    formData.append("shippingAddress", input.shippingAddress);
+    if (input.billingAddress) {
+      formData.append("billingAddress", input.billingAddress);
+    }
+    if (input.couponCode) {
+      formData.append("couponCode", input.couponCode);
+    }
+    if (input.proofImage) {
+      formData.append("proofImage", input.proofImage);
+    }
+
+    return request<OrderPayload>("/orders", {
       method: "POST",
-      body: JSON.stringify(input)
+      body: formData
     }).then((payload) => {
       emitCartUpdated();
       return payload;
-    }),
+    });
+  },
   getMyOrders: () => request<OrderPayload[]>("/orders"),
   getMyOrderById: (orderId: string) => request<OrderPayload>(`/orders/${orderId}`),
 

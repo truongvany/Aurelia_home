@@ -13,6 +13,7 @@ interface PlaceOrderInput {
   shippingAddress: string;
   billingAddress?: string;
   couponCode?: string;
+  proofImageUrl?: string;
 }
 
 export const placeOrder = async (input: PlaceOrderInput) => {
@@ -94,14 +95,28 @@ export const placeOrder = async (input: PlaceOrderInput) => {
     items: snapshots
   });
 
+  // Calculate and award points (1 point per 10,000 VND)
+  const earnedPoints = Math.floor(finalAmount / 10000);
+  if (earnedPoints > 0) {
+    user.points = (user.points || 0) + earnedPoints;
+    
+    // Update tier based on total points * 10,000 as estimated spend
+    const estimatedSpend = user.points * 10000;
+    if (estimatedSpend >= 20000000) user.tier = "Vàng";
+    else if (estimatedSpend >= 5000000) user.tier = "Bạc"; // VIP logic maps to Bạc/Vàng in tier string
+    
+    await user.save();
+  }
+
   await PaymentModel.create({
     orderId: order._id,
     userId: input.userId,
     amount: totalAmount,
     discountAmount,
     finalAmount,
-    status: "paid", // demo flow: luôn thành công
-    provider: "mock"
+    status: "pending", // Payment is pending until admin approves
+    provider: input.proofImageUrl ? "bank_transfer" : "mock",
+    proofImageUrl: input.proofImageUrl || ""
   });
 
   cart.items.splice(0, cart.items.length);

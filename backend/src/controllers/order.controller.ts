@@ -14,15 +14,21 @@ const getUserId = (req: Request): string => {
 
 export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const { shippingAddress, billingAddress, couponCode } = req.body;
-  if (!shippingAddress) {
-    throw new ApiError(400, "shippingAddress is required");
+  let proofImageUrl = "";
+  if (req.file) {
+    const { uploadToCloudinary } = await import("../utils/cloudinaryUpload.js");
+    const uploadResult = (await uploadToCloudinary(req.file.buffer, req.file.originalname, {
+      folder: "kingman_orders/proofs"
+    })) as { secure_url: string };
+    proofImageUrl = uploadResult.secure_url;
   }
 
   const order = await placeOrder({
     userId: getUserId(req),
     shippingAddress,
     billingAddress,
-    couponCode
+    couponCode,
+    proofImageUrl
   });
   sendSuccess(res, order, "Order placed", 201);
 });

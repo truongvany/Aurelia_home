@@ -161,6 +161,20 @@ export default function OrderDetail() {
                 <pre className="mt-2 text-sm text-slate-700 bg-slate-50 p-4 rounded border border-slate-200 whitespace-pre-wrap">{order.billingAddress}</pre>
               </div>
             )}
+
+            {order.payment?.proofImageUrl && (
+              <div className="mt-6 border-t border-slate-200 pt-6">
+                <p className="text-xs text-slate-500 uppercase tracking-wide mb-3">Bằng chứng thanh toán (Khách gửi)</p>
+                <a href={order.payment.proofImageUrl} target="_blank" rel="noopener noreferrer" className="block w-fit">
+                  <img
+                    src={order.payment.proofImageUrl}
+                    alt="Bằng chứng thanh toán"
+                    className="max-w-sm w-full rounded border border-slate-300 object-contain"
+                    referrerPolicy="no-referrer"
+                  />
+                </a>
+              </div>
+            )}
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm">

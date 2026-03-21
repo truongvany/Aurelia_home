@@ -5,6 +5,7 @@ import { UserModel } from "../models/user.model.js";
 import { UserProfileModel } from "../models/userProfile.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { listUserVouchers } from "./coupon.service.js";
+import { CouponModel } from "../models/coupon.model.js";
 
 const getGlobalSettings = async () => {
   const existing = await AppSettingModel.findOne({ key: "global" });
@@ -264,4 +265,67 @@ export const getMyVouchers = async (userId: string) => {
   }
 
   return listUserVouchers(userId);
+};
+
+export const exchangePointsForVoucher = async (userId: string, exchangeType: string) => {
+  if (!Types.ObjectId.isValid(userId)) {
+    throw new ApiError(400, "Invalid user id");
+  }
+
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  let requiredPoints = 0;
+  let discountType = "fixed";
+  let discountValue = 0;
+  let codePrefix = "";
+
+  if (exchangeType === "freeship") {
+    requiredPoints = 300;
+    discountType = "fixed";
+    discountValue = 30000;
+    codePrefix = "FS30";
+  } else if (exchangeType === "discount_10") {
+    requiredPoints = 1500;
+    discountType = "percent";
+    discountValue = 10;
+    codePrefix = "DC10";
+  } else if (exchangeType === "discount_20") {
+    requiredPoints = 3000;
+    discountType = "percent";
+    discountValue = 20;
+    codePrefix = "DC20";
+  } else {
+    throw new ApiError(400, "Loại phần thưởng không hợp lệ");
+  }
+
+  if ((user.points || 0) < requiredPoints) {
+    throw new ApiError(400, `Bạn không đủ ${requiredPoints} điểm để đổi mã này (hiện tại: ${user.points || 0} điểm).`);
+  }
+
+  user.points -= requiredPoints;
+  await user.save();
+
+  const expireDate = new Date();
+  expireDate.setDate(expireDate.getDate() + 30); // 30 ngày
+
+  const randomString = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const seed = user.customerCode ? user.customerCode.split("-")[1] : randomString;
+  const code = `${codePrefix}-${seed}-${Date.now().toString().slice(-4)}`;
+
+  const coupon = await CouponModel.create({
+    code,
+    discountType,
+    discountValue,
+    minOrderAmount: 0,
+    source: "membership",
+    assignedUserId: user._id,
+    maxUsesPerUser: 1,
+    expiresAt: expireDate,
+    isActive: true
+  });
+
+  return coupon;
 };

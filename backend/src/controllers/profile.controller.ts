@@ -9,7 +9,8 @@ import {
   getMyVouchers,
   getProfile,
   updateProfile,
-  upsertStyleProfile
+  upsertStyleProfile,
+  exchangePointsForVoucher
 } from "../services/profile.service.js";
 
 const getUserId = (req: Request): string => {
@@ -80,4 +81,14 @@ export const joinMembership = asyncHandler(async (req: Request, res: Response) =
 export const getVouchers = asyncHandler(async (req: Request, res: Response) => {
   const vouchers = await getMyVouchers(getUserId(req));
   sendSuccess(res, vouchers, "Vouchers fetched");
+});
+
+export const exchangeVoucher = asyncHandler(async (req: Request, res: Response) => {
+  const { exchangeType } = req.body;
+  if (!exchangeType) {
+    throw new ApiError(400, "exchangeType is required");
+  }
+  
+  const coupon = await exchangePointsForVoucher(getUserId(req), exchangeType);
+  sendSuccess(res, coupon, "Đổi điểm thành công");
 });

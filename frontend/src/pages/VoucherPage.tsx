@@ -140,12 +140,14 @@ export default function VoucherPage() {
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
             >
               {paginatedVouchers.map((v, index) => {
                 const isExpiredItem = activeTab === 'used';
-                const borderColor = isExpiredItem ? 'border-slate-200' : 'border-[#ff9eb5]';
-                const sideColor = isExpiredItem ? 'bg-slate-300' : 'bg-[#f40f51]';
+                const borderColor = isExpiredItem ? 'border-slate-300' : 'border-red-600';
+                const stubColor = isExpiredItem ? 'bg-slate-400' : 'bg-red-600';
+                const titleColor = isExpiredItem ? 'text-slate-500' : 'text-[#0f1f3d]';
+                const dashedColor = isExpiredItem ? 'border-slate-300' : 'border-red-300';
 
                 return (
                   <motion.div 
@@ -153,66 +155,69 @@ export default function VoucherPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.05 }}
                     key={v._id} 
-                    className={`relative bg-white border ${borderColor} rounded-[8px] flex h-[110px] sm:h-[120px] transition-shadow hover:shadow-md group`}
+                    className={`flex h-[100px] bg-white border ${borderColor} relative shrink-0 hover:shadow-md transition-shadow`}
                   >
-                    {/* Left thick accent bar */}
-                    <div className={`w-[5px] ${sideColor} rounded-[6px_0_0_6px] shrink-0`} />
+                    {/* Perforated left edge ticket stub */}
+                    <div className={`w-5 ${stubColor} flex flex-col justify-evenly items-center shrink-0`}>
+                      <div className="w-[5px] h-[5px] bg-[#fcfcfc] rounded-full"></div>
+                      <div className="w-[5px] h-[5px] bg-[#fcfcfc] rounded-full"></div>
+                      <div className="w-[5px] h-[5px] bg-[#fcfcfc] rounded-full"></div>
+                      <div className="w-[5px] h-[5px] bg-[#fcfcfc] rounded-full"></div>
+                      <div className="w-[5px] h-[5px] bg-[#fcfcfc] rounded-full"></div>
+                      <div className="w-[5px] h-[5px] bg-[#fcfcfc] rounded-full"></div>
+                      <div className="w-[5px] h-[5px] bg-[#fcfcfc] rounded-full"></div>
+                    </div>
                     
                     {/* Left Content */}
-                    <div className="flex-1 py-3 px-5 flex items-center relative">
-                      <div className="w-full pr-8">
-                        <h3 className={`text-[15px] sm:text-[17px] font-bold tracking-tight mb-1 leading-tight uppercase ${isExpiredItem ? 'text-slate-500' : 'text-slate-900'}`}>
+                    <div className="flex-1 py-2 px-3 flex flex-col justify-center relative min-w-0">
+                      <div className="w-full pr-4">
+                        <h3 className={`text-[12px] sm:text-[13px] font-bold tracking-tight mb-0.5 leading-tight uppercase truncate ${titleColor}`}>
                           ƯU ĐÃI {v.discountType === 'percent' ? `${v.discountValue}%` : formatVND(v.discountValue)}
                         </h3>
-                        <p className={`text-[11px] sm:text-[12px] leading-snug line-clamp-2 ${isExpiredItem ? 'text-slate-400' : 'text-slate-500'}`}>
-                          Áp dụng cho đơn hàng {v.minOrderAmount > 0 ? `từ ${formatVND(v.minOrderAmount)}` : 'mọi giá trị'}. {v.maxDiscountAmount ? `Giảm tối đa ${formatVND(v.maxDiscountAmount)}.` : ''}
+                        <p className={`text-[10px] leading-snug line-clamp-2 ${isExpiredItem ? 'text-slate-400' : 'text-slate-500'}`}>
+                          Áp dụng đơn từ {formatVND(v.minOrderAmount)}
                         </p>
                       </div>
 
-                      {/* Info Icon absolute centered vertically near the divider */}
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 shrink-0">
-                        <div className={`w-[18px] h-[18px] rounded-full flex items-center justify-center border ${isExpiredItem ? 'border-slate-200 text-slate-300' : 'border-slate-300 text-slate-400 hover:text-slate-600 hover:border-slate-400'} cursor-help transition-colors`}>
+                      {/* Info Icon */}
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0">
+                        <div title={v.maxDiscountAmount ? `Giảm tối đa ${formatVND(v.maxDiscountAmount)}` : 'Chi tiết ưu đãi'} className={`w-[16px] h-[16px] rounded-full flex items-center justify-center border ${isExpiredItem ? 'border-slate-200 text-slate-300' : 'border-slate-300 text-slate-400 hover:text-red-600 hover:border-red-400'} cursor-help transition-colors`}>
                            <Info className="w-2.5 h-2.5" />
                         </div>
                       </div>
                     </div>
 
-                    {/* Dotted Divider & Notches - Note: bg-[#fcfcfc] matches the page background for cutouts */}
-                    <div className="w-[1px] relative flex flex-col justify-center">
-                      <div className={`absolute inset-y-1.5 left-0 border-l-[1.5px] border-dashed ${isExpiredItem ? 'border-slate-200' : 'border-[#ffe4e9]'}`} />
-                      
-                      {/* Top Notch - covers precisely the top border */}
-                      <div className={`absolute -top-[1px] left-1/2 -translate-x-1/2 w-[14px] h-[7px] bg-[#fcfcfc] rounded-b-full border-b border-l border-r ${borderColor} z-10`} />
-                      
-                      {/* Bottom Notch - covers precisely the bottom border */}
-                      <div className={`absolute -bottom-[1px] left-1/2 -translate-x-1/2 w-[14px] h-[7px] bg-[#fcfcfc] rounded-t-full border-t border-l border-r ${borderColor} z-10`} />
+                    {/* Dashed Divider & Notches */}
+                    <div className={`w-0 border-l border-dashed ${dashedColor} relative shrink-0 my-1.5`}>
+                      <div className={`absolute -top-[7.5px] -left-[5px] w-[10px] h-[5px] bg-[#fcfcfc] border border-t-0 ${borderColor} rounded-b-full z-10`} />
+                      <div className={`absolute -bottom-[7.5px] -left-[5px] w-[10px] h-[5px] bg-[#fcfcfc] border border-b-0 ${borderColor} rounded-t-full z-10`} />
                     </div>
 
                     {/* Right Action */}
-                    <div className="w-[125px] sm:w-[140px] px-3 sm:px-4 flex flex-col items-center justify-center shrink-0">
+                    <div className={`w-[85px] px-2 flex flex-col items-center justify-center shrink-0 ${isExpiredItem ? 'bg-slate-50' : 'bg-red-50/30'}`}>
                       <div className="text-center w-full mb-2">
-                        <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-0.5 truncate flex flex-col sm:block">
-                          Mã: <span className={`font-bold tracking-normal uppercase ${isExpiredItem ? 'text-slate-400' : 'text-slate-800'}`}>{v.code}</span>
+                        <p className={`text-[9px] uppercase tracking-wide mb-0.5 truncate font-bold ${titleColor}`}>
+                          {v.code}
                         </p>
-                        <p className="text-[10px] text-slate-400 whitespace-nowrap">
-                          HSD: {new Date(v.expiresAt).toLocaleDateString('vi-VN')}
+                        <p className="text-[8px] text-slate-500 whitespace-nowrap font-medium">
+                          HSD: {new Date(v.expiresAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}
                         </p>
                       </div>
 
                       {!isExpiredItem ? (
                         <button 
                           onClick={() => handleCopyCode(v.code)}
-                          className={`w-full py-[8px] rounded-full text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center
+                          className={`w-full py-1.5 px-1 rounded-none text-[9px] font-bold uppercase tracking-wider transition-all flex items-center justify-center
                             ${copiedCode === v.code 
-                              ? 'bg-emerald-50 text-emerald-600' 
-                              : 'bg-black text-white hover:bg-slate-800'}
+                              ? 'bg-emerald-600 text-white' 
+                              : 'bg-red-600 text-white hover:bg-red-700'}
                           `}
                         >
-                          {copiedCode === v.code ? 'Đã chép' : 'Sao chép mã'}
+                          {copiedCode === v.code ? 'Đã sao chép' : 'Copy mã'}
                         </button>
                       ) : (
-                        <div className="w-full py-[8px] rounded-full bg-slate-100 text-slate-400 text-[10px] font-bold uppercase flex items-center justify-center cursor-not-allowed">
-                          Đã dùng
+                        <div className="w-full py-1.5 px-1 rounded-none bg-slate-200 text-slate-400 text-[9px] font-bold uppercase flex items-center justify-center cursor-not-allowed">
+                          {v.usedCount >= v.maxUsesPerUser ? 'Đã dùng' : 'Hết hạn'}
                         </div>
                       )}
                     </div>

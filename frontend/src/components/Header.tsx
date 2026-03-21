@@ -277,7 +277,7 @@ export default function Header() {
           </div>
           <nav className="hidden md:flex space-x-8 h-full items-center">
             <Link to="/" className="group text-sm font-medium uppercase tracking-wider h-full flex items-center">
-              <span className={`relative py-1 transition-colors duration-300 ${location.pathname === '/' ? 'text-[#1e3a8a]' : 'text-[#0a192f] group-hover:text-[#1e3a8a]'}`}>
+              <span className={`nav-text-anim relative py-1 ${location.pathname === '/' ? 'text-[#1e3a8a] nav-text-anim-active' : 'text-[#0a192f] group-hover:text-[#1e3a8a]'}`}>
                 Trang chủ
                 <span className={`absolute left-0 bottom-0 w-full h-[2px] bg-[#1e3a8a] transition-transform duration-300 ease-out origin-center ${location.pathname === '/' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
               </span>
@@ -285,7 +285,7 @@ export default function Header() {
 
             <div className="group flex items-center h-full">
               <Link to="/shop" className="text-sm font-medium uppercase tracking-wider h-full flex items-center relative z-10">
-                <span className={`relative py-1 transition-colors duration-300 ${location.pathname.startsWith('/shop') ? 'text-[#1e3a8a]' : 'text-[#0a192f] group-hover:text-[#1e3a8a]'}`}>
+                <span className={`nav-text-anim relative py-1 ${location.pathname.startsWith('/shop') ? 'text-[#1e3a8a] nav-text-anim-active' : 'text-[#0a192f] group-hover:text-[#1e3a8a]'}`}>
                   Thời trang
                   <span className={`absolute left-0 bottom-0 w-full h-[2px] bg-[#1e3a8a] transition-transform duration-300 ease-out origin-center ${location.pathname.startsWith('/shop') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
                 </span>
@@ -366,19 +366,19 @@ export default function Header() {
             </div>
 
             <Link to="/about" className="group text-sm font-medium uppercase tracking-wider h-full flex items-center">
-              <span className={`relative py-1 transition-colors duration-300 ${location.pathname.startsWith('/about') ? 'text-[#1e3a8a]' : 'text-[#0a192f] group-hover:text-[#1e3a8a]'}`}>
+              <span className={`nav-text-anim relative py-1 ${location.pathname.startsWith('/about') ? 'text-[#1e3a8a] nav-text-anim-active' : 'text-[#0a192f] group-hover:text-[#1e3a8a]'}`}>
                 Giới thiệu
                 <span className={`absolute left-0 bottom-0 w-full h-[2px] bg-[#1e3a8a] transition-transform duration-300 ease-out origin-center ${location.pathname.startsWith('/about') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
               </span>
             </Link>
             <Link to="/contact" className="group text-sm font-medium uppercase tracking-wider h-full flex items-center">
-              <span className={`relative py-1 transition-colors duration-300 ${location.pathname.startsWith('/contact') ? 'text-[#1e3a8a]' : 'text-[#0a192f] group-hover:text-[#1e3a8a]'}`}>
+              <span className={`nav-text-anim relative py-1 ${location.pathname.startsWith('/contact') ? 'text-[#1e3a8a] nav-text-anim-active' : 'text-[#0a192f] group-hover:text-[#1e3a8a]'}`}>
                 Liên hệ
                 <span className={`absolute left-0 bottom-0 w-full h-[2px] bg-[#1e3a8a] transition-transform duration-300 ease-out origin-center ${location.pathname.startsWith('/contact') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
               </span>
             </Link>
             <Link to="/membership" className="group text-sm font-medium uppercase tracking-wider h-full flex items-center">
-              <span className={`relative py-1 transition-colors duration-300 ${location.pathname.startsWith('/membership') ? 'text-[#1e3a8a]' : 'text-[#0a192f] group-hover:text-[#1e3a8a]'}`}>
+              <span className={`nav-text-anim relative py-1 ${location.pathname.startsWith('/membership') ? 'text-[#1e3a8a] nav-text-anim-active' : 'text-[#0a192f] group-hover:text-[#1e3a8a]'}`}>
                 Thành viên
                 <span className={`absolute left-0 bottom-0 w-full h-[2px] bg-[#1e3a8a] transition-transform duration-300 ease-out origin-center ${location.pathname.startsWith('/membership') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
               </span>
