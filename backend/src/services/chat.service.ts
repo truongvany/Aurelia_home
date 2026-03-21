@@ -168,8 +168,7 @@ const runRetrieval = async (query: string): Promise<RetrievalOutput> => {
   return { sources, suggestedProducts };
 };
 
-const buildPrompt = (
-  query: string,
+const buildSystemPrompt = (
   sources: ScoredKnowledgeSource[],
   suggestedProducts: SuggestedProduct[]
 ) => {
@@ -189,12 +188,12 @@ const buildPrompt = (
         .join("\n")
     : "No specific product matched strongly. You may suggest browsing /shop.";
 
-  return `
-You are King Man, the virtual assistant for King Man. Respond in Vietnamese.
+  return `You are King Man, the virtual assistant for King Man. Respond in Vietnamese.
 
 Rules:
 - VERY SHORT replies (2-3 sentences max). Be direct and polite.
 - Use professional, respectful Vietnamese (dùng danh xưng "King Man", gọi khách hàng là "Quý khách", dùng "dạ/vâng/ạ").
+- IMPORTANT: Remember and use information the user shared earlier in the conversation (e.g. their name, preferences). If the user told you their name, address them by name naturally.
 - If you suggest products, show 2-3 max with prices and links only.
 - Reply naturally - don't be robotic. Skip unnecessary formatting.
 - IMPORTANT: ALWAYS format links as Markdown links with CONTEXTUAL and NATURAL text. DO NOT use generic words like "Tại đây" repeatedly. Ví dụ ĐÚNG: "truy cập [trang Cửa hàng](/shop)", "thực hiện [thanh toán](/checkout)", "[Tên sản phẩm](/url)". Ví dụ SAI: "truy cập [Tại đây](/shop)". KHÔNG ĐƯỢC để đường link trơn (raw URL) trong câu.
@@ -207,17 +206,28 @@ Knowledge context:
 ${sourceContext}
 
 Product context:
-${productContext}
-
-User question:
-${query}
-`.trim();
+${productContext}`.trim();
 };
+
+// Used only for fallback (non-AI) mode
+const buildPrompt = (
+  query: string,
+  sources: ScoredKnowledgeSource[],
+  suggestedProducts: SuggestedProduct[]
+) => {
+  return buildSystemPrompt(sources, suggestedProducts) + `\n\nUser question:\n${query}`;
+};
+
+interface HistoryMessage {
+  sender: "user" | "ai";
+  text: string;
+}
 
 const generateGroqReply = async (
   query: string,
   sources: ScoredKnowledgeSource[],
-  suggestedProducts: SuggestedProduct[]
+  suggestedProducts: SuggestedProduct[],
+  history: HistoryMessage[] = []
 ): Promise<string | null> => {
   const groq = getGroqClient();
   if (!groq) {
@@ -225,7 +235,15 @@ const generateGroqReply = async (
     return null;
   }
 
-  const prompt = buildPrompt(query, sources, suggestedProducts);
+  const systemPrompt = buildSystemPrompt(sources, suggestedProducts);
+
+  // Build multi-turn messages: system + history + current user message
+  const historyMessages: Array<{ role: "user" | "assistant"; content: string }> = history.map(
+    (msg) => ({
+      role: msg.sender === "user" ? "user" : "assistant",
+      content: msg.text
+    })
+  );
 
   try {
     const message = await groq.chat.completions.create({
@@ -234,10 +252,9 @@ const generateGroqReply = async (
       temperature: 0.35,
       top_p: 0.9,
       messages: [
-        {
-          role: "user",
-          content: prompt
-        }
+        { role: "system", content: systemPrompt },
+        ...historyMessages,
+        { role: "user", content: query }
       ]
     });
 
@@ -322,6 +339,22 @@ export const sendChatMessage = async (input: SendMessageInput) => {
     conversationId = conversation._id.toString();
   }
 
+  // Load recent conversation history BEFORE saving the new user message
+  // Keep last 20 messages (10 turns) to stay within token limits
+  const recentMessages = conversationId
+    ? await AiMessageModel.find({ conversationId })
+        .sort({ createdAt: -1 })
+        .limit(20)
+        .lean()
+    : [];
+
+  const history: HistoryMessage[] = recentMessages
+    .reverse()
+    .map((msg) => ({
+      sender: msg.sender as "user" | "ai",
+      text: msg.text
+    }));
+
   const userMessage = await AiMessageModel.create({
     conversationId,
     sender: "user",
@@ -330,7 +363,7 @@ export const sendChatMessage = async (input: SendMessageInput) => {
 
   const retrieval = await runRetrieval(input.message);
   const replyText =
-    (await generateGroqReply(input.message, retrieval.sources, retrieval.suggestedProducts)) ??
+    (await generateGroqReply(input.message, retrieval.sources, retrieval.suggestedProducts, history)) ??
     buildFallbackReply(input.message, retrieval.sources, retrieval.suggestedProducts);
 
   const aiMessage = await AiMessageModel.create({
