@@ -2,10 +2,10 @@ import { ContactInquiryModel } from "../models/contactInquiry.model.js";
 
 interface ContactInput {
   name: string;
-  email: string;
-  phone?: string;
+  email?: string;
+  phone: string;
   subject: string;
-  message: string;
+  message?: string;
 }
 
 export const submitInquiry = async (input: ContactInput) =>
@@ -13,3 +13,9 @@ export const submitInquiry = async (input: ContactInput) =>
 
 export const listInquiries = async () =>
   ContactInquiryModel.find().sort({ createdAt: -1 }).limit(200);
+
+export const updateInquiryStatus = async (
+  id: string,
+  status: "new" | "in_progress" | "resolved"
+) =>
+  ContactInquiryModel.findByIdAndUpdate(id, { status }, { new: true });

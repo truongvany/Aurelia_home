@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Router } from "express";
 import multer from "multer";
+import { getInquiries, patchInquiryStatus } from "../controllers/contact.controller.js";
 import {
   deleteAdminProduct,
   getAdminBanks,
@@ -80,5 +81,8 @@ router.patch("/membership-requests/:userId/:action", patchAdminMembershipRequest
 router.get("/vouchers", getAdminVouchers);
 router.post("/vouchers", postAdminVoucher);
 router.patch("/vouchers/:voucherId/deactivate", patchAdminVoucherDeactivate);
+
+router.get("/contact-inquiries", getInquiries);
+router.patch("/contact-inquiries/:id/status", patchInquiryStatus);
 
 export default router;

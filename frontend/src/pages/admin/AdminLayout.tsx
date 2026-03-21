@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Bell, Search, LogOut, UserCheck, Ticket } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Bell, Search, LogOut, UserCheck, Ticket, MessageSquare } from 'lucide-react';
 
 export default function AdminLayout() {
   const location = useLocation();
@@ -13,6 +13,7 @@ export default function AdminLayout() {
     { path: '/admin/customers', label: 'Customers', icon: Users },
     { path: '/admin/membership-requests', label: 'Membership Requests', icon: UserCheck },
     { path: '/admin/vouchers', label: 'Voucher Management', icon: Ticket },
+    { path: '/admin/contact-inquiries', label: 'Contact Inquiries', icon: MessageSquare },
     { path: '/admin/settings', label: 'Settings', icon: Settings },
   ];
 

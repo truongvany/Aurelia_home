@@ -32,6 +32,7 @@ import AdminOrderDetail from './pages/admin/OrderDetail';
 import CustomerDetail from './pages/admin/CustomerDetail';
 import AdminMembershipRequests from './pages/admin/MembershipRequests';
 import AdminVouchers from './pages/admin/Vouchers';
+import AdminContactInquiries from './pages/admin/ContactInquiries';
 
 function AppRoutes() {
   const location = useLocation();
@@ -78,6 +79,7 @@ function AppRoutes() {
               <Route path="customers/:id" element={<CustomerDetail />} />
               <Route path="membership-requests" element={<AdminMembershipRequests />} />
               <Route path="vouchers" element={<AdminVouchers />} />
+              <Route path="contact-inquiries" element={<AdminContactInquiries />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
           </Route>

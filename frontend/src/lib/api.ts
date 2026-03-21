@@ -488,7 +488,7 @@ export const api = {
   getMyOrders: () => request<OrderPayload[]>("/orders"),
   getMyOrderById: (orderId: string) => request<OrderPayload>(`/orders/${orderId}`),
 
-  submitContact: (input: { name: string; email: string; phone?: string; subject: string; message: string }) =>
+  submitContact: (input: { name: string; email?: string; phone: string; subject: string; message?: string }) =>
     request<{ _id: string }>("/contact", {
       method: "POST",
       body: JSON.stringify(input)
@@ -730,5 +730,26 @@ export const api = {
   deactivateAdminVoucher: (voucherId: string) =>
     request<AdminVoucherItem>(`/admin/vouchers/${voucherId}/deactivate`, {
       method: "PATCH"
+    }),
+
+  getAdminContactInquiries: () =>
+    request<Array<{
+      _id: string;
+      name: string;
+      email?: string;
+      phone: string;
+      subject: string;
+      message?: string;
+      status: "new" | "in_progress" | "resolved";
+      createdAt: string;
+      updatedAt: string;
+    }>>("/admin/contact-inquiries"),
+  updateAdminContactInquiryStatus: (
+    id: string,
+    status: "new" | "in_progress" | "resolved"
+  ) =>
+    request<{ _id: string; status: string }>(`/admin/contact-inquiries/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status })
     })
 };

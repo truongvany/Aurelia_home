@@ -519,7 +519,7 @@ export default function PLP() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-9">
           <aside className={`lg:col-span-3 ${isFilterOpen ? 'block' : 'hidden lg:block'}`}>
             <div className="sticky top-24 pr-4">
-              <div className="mb-4 pb-4 border-b border-slate-200/70">
+              <div className="mb-3 pb-3 border-b border-slate-200/70">
                 <button
                   className="w-full flex items-center justify-between text-left text-[14px] font-semibold text-slate-800 group"
                   onClick={() => toggleSection('category')}
@@ -529,8 +529,8 @@ export default function PLP() {
                 </button>
                 <div className={`grid transition-all duration-300 ease-in-out ${openSections.category ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
                   <div className="overflow-hidden">
-                    <div className="space-y-2.5 max-h-[240px] overflow-y-auto pr-2 custom-scrollbar pb-1">
-                      {[
+                    <div className="space-y-2 max-h-[240px] overflow-y-auto pr-2 custom-scrollbar pb-1">
+                      {[ 
                         { slug: 'all', name: 'Tất cả' },
                         { slug: 'ao', name: 'Áo Nam' },
                         { slug: 'quan', name: 'Quần Nam' },
@@ -546,7 +546,7 @@ export default function PLP() {
                             role="radio"
                             aria-checked={isSelected}
                             onClick={() => updateCategory(cat.slug)}
-                            className="group flex items-center gap-2.5 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-colors"
+                            className="group flex items-center gap-2 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-all duration-300 ease-out transform hover:-translate-y-0.5 hover:bg-slate-100 rounded-md px-1 py-1"
                           >
                             <span className={`flex items-center justify-center w-[16px] h-[16px] rounded-full border transition-colors shrink-0 ${isSelected ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
                               {isSelected && <span className="w-2 h-2 rounded-full bg-slate-800" />}
@@ -560,7 +560,7 @@ export default function PLP() {
                 </div>
               </div>
 
-              <div className="mb-4 pb-4 border-b border-slate-200/70">
+              <div className="mb-3 pb-3 border-b border-slate-200/70">
                 <button
                   className="w-full flex items-center justify-between text-left text-[14px] font-semibold text-slate-800 group"
                   onClick={() => toggleSection('size')}
@@ -570,11 +570,11 @@ export default function PLP() {
                 </button>
                 <div className={`grid transition-all duration-300 ease-in-out ${openSections.size ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
                   <div className="overflow-hidden">
-                    <div className="space-y-2.5 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar pb-1">
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar pb-1">
                       <button
                         type="button"
                         onClick={() => setSelectedSize('all')}
-                        className="group flex items-center gap-2.5 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-colors"
+                        className="group flex items-center gap-2 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-all duration-300 ease-out transform hover:-translate-y-0.5 hover:bg-slate-100 rounded-md px-1 py-1"
                       >
                         <span className={`flex items-center justify-center w-[16px] h-[16px] rounded-full border transition-colors shrink-0 ${selectedSize === 'all' ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
                           {selectedSize === 'all' && <span className="w-2 h-2 rounded-full bg-slate-800" />}
@@ -586,7 +586,7 @@ export default function PLP() {
                           key={size}
                           type="button"
                           onClick={() => setSelectedSize(size)}
-                          className="group flex items-center gap-2.5 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-colors"
+                          className="group flex items-center gap-2 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-all duration-300 ease-out transform hover:-translate-y-0.5 hover:bg-slate-100 rounded-md px-1 py-1"
                         >
                           <span className={`flex items-center justify-center w-[16px] h-[16px] rounded-full border transition-colors shrink-0 ${selectedSize === size ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
                             {selectedSize === size && <span className="w-2 h-2 rounded-full bg-slate-800" />}
@@ -599,7 +599,7 @@ export default function PLP() {
                 </div>
               </div>
 
-              <div className="mb-4 pb-4 border-b border-slate-200/70">
+              <div className="mb-3 pb-3 border-b border-slate-200/70">
                 <button
                   className="w-full flex items-center justify-between text-left text-[14px] font-semibold text-slate-800 group"
                   onClick={() => toggleSection('color')}
@@ -609,11 +609,11 @@ export default function PLP() {
                 </button>
                 <div className={`grid transition-all duration-300 ease-in-out ${openSections.color ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
                   <div className="overflow-hidden">
-                    <div className="space-y-2.5 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar pb-1">
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar pb-1">
                       <button
                         type="button"
                         onClick={() => setSelectedColor('all')}
-                        className="group flex items-center gap-2.5 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-colors"
+                        className="group flex items-center gap-2 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-all duration-300 ease-out transform hover:-translate-y-0.5 hover:bg-slate-100 rounded-md px-1 py-1"
                       >
                         <span className={`flex items-center justify-center w-[16px] h-[16px] rounded-full border transition-colors shrink-0 ${selectedColor === 'all' ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
                           {selectedColor === 'all' && <span className="w-2 h-2 rounded-full bg-slate-800" />}
@@ -625,7 +625,7 @@ export default function PLP() {
                           key={color}
                           type="button"
                           onClick={() => setSelectedColor(color)}
-                          className="group flex items-center gap-2.5 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-colors"
+                          className="group flex items-center gap-2 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-all duration-300 ease-out transform hover:-translate-y-0.5 hover:bg-slate-100 rounded-md px-1 py-1"
                         >
                           <span className={`flex items-center justify-center w-[16px] h-[16px] rounded-full border transition-colors shrink-0 ${selectedColor === color ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
                             {selectedColor === color && <span className="w-2 h-2 rounded-full bg-slate-800" />}
@@ -638,7 +638,7 @@ export default function PLP() {
                 </div>
               </div>
 
-              <div className="mb-4 pb-4 border-b border-slate-200/70">
+              <div className="mb-3 pb-3 border-b border-slate-200/70">
                 <button
                   className="w-full flex items-center justify-between text-left text-[14px] font-semibold text-slate-800 group"
                   onClick={() => toggleSection('price')}
@@ -665,7 +665,7 @@ export default function PLP() {
                 </div>
               </div>
 
-              <div className="mb-6 pb-2">
+              <div className="mb-5 pb-2">
                 <button
                   className="w-full flex items-center justify-between text-left text-[14px] font-semibold text-slate-800 group"
                   onClick={() => toggleSection('sort')}
@@ -675,7 +675,7 @@ export default function PLP() {
                 </button>
                 <div className={`grid transition-all duration-300 ease-in-out ${openSections.sort ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
                   <div className="overflow-hidden">
-                    <div className="space-y-2.5 pb-1">
+                    <div className="space-y-2 pb-1">
                       {[
                         { id: 'newest', label: 'Mới nhất' },
                         { id: 'price-asc', label: 'Giá tăng' },
@@ -688,7 +688,7 @@ export default function PLP() {
                           role="radio"
                           aria-checked={sortBy === option.id}
                           onClick={() => setSortBy(option.id)}
-                          className="group flex items-center gap-2.5 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-colors"
+                          className="group flex items-center gap-2 w-full text-left text-[13px] text-slate-600 hover:text-slate-900 transition-all duration-300 ease-out transform hover:-translate-y-0.5 hover:bg-slate-100 rounded-md px-1 py-1"
                         >
                           <span className={`flex items-center justify-center w-[16px] h-[16px] rounded-full border transition-colors shrink-0 ${sortBy === option.id ? 'border-slate-800' : 'border-slate-300 group-hover:border-slate-500'}`}>
                             {sortBy === option.id && <span className="w-2 h-2 rounded-full bg-slate-800" />}
