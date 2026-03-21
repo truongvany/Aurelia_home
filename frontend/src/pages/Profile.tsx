@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Package, ShoppingBag, User, Pencil, Check, X, ShieldCheck, Diamond, Star, ChevronRight, LogOut, MapPin, Award, CreditCard, Ticket, Clock } from 'lucide-react';
+import { Package, ShoppingBag, User, Pencil, Check, X, ShieldCheck, Diamond, Star, ChevronRight, LogOut, MapPin, Award, CreditCard, Ticket, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { MembershipPayload, OrderPayload, ProfilePayload } from '../types';
@@ -306,16 +306,22 @@ export default function Profile() {
                           <div className="flex items-center gap-3 mb-3">
                              <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Mã đơn</p>
                              <p className="font-mono text-sm font-bold text-[#0f1f3d]">#{order._id.slice(-8).toUpperCase()}</p>
-                             <span className={`px-2.5 py-0.5 text-[9px] uppercase tracking-widest font-bold border rounded-none ${
-                                order.status === 'delivered'
-                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                  : order.status === 'cancelled'
-                                    ? 'bg-rose-50 text-rose-700 border-rose-200'
-                                    : 'bg-amber-50 text-amber-700 border-amber-200'
-                               }`}
-                             >
-                               {translateOrderStatus(order.status)}
-                             </span>
+                             {order.status === 'delivered' || order.status === 'paid' ? (
+                               <div className="flex items-center gap-1.5 text-emerald-600">
+                                 <CheckCircle className="w-4 h-4 fill-emerald-600 text-white" />
+                                 <span className="text-[10px] uppercase tracking-widest font-black">{translateOrderStatus(order.status)}</span>
+                               </div>
+                             ) : order.status === 'cancelled' ? (
+                               <div className="flex items-center gap-1.5 text-rose-600">
+                                 <XCircle className="w-4 h-4 fill-rose-600 text-white" />
+                                 <span className="text-[10px] uppercase tracking-widest font-black">{translateOrderStatus(order.status)}</span>
+                               </div>
+                             ) : (
+                               <div className="flex items-center gap-1.5 text-amber-500">
+                                 <Clock className="w-4 h-4" />
+                                 <span className="text-[10px] uppercase tracking-widest font-black">{translateOrderStatus(order.status)}</span>
+                               </div>
+                             )}
                           </div>
 
                           <div className="mb-2.5">
@@ -349,12 +355,14 @@ export default function Profile() {
                           </p>
                         </div>
                         
-                        <div className="w-full md:w-auto shrink-0 flex items-center justify-between md:justify-end gap-6 text-right px-4 py-3 bg-white border border-slate-200 group-hover:border-slate-300 transition-colors">
+                        <div className="w-full md:w-auto shrink-0 flex items-center justify-between md:justify-end gap-5 text-right pt-3 md:pt-0 mt-2 md:mt-0 border-t border-slate-100 md:border-t-0">
                           <div className="text-left md:text-right">
-                            <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-1">Tổng tiền</p>
-                            <p className="text-base font-bold text-[#0f1f3d]">{formatVND(order.totalAmount)}</p>
+                            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mb-0.5">Tổng tiền</p>
+                            <p className="text-[15px] font-bold text-rose-600">{formatVND(order.totalAmount)}</p>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-amber-600 transition-colors hidden md:block" />
+                          <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center group-hover:bg-[#0f1f3d] group-hover:border-[#0f1f3d] transition-colors shrink-0">
+                             <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
+                          </div>
                         </div>
                       </div>
                     </Link>
