@@ -60,7 +60,7 @@ export const placeOrder = async (input: PlaceOrderInput) => {
     totalAmount += item.unitPrice * item.quantity;
   }
 
-  const user = await UserModel.findById(input.userId).select("isMember memberStatus");
+  const user = await UserModel.findById(input.userId).select("isMember memberStatus points");
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -95,17 +95,21 @@ export const placeOrder = async (input: PlaceOrderInput) => {
     items: snapshots
   });
 
-  // Calculate and award points (1 point per 10,000 VND)
+  // Best-effort points update: never block order placement if legacy user data is inconsistent.
   const earnedPoints = Math.floor(finalAmount / 10000);
   if (earnedPoints > 0) {
-    user.points = (user.points || 0) + earnedPoints;
-    
-    // Update tier based on total points * 10,000 as estimated spend
-    const estimatedSpend = user.points * 10000;
-    if (estimatedSpend >= 20000000) user.tier = "Vàng";
-    else if (estimatedSpend >= 5000000) user.tier = "Bạc"; // VIP logic maps to Bạc/Vàng in tier string
-    
-    await user.save();
+    try {
+      const nextPoints = (user.points || 0) + earnedPoints;
+      const estimatedSpend = nextPoints * 10000;
+      const nextTier = estimatedSpend >= 20000000 ? "Vàng" : estimatedSpend >= 5000000 ? "Bạc" : "Mới";
+
+      await UserModel.updateOne(
+        { _id: input.userId },
+        { $set: { points: nextPoints, tier: nextTier } }
+      );
+    } catch (error) {
+      console.error("Failed to award points after order placement:", error);
+    }
   }
 
   await PaymentModel.create({

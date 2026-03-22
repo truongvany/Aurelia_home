@@ -383,6 +383,12 @@ export default function Header() {
                 <span className={`absolute left-0 bottom-0 w-full h-[2px] bg-[#1e3a8a] transition-transform duration-300 ease-out origin-center ${location.pathname.startsWith('/membership') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
               </span>
             </Link>
+            <Link to="/policies" className="group text-sm font-medium uppercase tracking-wider h-full flex items-center">
+              <span className={`nav-text-anim relative py-1 ${location.pathname.startsWith('/policies') ? 'text-[#1e3a8a] nav-text-anim-active' : 'text-[#0a192f] group-hover:text-[#1e3a8a]'}`}>
+                Chính sách
+                <span className={`absolute left-0 bottom-0 w-full h-[2px] bg-[#1e3a8a] transition-transform duration-300 ease-out origin-center ${location.pathname.startsWith('/policies') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
+              </span>
+            </Link>
             <div className="pl-4 border-l border-slate-300 flex items-center">
               <SearchBar />
             </div>
@@ -394,6 +400,12 @@ export default function Header() {
               className="md:hidden text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0a192f] hover:text-[#1e3a8a]"
             >
               Member
+            </Link>
+            <Link
+              to="/policies"
+              className="md:hidden text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0a192f] hover:text-[#1e3a8a]"
+            >
+              Policy
             </Link>
             <Link to={profileTarget} className="p-2 text-[#0a192f] hover:text-[#1e3a8a] transition-colors">
               <User className="h-5 w-5" />

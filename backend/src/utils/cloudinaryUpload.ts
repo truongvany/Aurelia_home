@@ -31,7 +31,11 @@ export const uploadToCloudinary = async (
       },
       (error, result) => {
         if (error) {
-          reject(error);
+          const errorMessage =
+            typeof error === "object" && error !== null && "message" in error
+              ? String((error as { message?: unknown }).message ?? "Cloudinary upload failed")
+              : "Cloudinary upload failed";
+          reject(new Error(errorMessage));
         } else {
           resolve(result);
         }

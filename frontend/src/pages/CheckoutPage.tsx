@@ -142,7 +142,7 @@ export default function CheckoutPage() {
       setCart(await api.getCart());
     } catch (error) {
       console.error(error);
-      alert('Không thể đặt hàng. Vui lòng đăng nhập và thử lại.');
+      alert(error instanceof Error ? error.message : 'Không thể đặt hàng. Vui lòng đăng nhập và thử lại.');
     } finally {
       setIsPlacingOrder(false);
     }

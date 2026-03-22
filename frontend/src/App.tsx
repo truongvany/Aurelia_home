@@ -16,6 +16,7 @@ import CartPage from './pages/CartPage';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Membership from './pages/Membership';
+import Policies from './pages/Policies';
 import Profile from './pages/Profile';
 import VoucherPage from './pages/VoucherPage';
 import OrderDetail from './pages/OrderDetail';
@@ -57,6 +58,7 @@ function AppRoutes() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/membership" element={<Membership />} />
+          <Route path="/policies" element={<Policies />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/profile" element={<ProtectedRoute roles={['customer']} />}>
             <Route index element={<Profile />} />
