@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Truck
 } from 'lucide-react';
+import chinhSachImg from '../assets/images/chinh-sach.jpg';
 
 const servicePolicies = [
   {
@@ -140,47 +141,79 @@ export default function Policies() {
       </section>
 
       <section className="max-w-7xl mx-auto px-6 py-12 md:py-16">
-        <div className="mb-6 md:mb-8 border-l-4 border-blue-700 pl-4">
-          <h2 className="text-2xl md:text-3xl font-bold">Chinh sach chi tiet</h2>
-          <p className="text-slate-600 mt-1 text-sm">Moi muc duoi day deu co hinh minh hoa va cac diem can biet quan trong.</p>
+        <div className="mb-8 border-l-4 border-blue-700 pl-4">
+          <h2 className="text-2xl md:text-3xl font-bold">Chính sách chi tiết</h2>
+          <p className="text-slate-600 mt-1 text-sm">Mỗi mục dưới đây đều có hình minh họa và các điểm cần biết quan trọng.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {servicePolicies.map((policy) => {
-            const Icon = policy.icon;
-            return (
-              <article key={policy.title} className="border border-slate-300 bg-white">
-                <img
-                  src={policy.image}
-                  alt={policy.title}
-                  className="w-full h-44 object-cover"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="p-6 md:p-7">
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className="h-11 w-11 border border-blue-200 bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold tracking-tight text-slate-900">{policy.title}</h3>
-                      <p className="text-sm text-slate-500 mt-1">{policy.subtitle}</p>
-                    </div>
-                  </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
+          {/* Left: Featured Image - Sticky on desktop */}
+          <div className="lg:col-span-5 lg:sticky lg:top-20">
+            <img
+              src={chinhSachImg}
+              alt="Chính sách King Man"
+              className="w-full h-auto border border-slate-300 object-cover"
+              referrerPolicy="no-referrer"
+            />
+            <div className="mt-4 border border-slate-300 bg-white p-4">
+              <h3 className="font-bold text-slate-900 mb-3 text-sm">Cam kết của chúng tôi</h3>
+              <ul className="space-y-2 text-xs text-slate-600">
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-3 w-3 bg-blue-600 shrink-0"></span>
+                  <span>Minh bạch trong mọi giao dịch</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-3 w-3 bg-blue-600 shrink-0"></span>
+                  <span>Khách hàng là ưu tiên hàng đầu</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-3 w-3 bg-blue-600 shrink-0"></span>
+                  <span>Hỗ trợ tận tình mọi lúc</span>
+                </li>
+              </ul>
+            </div>
+          </div>
 
-                  <ul className="space-y-3">
-                    {policy.points.map((point) => (
-                      <li key={point} className="flex items-start gap-2.5 text-sm text-slate-600 leading-relaxed">
-                        <span className="mt-0.5 h-4 w-4 bg-emerald-500 text-white flex items-center justify-center shrink-0">
-                          <Check className="h-3 w-3" />
-                        </span>
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </article>
-            );
-          })}
+          {/* Right: Policy Cards Grid */}
+          <div className="lg:col-span-7">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {servicePolicies.map((policy) => {
+                const Icon = policy.icon;
+                return (
+                  <article key={policy.title} className="border border-slate-300 bg-white">
+                    <img
+                      src={policy.image}
+                      alt={policy.title}
+                      className="w-full h-32 object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="p-4">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="h-9 w-9 border border-blue-200 bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold tracking-tight text-slate-900">{policy.title}</h3>
+                          <p className="text-xs text-slate-500 mt-0.5">{policy.subtitle}</p>
+                        </div>
+                      </div>
+
+                      <ul className="space-y-2">
+                        {policy.points.map((point) => (
+                          <li key={point} className="flex items-start gap-2 text-xs text-slate-600 leading-snug">
+                            <span className="mt-0.5 h-3 w-3 bg-emerald-500 text-white flex items-center justify-center shrink-0 text-[8px]">
+                              <Check className="h-2 w-2" />
+                            </span>
+                            <span>{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </section>
 
