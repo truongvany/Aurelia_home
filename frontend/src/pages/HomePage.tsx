@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Bot, Package, RefreshCw, Headset, CreditCard, Crown, Star, Truck, ShieldCheck, ShoppingBag, Check } from 'lucide-react';
 import { Product } from '../types';
 import { api } from '../lib/api';
 import { formatVND } from '../utils/currency';
@@ -11,29 +11,6 @@ import hero3 from '../assets/images/hero_3.jpg';
 import hero4 from '../assets/images/hero_4.jpg';
 
 const heroImages = [hero1, hero2, hero3, hero4];
-
-const heroGalleryCards = [
-  {
-    title: 'Smart Casual',
-    subtitle: 'Phong cach linh hoat',
-    image: hero1
-  },
-  {
-    title: 'Office Ready',
-    subtitle: 'Chinh chu moi ngay',
-    image: hero2
-  },
-  {
-    title: 'Weekend Fit',
-    subtitle: 'Thoai mai xuong pho',
-    image: 'https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?q=80&w=1200&auto=format&fit=crop'
-  },
-  {
-    title: 'Layer Season',
-    subtitle: 'Nang tam trang phuc',
-    image: 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=1200&auto=format&fit=crop'
-  }
-];
 
 interface Category {
   _id: string;
@@ -508,121 +485,42 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased">
       {/* Hero Section */}
-      <section className="relative w-full min-h-[72vh] md:min-h-[82vh] bg-[#090f1b] group overflow-hidden">
-        <img
-          alt="King Man SS25 Lookbook"
+      <section className="relative w-full h-[60vh] md:h-[75vh] 2xl:h-[80vh] bg-black group">
+        <img 
+          alt="King Man SS25 Lookbook" 
           className="absolute inset-0 w-full h-full object-cover bg-black transition-opacity duration-1000"
           src={heroImages[heroIndex]}
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#05070f]/90 via-[#0a1220]/70 to-[#101827]/45" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(56,189,248,0.28),transparent_45%)]" />
-
-        <button
+        {/* Lớp phủ siêu mờ chỉ đủ để chữ có thể đọc được nhưng không làm mờ ảnh */}
+        <div className="absolute inset-0 bg-white/10"></div>
+        
+        {/* Nút Previous - Chỉ hiện khi hover vào banner */}
+        <button 
           onClick={() => setHeroIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length)}
-          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 md:w-12 md:h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:scale-110 opacity-0 lg:group-hover:opacity-100 transition-all duration-300 z-30"
-          aria-label="Slide trước"
+          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:scale-110 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20"
         >
           <ChevronLeft className="w-6 h-6 text-red-500 hover:text-red-600" />
         </button>
 
-        <button
+        {/* Nút Next - Chỉ hiện khi hover vào banner */}
+        <button 
           onClick={() => setHeroIndex((prev) => (prev + 1) % heroImages.length)}
-          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 md:w-12 md:h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:scale-110 opacity-0 lg:group-hover:opacity-100 transition-all duration-300 z-30"
-          aria-label="Slide tiếp theo"
+          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:scale-110 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20"
         >
           <ChevronRight className="w-6 h-6 text-red-500 hover:text-red-600" />
         </button>
 
-        <div className="relative z-20 max-w-[1460px] mx-auto px-4 md:px-8 pt-16 pb-20 md:pt-20 md:pb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-end">
-            <div className="lg:col-span-7 text-white">
-              <p className="inline-flex items-center rounded-full border border-white/25 bg-white/10 backdrop-blur px-4 py-1.5 text-[11px] uppercase tracking-[0.24em] font-semibold mb-5">
-                New Season Lookbook
-              </p>
-              <h1 className="text-3xl md:text-5xl xl:text-6xl font-bold leading-[1.05] tracking-tight max-w-3xl">
-                Thoi trang nam hien dai, bo cuc ro rang de ban chon do nhanh hon
-              </h1>
-              <p className="mt-5 text-sm md:text-base text-slate-200/95 max-w-2xl leading-relaxed">
-                Ket hop giua chat lieu cao cap, duong cat may gon dep va bang mau de phoi. Kham pha bo suu tap
-                moi voi thong tin ngan gon, de hieu va de mua ngay tren cung mot man hinh.
-              </p>
-
-              <div className="mt-7 flex flex-wrap gap-3">
-                <Link
-                  to="/shop"
-                  className="inline-flex items-center rounded-full bg-white text-slate-900 px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] hover:bg-slate-100 transition-colors"
-                >
-                  Mua ngay
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-                <Link
-                  to="/membership"
-                  className="inline-flex items-center rounded-full border border-white/35 bg-white/10 px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] hover:bg-white/20 transition-colors"
-                >
-                  Quyen loi thanh vien
-                </Link>
-              </div>
-
-              <div className="mt-8 grid grid-cols-3 gap-3 max-w-xl">
-                <div className="rounded-2xl bg-white/10 backdrop-blur px-3 py-3 border border-white/15">
-                  <p className="text-xl md:text-2xl font-bold">500+</p>
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-slate-200">Mau moi</p>
-                </div>
-                <div className="rounded-2xl bg-white/10 backdrop-blur px-3 py-3 border border-white/15">
-                  <p className="text-xl md:text-2xl font-bold">24h</p>
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-slate-200">Xu ly don</p>
-                </div>
-                <div className="rounded-2xl bg-white/10 backdrop-blur px-3 py-3 border border-white/15">
-                  <p className="text-xl md:text-2xl font-bold">7-14</p>
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-slate-200">Ngay doi tra</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-5">
-              <div className="rounded-[28px] border border-white/20 bg-white/10 backdrop-blur-md p-3 md:p-4 shadow-2xl">
-                <div className="flex items-center justify-between mb-3 text-white">
-                  <p className="text-[11px] uppercase tracking-[0.2em] font-semibold">Hinh anh noi bat</p>
-                  <p className="text-[11px] text-white/70">{heroIndex + 1}/{heroImages.length}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {heroGalleryCards.map((item, idx) => (
-                    <button
-                      key={item.title}
-                      type="button"
-                      onClick={() => setHeroIndex(idx % heroImages.length)}
-                      className="group/card relative text-left rounded-2xl overflow-hidden border border-white/20 hover:border-white/45 transition-colors"
-                    >
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="h-28 md:h-32 w-full object-cover transition-transform duration-700 group-hover/card:scale-110"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      <div className="absolute bottom-2 left-2 right-2 text-white">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.12em] truncate">{item.title}</p>
-                        <p className="text-[10px] text-white/80 truncate">{item.subtitle}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute bottom-4 left-0 right-0 z-30 flex justify-center gap-2.5">
+        {/* Nút phân trang (dots) định vị đè lên vạch biên dưới cùng */}
+        <div className="absolute -bottom-2 left-0 right-0 z-30 flex justify-center gap-3">
           {heroImages.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setHeroIndex(idx)}
               className={`transition-all duration-300 rounded-full ${
-                idx === heroIndex
-                  ? 'w-8 h-2.5 bg-red-500 shadow-md'
-                  : 'w-2.5 h-2.5 bg-white/45 hover:bg-white/70'
+                idx === heroIndex 
+                  ? 'w-4 h-4 bg-red-600 shadow-md scale-110' 
+                  : 'w-4 h-4 bg-black/20 hover:bg-black/40 backdrop-blur-sm'
               }`}
               aria-label={`Go to slide ${idx + 1}`}
             />
@@ -961,31 +859,115 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-14 bg-white border-t border-slate-200">
+      {/* Policies & Privileges Section */}
+      <section className="py-20 md:py-28 bg-white border-t border-slate-200">
         <div className="max-w-[1440px] mx-auto px-6">
-          <div className="rounded-[28px] bg-gradient-to-r from-slate-900 via-slate-800 to-blue-900 p-8 md:p-10 text-white flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.22em] font-semibold text-white/70 mb-2">Thong tin dich vu</p>
-              <h3 className="text-2xl md:text-3xl font-bold leading-tight">Tim hieu day du chinh sach mua sam va dac quyen thanh vien</h3>
-              <p className="text-sm text-white/80 mt-3 max-w-2xl">
-                Xem thong tin minh bach ve doi tra, giao hang, bao mat va cac quyen loi danh rieng cho hoi vien King Man.
-              </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            
+            {/* Left: Introduction Image & Concept */}
+            <div className="relative group overflow-hidden h-[450px] md:h-[550px]">
+              <img 
+                src="https://bizweb.dktcdn.net/100/399/392/files/ao-so-mi-nam.jpg?v=1680252176645" 
+                alt="Trải nghiệm mua sắm" 
+                className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute bottom-0 left-0 bg-white p-6 md:p-8 max-w-[90%] md:max-w-[80%]">
+                <h2 className="text-xl md:text-2xl font-bold uppercase tracking-widest text-[#2a2a2a] mb-3 leading-tight">Trải Nghiệm Hoàn Hảo</h2>
+                <p className="text-slate-500 text-[13px] leading-relaxed mb-6">
+                  Trở thành viên King Man để mở khóa các đặc quyền riêng biệt. Tích lũy điểm thưởng và nhận ưu đãi độc quyền.
+                </p>
+                <Link to="/register" className="inline-flex items-center text-[10px] font-bold uppercase tracking-[0.2em] text-slate-900 border-b border-black pb-1 hover:text-slate-500 hover:border-slate-500 transition-colors">
+                  Đăng Ký Thành Viên <ArrowRight className="ml-2 w-3.5 h-3.5" />
+                </Link>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-3 shrink-0">
-              <Link
-                to="/policies"
-                className="inline-flex items-center rounded-full bg-white text-slate-900 px-6 py-3 text-xs font-bold uppercase tracking-[0.18em] hover:bg-slate-100 transition-colors"
-              >
-                Xem chinh sach
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-              <Link
-                to="/membership"
-                className="inline-flex items-center rounded-full border border-white/40 text-white px-6 py-3 text-xs font-bold uppercase tracking-[0.18em] hover:bg-white/10 transition-colors"
-              >
-                Trang thanh vien
-              </Link>
+
+            {/* Right: Policies Minimal Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-16">
+              
+              {/* Policy: Đổi Trả */}
+              <div>
+                <RefreshCw className="w-6 h-6 text-[#2a2a2a] mb-5 stroke-[1.5]" />
+                <h4 className="text-[12px] font-bold uppercase tracking-widest text-[#2a2a2a] mb-3">Chính Sách Đổi Trả</h4>
+                <ul className="space-y-3 text-[13px] text-slate-500 leading-relaxed">
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Hỗ trợ đổi trả trong vòng 7–14 ngày kể từ khi nhận hàng.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Sản phẩm giữ nguyên tem mác, chưa qua sử dụng.</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Policy: Giao hàng */}
+              <div>
+                <Truck className="w-6 h-6 text-[#2a2a2a] mb-5 stroke-[1.5]" />
+                <h4 className="text-[12px] font-bold uppercase tracking-widest text-[#2a2a2a] mb-3">Giao Hàng Miễn Phí</h4>
+                <ul className="space-y-3 text-[13px] text-slate-500 leading-relaxed">
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Giao hàng toàn quốc cho mọi đơn đặt hàng.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Thời gian nhận hàng tiêu chuẩn từ 2–5 ngày tùy khu vực.</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Policy: Bảo mật */}
+              <div>
+                <ShieldCheck className="w-6 h-6 text-[#2a2a2a] mb-5 stroke-[1.5]" />
+                <h4 className="text-[12px] font-bold uppercase tracking-widest text-[#2a2a2a] mb-3">Bảo Mật Thông Tin</h4>
+                <ul className="space-y-3 text-[13px] text-slate-500 leading-relaxed">
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Cam kết bảo mật tuyệt đối dữ liệu cá nhân khách hàng.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Không tiết lộ cho bên thứ ba khi không có sự đồng ý.</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Policy: Khách hàng thân thiết */}
+              <div>
+                <Crown className="w-6 h-6 text-[#2a2a2a] mb-5 stroke-[1.5]" />
+                <h4 className="text-[12px] font-bold uppercase tracking-widest text-[#2a2a2a] mb-3">Đặc Quyền Vip</h4>
+                <ul className="space-y-3 text-[13px] text-slate-500 leading-relaxed">
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Nhận thông báo sớm nhất về các BST mới và giới hạn.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <div className="w-[15px] h-[15px] rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-[3px]">
+                      <Check className="w-[10px] h-[10px] text-white stroke-[3.5]" />
+                    </div>
+                    <span>Ưu đãi đặc quyền độc quyền vào tháng sinh nhật.</span>
+                  </li>
+                </ul>
+              </div>
+
             </div>
+
           </div>
         </div>
       </section>
