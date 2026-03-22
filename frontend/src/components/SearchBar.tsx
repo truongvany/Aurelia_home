@@ -22,7 +22,7 @@ export default function SearchBar() {
           placeholder="Tìm kiếm..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-64 px-4 py-2 pr-10 rounded-full border border-slate-300 focus:border-[#1e3a8a] focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] focus:ring-opacity-20 transition-all text-sm placeholder-slate-400"
+          className="w-40 lg:w-52 xl:w-64 px-4 py-2 pr-10 rounded-full border border-slate-300 focus:border-[#1e3a8a] focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] focus:ring-opacity-20 transition-all text-sm placeholder-slate-400"
         />
         <button
           type="submit"

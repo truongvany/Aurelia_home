@@ -159,7 +159,7 @@ export default function Header() {
     <div className="sticky top-0 z-50 w-full flex flex-col">
       {/* Top Bar Announcement / Contact Info */}
       <div className="bg-[#1d1d1f] text-[#f5f5f7] text-[12px] font-medium hidden md:block">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[36px]">
             {/* Left side: Notifications */}
             <div className="relative group/notif flex items-center cursor-pointer hover:text-white transition-colors py-2">
@@ -265,17 +265,17 @@ export default function Header() {
 
       {/* Main Navigation Header */}
       <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm relative z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-          <div className="flex items-center">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20 gap-4">
+          <div className="flex items-center shrink-0 min-w-[170px]">
             <button className="p-2 -ml-2 mr-2 md:hidden text-[#0a192f] hover:text-[#1e3a8a] transition-colors">
               <Menu className="h-6 w-6" />
             </button>
-            <Link to="/" className="flex items-center font-serif text-2xl font-bold tracking-widest uppercase text-[#0a192f]">
-              <img src={logo} alt="King Man" className="h-15 w-auto mr-2" />
+            <Link to="/" className="flex items-center shrink-0 font-serif text-2xl font-bold tracking-widest uppercase text-[#0a192f]">
+              <img src={logo} alt="King Man" className="h-14 lg:h-16 w-auto object-contain" />
             </Link>
           </div>
-          <nav className="hidden md:flex space-x-8 h-full items-center">
+          <nav className="hidden md:flex flex-1 min-w-0 h-full items-center justify-center gap-5 xl:gap-7">
             <Link to="/" className="group text-sm font-medium uppercase tracking-wider h-full flex items-center">
               <span className={`nav-text-anim relative py-1 ${location.pathname === '/' ? 'text-[#1e3a8a] nav-text-anim-active' : 'text-[#0a192f] group-hover:text-[#1e3a8a]'}`}>
                 Trang chủ
@@ -389,12 +389,12 @@ export default function Header() {
                 <span className={`absolute left-0 bottom-0 w-full h-[2px] bg-[#1e3a8a] transition-transform duration-300 ease-out origin-center ${location.pathname.startsWith('/policies') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
               </span>
             </Link>
-            <div className="pl-4 border-l border-slate-300 flex items-center">
+            <div className="pl-3 xl:pl-4 border-l border-slate-300 flex items-center shrink-0">
               <SearchBar />
             </div>
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 xl:space-x-4 shrink-0">
             <Link
               to="/membership"
               className="md:hidden text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0a192f] hover:text-[#1e3a8a]"
